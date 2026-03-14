@@ -27,4 +27,9 @@ export const orderService = {
         const response: any = await apiClient.get('/payments/vnpay-return', { params });
         return response;
     },
+
+    verifyMomoReturn: async (params: any): Promise<ApiResponse<any>> => {
+        const response: any = await apiClient.get('/payments/momo-return', { params });
+        return response;
+    },
 };

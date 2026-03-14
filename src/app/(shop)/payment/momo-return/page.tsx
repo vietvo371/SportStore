@@ -45,7 +45,7 @@ function MomoReturnContent() {
 
             // 3. Gọi Backend xác minh chữ ký (resultCode == 0)
             try {
-                const res = await verifyMomoReturn(params);
+                const res: any = await verifyMomoReturn(params);
                 setResult({
                     success: true,
                     message: res.message || 'Thanh toán MoMo thành công!',
