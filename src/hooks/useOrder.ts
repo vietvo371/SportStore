@@ -14,10 +14,23 @@ export const useOrder = () => {
         mutationFn: (payload: OrderPayload) => orderService.placeOrder(payload),
     });
 
+    const createPaymentUrlMutation = useMutation({
+        mutationFn: ({ ma_don_hang, phuong_thuc }: { ma_don_hang: string, phuong_thuc: 'vnpay' | 'momo' }) => 
+            orderService.createPaymentUrl(ma_don_hang, phuong_thuc),
+    });
+
+    const verifyVNPayReturnMutation = useMutation({
+        mutationFn: (params: any) => orderService.verifyVNPayReturn(params),
+    });
+
     return {
         placeOrder: placeOrderMutation.mutateAsync,
         isPlacing: placeOrderMutation.isPending,
         placeOrderError: placeOrderMutation.error,
+        createPaymentUrl: createPaymentUrlMutation.mutateAsync,
+        isCreatingPaymentUrl: createPaymentUrlMutation.isPending,
+        verifyVNPayReturn: verifyVNPayReturnMutation.mutateAsync,
+        isVerifying: verifyVNPayReturnMutation.isPending,
     };
 };
 

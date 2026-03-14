@@ -1,15 +1,16 @@
 'use client';
 
 import { useState, use } from 'react';
-import { useOrderDetails } from '@/hooks/useOrder';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft, CheckCircle2, Package, MapPin, Tag } from 'lucide-react';
+import { Loader2, ArrowLeft, CheckCircle2, Package, MapPin, Tag, CreditCard } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
 import { OrderItem } from '@/types/order.types';
 import { ReviewModal } from '@/components/product/ReviewModal';
+import { useOrder, useOrderDetails } from '@/hooks/useOrder';
+import { toast } from 'sonner';
 
 const getStatusBadge = (status: string) => {
     switch (status) {
@@ -24,6 +25,7 @@ const getStatusBadge = (status: string) => {
 export default function OrderDetailsPage({ params }: { params: Promise<{ code: string }> }) {
     const { code } = use(params);
     const { data: responseData, isLoading, error, refetch } = useOrderDetails(code);
+    const { createPaymentUrl, isCreatingPaymentUrl } = useOrder();
 
     const order = responseData?.data; // The interceptor returns { success, data } from API
 
@@ -179,13 +181,42 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ code: s
                             </div>
                             <div className="mt-4 p-3 bg-slate-50 rounded-lg text-sm flex items-start space-x-2 border border-slate-100">
                                 <Tag className="h-4 w-4 text-slate-400 mt-0.5" />
-                                <div>
+                                <div className="flex-1">
                                     <span className="text-slate-500 block mb-1">Phương thức thanh toán:</span>
-                                    <span className="font-semibold text-slate-800 uppercase">{order.phuong_thuc_tt === 'cod' ? 'Thanh toán khi nhận hàng' : order.phuong_thuc_tt}</span>
-                                    {order.trang_thai_tt === 'da_thanh_toan' ? (
-                                        <span className="ml-2 text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-medium">Đã thanh toán</span>
-                                    ) : (
-                                        <span className="ml-2 text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-medium">Chưa thanh toán</span>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <span className="font-semibold text-slate-800 uppercase">
+                                            {order.phuong_thuc_tt === 'cod' ? 'Thanh toán khi nhận hàng' : order.phuong_thuc_tt}
+                                        </span>
+                                        {order.trang_thai_tt === 'da_thanh_toan' ? (
+                                            <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">Đã thanh toán</span>
+                                        ) : (
+                                            <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">Chưa thanh toán</span>
+                                        )}
+                                    </div>
+
+                                    {(order.trang_thai_tt === 'chua_thanh_toan' && (order.phuong_thuc_tt === 'vnpay' || order.phuong_thuc_tt === 'momo') && order.trang_thai !== 'da_huy') && (
+                                        <Button 
+                                            className="w-full mt-4 bg-primary hover:bg-primary/90 shadow-md group h-11 rounded-xl"
+                                            onClick={async () => {
+                                                const loadingToast = toast.loading('Đang khởi tạo lại thanh toán...');
+                                                try {
+                                                    const res = await createPaymentUrl({
+                                                        ma_don_hang: order.ma_don_hang,
+                                                        phuong_thuc: order.phuong_thuc_tt as 'vnpay' | 'momo'
+                                                    });
+                                                    if (res.data.payment_url) {
+                                                        window.location.href = res.data.payment_url;
+                                                    }
+                                                } catch (err: any) {
+                                                    toast.dismiss(loadingToast);
+                                                    toast.error(err?.message || 'Lỗi khởi tạo thanh toán.');
+                                                }
+                                            }}
+                                            disabled={isCreatingPaymentUrl}
+                                        >
+                                            <CreditCard className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
+                                            Thanh toán ngay bây giờ
+                                        </Button>
                                     )}
                                 </div>
                             </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCartStore } from '@/store/cart.store';
+import Cookies from 'js-cookie';
 import {
     Sheet,
     SheetContent,
@@ -146,14 +147,25 @@ export function CartDrawer() {
                         <div className="flex justify-between font-semibold mb-4 text-lg">
                             <span>Tổng tiền:</span>
                             <span className="text-primary">
-                                {new Intl.NumberFormat('vi-VN').format(cart.tam_tinh || 0)} ₫
+                                {new Intl.NumberFormat('vi-VN').format(cart?.tam_tinh || 0)} ₫
                             </span>
                         </div>
-                        <Link href="/checkout" onClick={closeCart}>
-                            <Button className="w-full h-12 text-lg font-medium">
-                                Đặt Hàng Ngay
-                            </Button>
-                        </Link>
+                        <Button
+                            className="w-full h-12 text-lg font-medium"
+                            onClick={() => {
+                                const token = Cookies.get('token');
+                                if (!token) {
+                                    toast.error('Vui lòng đăng nhập để tiếp tục thanh toán.');
+                                    // Chuyển hướng tới login với callbackUrl
+                                    window.location.href = `/login?callbackUrl=/checkout`;
+                                    return;
+                                }
+                                closeCart();
+                                window.location.href = '/checkout';
+                            }}
+                        >
+                            Đặt Hàng Ngay
+                        </Button>
                     </div>
                 )}
             </SheetContent>

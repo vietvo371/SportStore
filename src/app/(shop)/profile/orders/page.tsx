@@ -1,11 +1,12 @@
 'use client';
 
-import { useOrderHistory } from '@/hooks/useOrder';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, PackageOpen, ChevronRight } from 'lucide-react';
+import { useOrder, useOrderHistory } from '@/hooks/useOrder';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2, PackageOpen, ChevronRight, CreditCard } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import { toast } from 'sonner';
 
 const getStatusColor = (status: string) => {
     switch (status) {
@@ -35,6 +36,7 @@ const getStatusText = (status: string) => {
 
 export default function OrderHistoryPage() {
     const { data: orderHistory, isLoading: isLoadingHistory } = useOrderHistory(1);
+    const { createPaymentUrl, isCreatingPaymentUrl } = useOrder();
 
     console.log('--- RAW ORDER HISTORY ---', orderHistory);
 
@@ -81,7 +83,14 @@ export default function OrderHistoryPage() {
                                     <div className="flex items-center space-x-4">
                                         <div>
                                             <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Mã đơn hàng</p>
-                                            <p className="font-mono font-bold text-slate-900">{order.ma_don_hang}</p>
+                                            <div className="flex items-center space-x-2">
+                                                <p className="font-mono font-bold text-slate-900">{order.ma_don_hang}</p>
+                                                {order.trang_thai_tt === 'da_thanh_toan' ? (
+                                                    <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold uppercase">Đã thanh toán</span>
+                                                ) : (order.phuong_thuc_tt !== 'cod' && order.trang_thai !== 'da_huy') && (
+                                                    <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold uppercase">Chưa thanh toán</span>
+                                                )}
+                                            </div>
                                         </div>
                                         <div className="hidden sm:block w-px h-8 bg-slate-200"></div>
                                         <div className="hidden sm:block">
@@ -89,8 +98,39 @@ export default function OrderHistoryPage() {
                                             <p className="text-sm text-slate-900">{new Date(order.created_at).toLocaleDateString('vi-VN')}</p>
                                         </div>
                                     </div>
-                                    <div className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.trang_thai)}`}>
-                                        {getStatusText(order.trang_thai)}
+                                    <div className="flex items-center space-x-3">
+                                        <div className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.trang_thai)}`}>
+                                            {getStatusText(order.trang_thai)}
+                                        </div>
+                                        {/* Nút Thanh toán lại */}
+                                        {(order.trang_thai_tt === 'chua_thanh_toan' && (order.phuong_thuc_tt === 'vnpay' || order.phuong_thuc_tt === 'momo') && order.trang_thai !== 'da_huy') && (
+                                            <Button 
+                                                size="sm" 
+                                                variant="default" 
+                                                className="h-8 text-xs bg-primary hover:bg-primary/90 shadow-sm"
+                                                onClick={async (e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    const loadingToast = toast.loading('Đang khởi tạo lại thanh toán...');
+                                                    try {
+                                                        const res = await createPaymentUrl({
+                                                            ma_don_hang: order.ma_don_hang,
+                                                            phuong_thuc: order.phuong_thuc_tt
+                                                        });
+                                                        if (res.data.payment_url) {
+                                                            window.location.href = res.data.payment_url;
+                                                        }
+                                                    } catch (err: any) {
+                                                        toast.dismiss(loadingToast);
+                                                        toast.error(err?.message || 'Không thể tạo lại liên kết thanh toán.');
+                                                    }
+                                                }}
+                                                disabled={isCreatingPaymentUrl}
+                                            >
+                                                {isCreatingPaymentUrl ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CreditCard className="h-3 w-3 mr-1" />}
+                                                Thanh toán ngay
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
                                 <CardContent className="p-0">

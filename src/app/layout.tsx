@@ -22,6 +22,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 
 import { Toaster } from "@/components/ui/sonner";
 import { EmailVerifyBanner } from "@/components/auth/EmailVerifyBanner";
+import { ChatbotWidget } from "@/components/common/ChatbotWidget";
 
 export default function RootLayout({
   children,
@@ -37,6 +38,7 @@ export default function RootLayout({
           <TooltipProvider>
             <EmailVerifyBanner />
             <main className="flex min-h-screen flex-col">{children}</main>
+            <ChatbotWidget />
             <Toaster position="top-center" richColors />
           </TooltipProvider>
         </Providers>

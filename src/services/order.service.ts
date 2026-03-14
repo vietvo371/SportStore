@@ -17,4 +17,14 @@ export const orderService = {
         const response: any = await apiClient.post('/orders', payload);
         return response;
     },
+
+    createPaymentUrl: async (ma_don_hang: string, phuong_thuc: 'vnpay' | 'momo'): Promise<ApiResponse<{ payment_url: string }>> => {
+        const response: any = await apiClient.post('/payments/create-url', { ma_don_hang, phuong_thuc });
+        return response;
+    },
+
+    verifyVNPayReturn: async (params: any): Promise<ApiResponse<any>> => {
+        const response: any = await apiClient.get('/payments/vnpay-return', { params });
+        return response;
+    },
 };

@@ -26,7 +26,7 @@ export default function CheckoutPage() {
     const router = useRouter();
     const { cart, isLoading: isCartLoading } = useCart();
     const { addresses, isLoading: isAddressesLoading } = useAddress();
-    const { placeOrder, isPlacing } = useOrder();
+    const { placeOrder, isPlacing, createPaymentUrl, isCreatingPaymentUrl } = useOrder();
     const { validateCoupon, isValidating: isVerifyingCoupon } = useCoupon();
     const clearCartStore = useCartStore((state) => state.clearCart);
 
@@ -82,10 +82,32 @@ export default function CheckoutPage() {
                 ghi_chu: note,
             });
 
-            toast.success('Đặt hàng thành công!');
-            clearCartStore();
-            // Redirect to success page
-            router.push(`/checkout/success?order=${res.data.ma_don_hang}`);
+            // Nếu là thanh toán online, gọi tiếp API lấy URL
+            if (paymentMethod === 'vnpay' || paymentMethod === 'momo') {
+                const loadingToast = toast.loading(`Đơn hàng #${res.data.ma_don_hang} đã được tiếp nhận. Đang chuyển hướng tới cổng thanh toán...`);
+                
+                try {
+                    const payRes = await createPaymentUrl({
+                        ma_don_hang: res.data.ma_don_hang,
+                        phuong_thuc: paymentMethod
+                    });
+
+                    if (payRes.data.payment_url) {
+                        window.location.href = payRes.data.payment_url;
+                        return;
+                    }
+                } catch (error) {
+                    toast.dismiss(loadingToast);
+                    toast.error('Đơn hàng đã được tạo nhưng không thể khởi tạo thanh toán trực tuyến ngay bây giờ. Vui lòng thanh toán tại Lịch sử đơn hàng.');
+                    router.push('/profile/orders');
+                    return;
+                }
+            } else {
+                toast.success('Đặt hàng thành công!');
+                clearCartStore();
+                // Redirect to success page
+                router.push(`/checkout/success?order=${res.data.ma_don_hang}`);
+            }
         } catch (error: any) {
             const errMsgs = error?.errors ? Object.values(error.errors).flat().join(', ') : error?.message;
             toast.error(errMsgs || 'Lỗi đặt hàng. Vui lòng thử lại sau.');
@@ -190,14 +212,17 @@ export default function CheckoutPage() {
                                         Thanh toán khi nhận hàng (COD)
                                     </Label>
                                 </div>
-                                <div className={`flex items-center space-x-3 p-4 rounded-xl border-2 transition-all justify-between opacity-50 cursor-not-allowed`}>
-                                    <div className="flex items-center space-x-3">
-                                        <RadioGroupItem value="vnpay" id="payment-vnpay" disabled />
-                                        <Label htmlFor="payment-vnpay" className="font-medium flex-1">
-                                            VNPay
-                                        </Label>
-                                    </div>
-                                    <span className="text-xs bg-slate-200 px-2 py-1 rounded">Sắp ra mắt</span>
+                                <div className={`flex items-center space-x-3 p-4 rounded-xl border-2 transition-all cursor-pointer ${paymentMethod === 'vnpay' ? 'border-primary bg-primary/5' : 'border-slate-100 hover:border-slate-200'}`}>
+                                    <RadioGroupItem value="vnpay" id="payment-vnpay" />
+                                    <Label htmlFor="payment-vnpay" className="font-medium cursor-pointer flex-1">
+                                        VNPay
+                                    </Label>
+                                </div>
+                                <div className={`flex items-center space-x-3 p-4 rounded-xl border-2 transition-all cursor-pointer ${paymentMethod === 'momo' ? 'border-primary bg-primary/5' : 'border-slate-100 hover:border-slate-200'}`}>
+                                    <RadioGroupItem value="momo" id="payment-momo" />
+                                    <Label htmlFor="payment-momo" className="font-medium cursor-pointer flex-1">
+                                        Ví MoMo
+                                    </Label>
                                 </div>
                             </RadioGroup>
 
@@ -338,12 +363,12 @@ export default function CheckoutPage() {
                                 <Button
                                     className="w-full h-14 mt-6 text-base font-bold rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all"
                                     onClick={handlePlaceOrder}
-                                    disabled={isPlacing || !selectedAddressId}
+                                    disabled={isPlacing || isCreatingPaymentUrl || !selectedAddressId}
                                 >
-                                    {isPlacing ? (
+                                    {isPlacing || isCreatingPaymentUrl ? (
                                         <>
                                             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                                            Đang Xử Lý...
+                                            {isCreatingPaymentUrl ? 'Đang chuyển hướng...' : 'Đang Xử Lý...'}
                                         </>
                                     ) : (
                                         'Hoàn Tất Đặt Hàng'

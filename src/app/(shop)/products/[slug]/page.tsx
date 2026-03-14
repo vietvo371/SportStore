@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { useState, useEffect, use } from 'react';
 import { ShoppingCart, Heart } from 'lucide-react';
+import Cookies from 'js-cookie';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { productService } from '@/services/product.service';
@@ -219,12 +220,55 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
 
                         <Button
                             size="lg"
-                            className="flex-1 h-14 text-base gap-2 shadow-lg shadow-primary/20"
+                            variant="outline"
+                            className="flex-1 h-14 text-base gap-2 border-primary text-primary hover:bg-primary/5"
                             onClick={handleAddToCart}
                             disabled={isAdding}
                         >
                             <ShoppingCart className="h-5 w-5" />
                             {isAdding ? 'Đang thêm...' : 'Thêm Vào Giỏ'}
+                        </Button>
+
+                        <Button
+                            size="lg"
+                            className="flex-1 h-14 text-base shadow-lg shadow-primary/20"
+                            onClick={async () => {
+                                // 1. Check size/variant
+                                if (sizes.length > 0 && !selectedSize) {
+                                    toast.error('Vui lòng chọn kích cỡ/phân loại sản phẩm.');
+                                    return;
+                                }
+
+                                // 2. Check Auth
+                                const token = Cookies.get('token');
+                                if (!token) {
+                                    toast.error('Vui lòng đăng nhập để đặt hàng.');
+                                    window.location.href = `/login?callbackUrl=${window.location.pathname}`;
+                                    return;
+                                }
+
+                                // 3. Logic Mua ngay = Add to cart + Redirect
+                                try {
+                                    let variantId = undefined;
+                                    if (selectedSize) {
+                                        const matched = (product?.bien_the || []).find(v => v.kich_co === selectedSize);
+                                        if (matched) variantId = matched.id;
+                                    }
+
+                                    await addToCart({
+                                        san_pham_id: product.id,
+                                        so_luong: quantity,
+                                        bien_the_id: variantId,
+                                    });
+                                    
+                                    window.location.href = '/checkout';
+                                } catch (error: any) {
+                                    toast.error(error.message || 'Lỗi xử lý đặt hàng');
+                                }
+                            }}
+                            disabled={isAdding}
+                        >
+                            Đặt Hàng Ngay
                         </Button>
 
                         <Button
