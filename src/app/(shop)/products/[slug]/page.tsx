@@ -16,6 +16,8 @@ import { useWishlist } from '@/hooks/useWishlist';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProductReviews } from '@/components/product/ProductReviews';
+import { RecommendationSection } from '@/components/recommendation/RecommendationSection';
+import { useBehaviorTracking } from '@/hooks/useBehaviorTracking';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = use(params);
@@ -26,11 +28,14 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     const { openCart } = useCartStore();
     const { addToCart, isAdding } = useCart();
     const { wishlistData, toggleWishlist, isToggling } = useWishlist();
+    const { useTrackView, trackAction } = useBehaviorTracking();
 
     const { data: product, isLoading, isError } = useQuery({
         queryKey: ['product', slug],
         queryFn: () => productService.getProductBySlug(slug),
     });
+
+    useTrackView(product?.id);
 
     const isWished = wishlistData?.data?.some(item => item.san_pham_id === product?.id) || false;
 
@@ -40,6 +45,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
             await toggleWishlist(product.id);
             if (!isWished) {
                 toast.success('Đã thêm vào yêu thích!');
+                trackAction(product.id, 'yeu_thich');
             }
         } catch (error: any) {
             toast.error(error.message || 'Lỗi khi yêu thích sản phẩm');
@@ -103,6 +109,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                 bien_the_id: variantId,
             });
             toast.success('Đã thêm vào giỏ hàng');
+            trackAction(product.id, 'them_gio_hang');
             openCart();
         } catch (error: any) {
             toast.error(error.message || 'Có lỗi xảy ra khi thêm vào giỏ');
@@ -260,6 +267,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                                         so_luong: quantity,
                                         bien_the_id: variantId,
                                     });
+                                    trackAction(product.id, 'mua_hang');
                                     
                                     window.location.href = '/checkout';
                                 } catch (error: any) {
@@ -319,6 +327,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                         <ProductReviews product={product} />
                     </TabsContent>
                 </Tabs>
+            </div>
+
+            <div className="mt-16">
+                <RecommendationSection title="Sản phẩm tương tự" subtitle="Những sản phẩm bạn có thể thích dựa trên lựa chọn này" />
             </div>
         </div>
     );

@@ -8,16 +8,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle2, XCircle, Loader2, ArrowRight, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
-function VNPayReturnContent() {
+function MomoReturnContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const { verifyVNPayReturn, isVerifying } = useOrder();
+    const { verifyMomoReturn, isVerifyingMomo } = useOrder();
     const [result, setResult] = useState<{ success: boolean; message: string; ma_don_hang?: string } | null>(null);
     const hasCalled = useRef(false);
 
     useEffect(() => {
         const verify = async () => {
+             // 1. Chặn re-render hook nhiều lần
             if (hasCalled.current) return;
             hasCalled.current = true;
 
@@ -26,33 +28,49 @@ function VNPayReturnContent() {
                 params[key] = value;
             });
 
+            const resultCode = params.resultCode;
+            const extraMessage = params.message;
+            const originalOrderId = params.orderId ? params.orderId.split('_')[0] : 'Không rõ';
+
+            // 2. Chặn lỗi từ cổng MoMo (Ví dụ resultCode 1006 nghĩa là từ chối)
+            if (resultCode && resultCode !== '0') {
+               setResult({
+                    success: false,
+                    message: extraMessage || 'Giao dịch bị từ chối/hủy bỏ bởi người dùng.',
+                    ma_don_hang: originalOrderId
+                });
+                toast.error(extraMessage || "Thanh toán thất bại");
+                return; // Dừng, không cần gọi lên Backend xác thực chữ ký mất công
+            }
+
+            // 3. Gọi Backend xác minh chữ ký (resultCode == 0)
             try {
-                const res = await verifyVNPayReturn(params);
+                const res = await verifyMomoReturn(params);
                 setResult({
                     success: true,
-                    message: res.message || 'Thanh toán thành công!',
-                    ma_don_hang: params.vnp_TxnRef
+                    message: res.message || 'Thanh toán MoMo thành công!',
+                    ma_don_hang: originalOrderId
                 });
             } catch (error: any) {
                 setResult({
                     success: false,
                     message: error?.message || 'Giao dịch không thành công hoặc chữ ký không hợp lệ.',
-                    ma_don_hang: params.vnp_TxnRef
+                    ma_don_hang: originalOrderId
                 });
             }
         };
 
-        if (searchParams.get('vnp_SecureHash')) {
+        if (searchParams.get('signature')) {
             verify();
         } else {
             router.push('/');
         }
-    }, [searchParams, verifyVNPayReturn, router]);
+    }, [searchParams, verifyMomoReturn, router]);
 
     return (
         <div className="container mx-auto px-4 py-16 flex justify-center items-center min-h-[80vh]">
             <AnimatePresence mode="wait">
-                {isVerifying || !result ? (
+                {isVerifyingMomo || !result ? (
                     <motion.div
                         key="loading"
                         initial={{ opacity: 0, scale: 0.9 }}
@@ -61,7 +79,7 @@ function VNPayReturnContent() {
                         className="text-center space-y-4"
                     >
                         <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
-                        <h2 className="text-2xl font-bold text-slate-800">Đang xác thực giao dịch...</h2>
+                        <h2 className="text-2xl font-bold text-slate-800">Đang xác thực giao dịch MoMo...</h2>
                         <p className="text-muted-foreground">Vui lòng không tắt trình duyệt hoặc nhấn quay lại.</p>
                     </motion.div>
                 ) : (
@@ -98,7 +116,7 @@ function VNPayReturnContent() {
                                     )}
                                 </div>
                                 <CardTitle className={`text-3xl font-extrabold ${result.success ? 'text-emerald-700' : 'text-red-700'}`}>
-                                    {result.success ? 'Thanh Toán Thành Công!' : 'Thanh Toán Thất Bại'}
+                                    {result.success ? 'Thanh Toán MoMo Thành Công!' : 'Thanh Toán MoMo Thất Bại'}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="px-8 pb-10 space-y-8">
@@ -136,10 +154,10 @@ function VNPayReturnContent() {
     );
 }
 
-export default function VNPayReturnPage() {
+export default function MomoReturnPage() {
     return (
         <Suspense fallback={<div className="flex justify-center py-20"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>}>
-            <VNPayReturnContent />
+            <MomoReturnContent />
         </Suspense>
     );
 }

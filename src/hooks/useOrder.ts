@@ -23,6 +23,10 @@ export const useOrder = () => {
         mutationFn: (params: any) => orderService.verifyVNPayReturn(params),
     });
 
+    const verifyMomoReturnMutation = useMutation({
+        mutationFn: (params: any) => orderService.verifyMomoReturn(params),
+    });
+
     return {
         placeOrder: placeOrderMutation.mutateAsync,
         isPlacing: placeOrderMutation.isPending,
@@ -31,6 +35,8 @@ export const useOrder = () => {
         isCreatingPaymentUrl: createPaymentUrlMutation.isPending,
         verifyVNPayReturn: verifyVNPayReturnMutation.mutateAsync,
         isVerifying: verifyVNPayReturnMutation.isPending,
+        verifyMomoReturn: verifyMomoReturnMutation.mutateAsync,
+        isVerifyingMomo: verifyMomoReturnMutation.isPending,
     };
 };
 

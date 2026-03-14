@@ -7,6 +7,7 @@ import { productService } from '@/services/product.service';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { BrandsTab } from '@/components/brand/BrandsTab';
+import { RecommendationSection } from '@/components/recommendation/RecommendationSection';
 
 export default function Home() {
     const { data: featuredProducts = [], isLoading } = useQuery({
@@ -66,6 +67,11 @@ export default function Home() {
                         </Button>
                     </Link>
                 </div>
+            </section>
+
+            {/* Recommendations Section */}
+            <section className="container mx-auto px-4 mt-8 bg-slate-50/50 py-12 rounded-3xl" id="recommendations">
+                <RecommendationSection />
             </section>
 
             {/* Brands Section */}
