@@ -324,7 +324,7 @@ export default function AdminDashboard() {
                         {/* Custom Legend */}
                         <div className="grid grid-cols-2 gap-x-8 gap-y-3 mt-4 w-full px-4">
                             {charts.category_distribution.map((entry: any, index: number) => (
-                                <div key={entry.name} className="flex items-center gap-2 group cursor-default">
+                                <div key={`${entry.name}-${index}`} className="flex items-center gap-2 group cursor-default">
                                     <div className="h-2 w-2 rounded-full group-hover:scale-125 transition-transform" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
                                     <span className="text-[10px] font-black text-slate-500 uppercase truncate group-hover:text-slate-900 transition-colors">{entry.name}</span>
                                 </div>
