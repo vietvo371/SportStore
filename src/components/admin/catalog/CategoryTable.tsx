@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import {
     Table,
     TableBody,
@@ -185,5 +186,3 @@ export function CategoryTable({ categories, onEdit }: CategoryTableProps) {
         </>
     );
 }
-
-import React from "react";

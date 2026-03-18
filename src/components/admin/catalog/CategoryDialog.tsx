@@ -67,25 +67,31 @@ export function CategoryDialog({
     });
 
     useEffect(() => {
-        if (category) {
-            form.reset({
-                ten: category.ten,
-                danh_muc_cha_id: category.danh_muc_cha_id?.toString() || null,
-                trang_thai: !!category.trang_thai,
-            });
-        } else {
-            form.reset({
-                ten: "",
-                danh_muc_cha_id: null,
-                trang_thai: true,
-            });
+        if (open) {
+            if (category) {
+                form.reset({
+                    ten: category.ten,
+                    // Dùng "none" thay null để Select hiện đúng "Không có danh mục cha"
+                    danh_muc_cha_id: category.danh_muc_cha_id?.toString() ?? "none",
+                    trang_thai: !!category.trang_thai,
+                });
+            } else {
+                form.reset({
+                    ten: "",
+                    danh_muc_cha_id: "none",
+                    trang_thai: true,
+                });
+            }
         }
-    }, [category, form, open]);
+    }, [category, open]); // bỏ form khỏi deps tránh infinite loop
 
     function onSubmit(values: FormValues) {
         const data = {
             ...values,
-            danh_muc_cha_id: values.danh_muc_cha_id ? parseInt(values.danh_muc_cha_id) : null,
+            // "none" → null (danh mục gốc), còn lại parse thành số
+            danh_muc_cha_id: values.danh_muc_cha_id && values.danh_muc_cha_id !== "none"
+                ? parseInt(values.danh_muc_cha_id)
+                : null,
         };
 
         if (isEdit) {
@@ -155,8 +161,7 @@ export function CategoryDialog({
                                     <FormLabel className="text-sm font-semibold text-slate-700">Danh mục cha (Tùy chọn)</FormLabel>
                                     <Select
                                         onValueChange={field.onChange}
-                                        defaultValue={field.value || undefined}
-                                        value={field.value || undefined}
+                                        value={field.value ?? "none"}
                                     >
                                         <FormControl>
                                             <SelectTrigger className="rounded-xl border-slate-200 bg-white h-11 focus:ring-primary/20">
@@ -164,7 +169,7 @@ export function CategoryDialog({
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent className="rounded-xl border-slate-100 shadow-xl max-h-[300px]">
-                                            <SelectItem value="null" className="text-slate-500 italic">Không có danh mục cha</SelectItem>
+                                            <SelectItem value="none" className="text-slate-500 italic">— Không có (danh mục cấp 1)</SelectItem>
                                             {flatCategories.map((cat) => (
                                                 <SelectItem key={cat.id} value={cat.id.toString()}>
                                                     {"— ".repeat(cat.depth)} {cat.ten}

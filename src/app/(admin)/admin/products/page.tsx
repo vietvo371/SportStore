@@ -25,10 +25,10 @@ import {
     ChevronLeft,
     ChevronRight,
     Loader2,
-    Filter,
     X,
-    LayoutGrid,
-    Archive
+    Archive,
+    FolderOpen,
+    CornerDownRight,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -46,10 +46,14 @@ import { Badge } from "@/components/ui/badge";
 import {
     Select,
     SelectContent,
+    SelectGroup,
     SelectItem,
+    SelectLabel,
+    SelectSeparator,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Category } from "@/types/product.types";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -161,16 +165,49 @@ export default function AdminProductsPage() {
                     </div>
 
                     {/* Category Filter */}
-                    <div className="w-full md:w-48">
+                    <div className="w-full md:w-52">
                         <Select value={categoryId} onValueChange={(v) => { setCategoryId(v); setPage(1); }}>
                             <SelectTrigger className="bg-slate-50 border-none">
                                 <SelectValue placeholder="Danh mục" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="max-h-80">
                                 <SelectItem value="all">Tất cả danh mục</SelectItem>
-                                {categories.map((c: any) => (
-                                    <SelectItem key={c.id} value={c.id.toString()}>{c.ten}</SelectItem>
-                                ))}
+                                <SelectSeparator />
+                                {(categories as Category[]).map((parent, idx) => {
+                                    const children = parent.danh_muc_con ?? [];
+                                    const isLast = idx === (categories as Category[]).length - 1;
+                                    if (children.length > 0) {
+                                        return (
+                                            <SelectGroup key={parent.id}>
+                                                <SelectLabel className="flex items-center gap-1.5 px-2 py-2 text-xs font-bold text-primary bg-primary/5 border-b border-primary/10 -mx-1 mb-1">
+                                                    <FolderOpen className="h-3.5 w-3.5 shrink-0" />
+                                                    {parent.ten}
+                                                </SelectLabel>
+                                                {children.map((child) => (
+                                                    <SelectItem
+                                                        key={child.id}
+                                                        value={child.id.toString()}
+                                                        className="pl-7 text-sm text-slate-700 focus:bg-primary/10 focus:text-primary"
+                                                    >
+                                                        <span className="flex items-center gap-1.5">
+                                                            <CornerDownRight className="h-3 w-3 text-slate-400 shrink-0" />
+                                                            {child.ten}
+                                                        </span>
+                                                    </SelectItem>
+                                                ))}
+                                                {!isLast && <SelectSeparator className="mt-1" />}
+                                            </SelectGroup>
+                                        );
+                                    }
+                                    return (
+                                        <SelectItem key={parent.id} value={parent.id.toString()} className="font-medium">
+                                            <span className="flex items-center gap-1.5">
+                                                <FolderOpen className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                                                {parent.ten}
+                                            </span>
+                                        </SelectItem>
+                                    );
+                                })}
                             </SelectContent>
                         </Select>
                     </div>

@@ -19,13 +19,17 @@ import { Textarea } from "@/components/ui/textarea";
 import {
     Select,
     SelectContent,
+    SelectGroup,
     SelectItem,
+    SelectLabel,
+    SelectSeparator,
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
+import { Category } from "@/types/product.types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAdminMetadata } from "@/hooks/useAdmin";
-import { Plus, Loader2, Save, X, Trash2, Image as ImageIcon, CheckCircle2 } from "lucide-react";
+import { Plus, Loader2, Save, X, Trash2, Image as ImageIcon, CheckCircle2, FolderOpen, CornerDownRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Product } from "@/types/product.types";
 import { toast } from "sonner";
@@ -207,15 +211,48 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                 <Select onValueChange={field.onChange} value={field.value}>
                                     <FormControl>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Chọn danh mục" />
+                                            <SelectValue placeholder="Chọn danh mục con..." />
                                         </SelectTrigger>
                                     </FormControl>
-                                    <SelectContent>
-                                        {categories.map((cat: any) => (
-                                            <SelectItem key={cat.id} value={cat.id.toString()}>
-                                                {cat.ten}
-                                            </SelectItem>
-                                        ))}
+                                    <SelectContent className="max-h-80">
+                                        {(categories as Category[]).map((parent, idx) => {
+                                            const children = parent.danh_muc_con ?? [];
+                                            const isLast = idx === (categories as Category[]).length - 1;
+                                            if (children.length > 0) {
+                                                return (
+                                                    <SelectGroup key={parent.id}>
+                                                        {/* Header danh mục cha */}
+                                                        <SelectLabel className="flex items-center gap-1.5 px-2 py-2 text-xs font-bold text-primary bg-primary/5 border-b border-primary/10 -mx-1 mb-1">
+                                                            <FolderOpen className="h-3.5 w-3.5 shrink-0" />
+                                                            {parent.ten}
+                                                        </SelectLabel>
+                                                        {/* Danh mục con */}
+                                                        {children.map((child) => (
+                                                            <SelectItem
+                                                                key={child.id}
+                                                                value={child.id.toString()}
+                                                                className="pl-7 text-sm text-slate-700 focus:bg-primary/10 focus:text-primary"
+                                                            >
+                                                                <span className="flex items-center gap-1.5">
+                                                                    <CornerDownRight className="h-3 w-3 text-slate-400 shrink-0" />
+                                                                    {child.ten}
+                                                                </span>
+                                                            </SelectItem>
+                                                        ))}
+                                                        {!isLast && <SelectSeparator className="mt-1" />}
+                                                    </SelectGroup>
+                                                );
+                                            }
+                                            // Danh mục độc lập (không có con)
+                                            return (
+                                                <SelectItem key={parent.id} value={parent.id.toString()} className="font-medium">
+                                                    <span className="flex items-center gap-1.5">
+                                                        <FolderOpen className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                                                        {parent.ten}
+                                                    </span>
+                                                </SelectItem>
+                                            );
+                                        })}
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -274,8 +311,15 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                 <FormControl>
                                     <Input
                                         type="number"
+                                        inputMode="numeric"
+                                        placeholder="VD: 350000"
+                                        min={0}
                                         {...field}
-                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                        value={field.value === 0 ? "" : field.value}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            field.onChange(val === "" ? 0 : parseFloat(val));
+                                        }}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -293,15 +337,17 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                 <FormControl>
                                     <Input
                                         type="number"
+                                        inputMode="numeric"
+                                        placeholder="Để trống nếu không giảm giá"
+                                        min={0}
                                         {...field}
-                                        value={field.value || ""}
+                                        value={field.value ?? ""}
                                         onChange={(e) => {
                                             const val = e.target.value;
                                             field.onChange(val === "" ? null : parseFloat(val));
                                         }}
                                     />
                                 </FormControl>
-                                <FormDescription>Để trống nếu không giảm giá</FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -326,8 +372,15 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                     input.onchange = async (e) => {
                                         const files = (e.target as HTMLInputElement).files;
                                         if (files) {
+                                            const MAX_SIZE = 2 * 1024 * 1024; // 2MB — match BE validation
                                             for (let i = 0; i < files.length; i++) {
                                                 const file = files[i];
+
+                                                if (file.size > MAX_SIZE) {
+                                                    toast.error(`Ảnh "${file.name}" vượt quá 2MB, vui lòng chọn ảnh nhỏ hơn.`);
+                                                    continue;
+                                                }
+
                                                 try {
                                                     const res = await adminService.uploadImage(file);
                                                     appendImage({
@@ -335,8 +388,14 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                                         la_anh_chinh: imageFields.length === 0 && i === 0,
                                                         thu_tu: imageFields.length + i,
                                                     });
-                                                } catch (err) {
-                                                    toast.error(`Lỗi upload ảnh ${file.name}`);
+                                                } catch (err: any) {
+                                                    const status = err?.response?.status ?? err?.status;
+                                                    if (status === 413) {
+                                                        toast.error(`Ảnh "${file.name}" quá lớn. Server chỉ nhận file tối đa 2MB.`);
+                                                    } else {
+                                                        const msg = err?.response?.data?.message ?? err?.message ?? 'Có lỗi xảy ra';
+                                                        toast.error(`Lỗi upload "${file.name}": ${msg}`);
+                                                    }
                                                 }
                                             }
                                         }
@@ -436,16 +495,23 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                         <FormLabel className="text-xs">Tồn kho</FormLabel>
                                         <Input
                                             type="number"
-                                            {...form.register(`bien_the.${index}.ton_kho`, { valueAsNumber: true })}
+                                            inputMode="numeric"
+                                            placeholder="0"
+                                            min={0}
+                                            {...form.register(`bien_the.${index}.ton_kho`, {
+                                                setValueAs: (v: any) => v === "" ? 0 : parseInt(v, 10),
+                                            })}
                                         />
                                     </div>
                                     <div className="col-span-3">
                                         <FormLabel className="text-xs">Giá riêng (₫)</FormLabel>
                                         <Input
                                             type="number"
+                                            inputMode="numeric"
                                             placeholder="Để trống nếu = giá gốc"
+                                            min={0}
                                             {...form.register(`bien_the.${index}.gia_rieng`, {
-                                                setValueAs: (v: any) => v === "" ? null : parseFloat(v)
+                                                setValueAs: (v: any) => v === "" ? null : parseFloat(v),
                                             })}
                                         />
                                     </div>

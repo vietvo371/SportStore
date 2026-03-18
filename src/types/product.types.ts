@@ -7,6 +7,7 @@ export interface Category {
     mo_ta: string | null;
     thu_tu: number;
     trang_thai: boolean;
+    danh_muc_con?: Category[];
 }
 
 export interface Brand {

@@ -65,8 +65,8 @@ export function BannerDialog({ open, onOpenChange, banner, onClose }: BannerDial
             return;
         }
 
-        if (file.size > 5 * 1024 * 1024) {
-            toast.error('Kích thước ảnh không được vượt quá 5MB.');
+        if (file.size > 2 * 1024 * 1024) {
+            toast.error('Kích thước ảnh không được vượt quá 2MB.');
             return;
         }
 
@@ -79,7 +79,12 @@ export function BannerDialog({ open, onOpenChange, banner, onClose }: BannerDial
             }
         } catch (error: any) {
             console.error('Lỗi upload ảnh:', error);
-            toast.error(error.response?.data?.message || 'Có lỗi khi upload hình ảnh');
+            const status = error?.response?.status ?? error?.status;
+            if (status === 413) {
+                toast.error('File ảnh quá lớn. Server chỉ nhận file tối đa 2MB.');
+            } else {
+                toast.error(error?.response?.data?.message || 'Có lỗi khi upload hình ảnh');
+            }
         } finally {
             setUploading(false);
             if (fileInputRef.current) {
