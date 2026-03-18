@@ -19,10 +19,12 @@ import {
     FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { Loader2, Plus } from 'lucide-react';
+import { VietnamAddressFields } from '@/components/address/VietnamAddressFields';
 
 export function AddAddressModal() {
     const [open, setOpen] = useState(false);
@@ -104,65 +106,7 @@ export function AddAddressModal() {
                             />
                         </div>
 
-                        <div className="grid grid-cols-3 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="tinh_thanh"
-                                rules={{ required: 'Bắt buộc' }}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Tỉnh/Thành</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Nhập tỉnh..." {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="quan_huyen"
-                                rules={{ required: 'Bắt buộc' }}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Quận/Huyện</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Nhập huyện..." {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="phuong_xa"
-                                rules={{ required: 'Bắt buộc' }}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Phường/Xã</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Nhập phường..." {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                        <FormField
-                            control={form.control}
-                            name="dia_chi_cu_the"
-                            rules={{ required: 'Vui lòng nhập địa chỉ cụ thể' }}
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Địa chỉ cụ thể</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Số nhà, đường, ngõ hẻm..." {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                        <VietnamAddressFields resetKey={open} />
 
                         <FormField
                             control={form.control}

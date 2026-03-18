@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAddress } from '@/hooks/useAddress';
 import { Address, AddressPayload } from '@/types/address.types';
@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { VietnamAddressFields } from '@/components/address/VietnamAddressFields';
 
 interface AddressFormDialogProps {
     open: boolean;
@@ -134,64 +135,12 @@ export function AddressFormDialog({ open, onOpenChange, initialData }: AddressFo
                             />
                         </div>
 
-                        <div className="grid grid-cols-3 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="tinh_thanh"
-                                rules={{ required: 'Bắt buộc' }}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Tỉnh/Thành</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Nhập tỉnh..." {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="quan_huyen"
-                                rules={{ required: 'Bắt buộc' }}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Quận/Huyện</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Nhập huyện..." {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="phuong_xa"
-                                rules={{ required: 'Bắt buộc' }}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Phường/Xã</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Nhập phường..." {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                        <FormField
-                            control={form.control}
-                            name="dia_chi_cu_the"
-                            rules={{ required: 'Vui lòng nhập địa chỉ cụ thể' }}
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Địa chỉ cụ thể</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Số nhà, đường, ngõ hẻm..." {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
+                        <VietnamAddressFields
+                            resetKey={`${open}-${initialData?.id ?? 'new'}`}
+                            initialProvince={initialData?.tinh_thanh}
+                            initialDistrict={initialData?.quan_huyen}
+                            initialWard={initialData?.phuong_xa}
+                            initialAddress={initialData?.dia_chi_cu_the}
                         />
 
                         <FormField

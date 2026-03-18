@@ -7,7 +7,7 @@ import { ShoppingCart, User, Search, Menu, LogOut, Package, Heart, LayoutDashboa
 import { Button } from '@/components/ui/button';
 import { useCartStore } from '@/store/cart.store';
 import { useAuthStore } from '@/store/auth.store';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuPortal } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription, SheetClose } from '@/components/ui/sheet';
 
 import { useCategories } from '@/hooks/useCategory';
@@ -67,17 +67,35 @@ export function Header() {
 
                                         {categories && categories.length > 0 ? (
                                             categories.map((cat: any) => (
-                                                <SheetClose asChild key={cat.id}>
-                                                    <Link
-                                                        href={`/products?category=${cat.duong_dan}`}
-                                                        className="px-6 py-3 text-sm text-slate-600 border-b hover:bg-slate-50 hover:text-primary transition-colors"
-                                                    >
-                                                        {cat.ten}
-                                                    </Link>
-                                                </SheetClose>
+                                                <div key={cat.id} className="flex flex-col border-b">
+                                                    <SheetClose asChild>
+                                                        <Link
+                                                            href={`/products?category=${cat.duong_dan}`}
+                                                            className="px-6 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50 hover:text-primary transition-colors flex items-center justify-between"
+                                                        >
+                                                            <span>{cat.ten}</span>
+                                                        </Link>
+                                                    </SheetClose>
+                                                    
+                                                    {/* Nhánh danh mục con */}
+                                                    {cat.danh_muc_con && cat.danh_muc_con.length > 0 && (
+                                                        <div className="flex flex-col bg-slate-50/30 pb-2">
+                                                            {cat.danh_muc_con.map((child: any) => (
+                                                                <SheetClose asChild key={child.id}>
+                                                                    <Link
+                                                                        href={`/products?category=${child.duong_dan}`}
+                                                                        className="pl-10 pr-6 py-2.5 text-sm text-slate-600 hover:bg-slate-100 hover:text-primary transition-colors relative before:content-[''] before:absolute before:left-6 before:top-1/2 before:-translate-y-1/2 before:w-1 before:h-1 before:bg-slate-400 before:rounded-full hover:before:bg-primary"
+                                                                    >
+                                                                        {child.ten}
+                                                                    </Link>
+                                                                </SheetClose>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
                                             ))
                                         ) : (
-                                            <div className="px-6 py-4 text-sm text-slate-500">Đang tải danh mục...</div>
+                                            <div className="px-6 py-4 text-sm text-slate-500 border-b">Đang tải danh mục...</div>
                                         )}
 
                                         <SheetClose asChild>
@@ -111,17 +129,41 @@ export function Header() {
                                 Danh mục
                                 <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="mt-[2px] opacity-70"><path d="M4.18179 6.18181C4.35753 6.00608 4.64245 6.00608 4.81819 6.18181L7.49999 8.86362L10.1818 6.18181C10.3575 6.00608 10.6424 6.00608 10.8182 6.18181C10.9939 6.35755 10.9939 6.64247 10.8182 6.81821L7.81819 9.81821C7.73379 9.9026 7.61934 9.95001 7.49999 9.95001C7.38064 9.95001 7.26618 9.9026 7.18179 9.81821L4.18179 6.81821C4.00605 6.64247 4.00605 6.35755 4.18179 6.18181Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path></svg>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56 max-h-[300px] overflow-y-auto" align="start">
+                            <DropdownMenuContent className="w-56 max-h-[400px] overflow-y-auto" align="start">
                                 {categories && categories.length > 0 ? (
                                     categories.map((cat: any) => (
-                                        <DropdownMenuItem key={cat.id} asChild className="cursor-pointer">
-                                            <Link href={`/products?category=${cat.duong_dan}`}>
-                                                {cat.ten}
-                                            </Link>
-                                        </DropdownMenuItem>
+                                        cat.danh_muc_con && cat.danh_muc_con.length > 0 ? (
+                                            <DropdownMenuSub key={cat.id}>
+                                                <DropdownMenuSubTrigger className="cursor-pointer font-medium hover:bg-slate-50 py-2.5">
+                                                    {cat.ten}
+                                                </DropdownMenuSubTrigger>
+                                                <DropdownMenuPortal>
+                                                    <DropdownMenuSubContent className="w-48 max-h-[300px] overflow-y-auto z-[100] shadow-md border-slate-100 p-2">
+                                                        <DropdownMenuItem asChild className="cursor-pointer border-b border-slate-100 font-semibold text-primary pb-2 rounded-none mb-1">
+                                                            <Link href={`/products?category=${cat.duong_dan}`}>
+                                                                Tất cả {cat.ten}
+                                                            </Link>
+                                                        </DropdownMenuItem>
+                                                        {cat.danh_muc_con.map((child: any) => (
+                                                            <DropdownMenuItem key={child.id} asChild className="cursor-pointer py-2 hover:text-primary transition-colors focus:bg-slate-50 focus:text-primary">
+                                                                <Link href={`/products?category=${child.duong_dan}`}>
+                                                                    {child.ten}
+                                                                </Link>
+                                                            </DropdownMenuItem>
+                                                        ))}
+                                                    </DropdownMenuSubContent>
+                                                </DropdownMenuPortal>
+                                            </DropdownMenuSub>
+                                        ) : (
+                                            <DropdownMenuItem key={cat.id} asChild className="cursor-pointer font-medium hover:bg-slate-50 py-2.5">
+                                                <Link href={`/products?category=${cat.duong_dan}`}>
+                                                    {cat.ten}
+                                                </Link>
+                                            </DropdownMenuItem>
+                                        )
                                     ))
                                 ) : (
-                                    <div className="p-2 text-sm text-slate-500 text-center">Đang tải...</div>
+                                    <div className="p-4 text-sm text-slate-500 text-center animate-pulse">Đang tải danh mục...</div>
                                 )}
                             </DropdownMenuContent>
                         </DropdownMenu>
