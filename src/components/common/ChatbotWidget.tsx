@@ -145,7 +145,7 @@ export function ChatbotWidget() {
                                 </Button>
                             </form>
                             <p className="text-[10px] text-slate-400 mt-2 text-center">
-                                Cung cấp bởi <strong>Gemini 2.0 Flash</strong>
+                                Cung cấp bởi <strong>SPORTSTORE AI</strong>
                             </p>
                         </div>
                     </motion.div>
