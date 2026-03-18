@@ -19,12 +19,11 @@ import {
     ChevronLeft,
     ChevronRight,
     Loader2,
-    Filter,
     X,
-    Calendar,
-    ArrowRight,
+    Calendar as CalendarIcon,
     CreditCard,
-    ClipboardList
+    ClipboardList,
+    FilterX,
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +34,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { DateRange } from "react-day-picker";
 
 import { OrderDetailModal } from "@/components/admin/OrderDetailModal";
 
@@ -48,10 +53,18 @@ const ORDER_STATUSES = {
     'hoan_tra': { label: 'Hoàn trả', color: 'bg-slate-50 text-slate-600 border-slate-100' },
 };
 
+const PAYMENT_METHODS = {
+    'cod': { label: 'COD (Tiền mặt)', icon: '💵' },
+    'vnpay': { label: 'VNPay', icon: '💳' },
+    'momo': { label: 'MoMo', icon: '📱' },
+};
+
 export default function AdminOrdersPage() {
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState<string>("all");
+    const [paymentMethod, setPaymentMethod] = useState<string>("all");
+    const [dateRange, setDateRange] = useState<DateRange | undefined>();
     const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -59,7 +72,10 @@ export default function AdminOrdersPage() {
         page,
         tu_khoa: search || undefined,
         trang_thai: status === 'all' ? undefined : status,
-    }), [page, search, status]);
+        phuong_thuc_tt: paymentMethod === 'all' ? undefined : paymentMethod,
+        tu_ngay: dateRange?.from ? format(dateRange.from, 'yyyy-MM-dd') : undefined,
+        den_ngay: dateRange?.to ? format(dateRange.to, 'yyyy-MM-dd') : undefined,
+    }), [page, search, status, paymentMethod, dateRange]);
 
     const { data: response, isLoading, error } = useAdminOrders(params);
 
@@ -69,9 +85,13 @@ export default function AdminOrdersPage() {
     const orders = response?.data || [];
     const meta = response?.meta;
 
+    const hasActiveFilters = search || status !== 'all' || paymentMethod !== 'all' || dateRange;
+
     const resetFilters = () => {
         setSearch("");
         setStatus("all");
+        setPaymentMethod("all");
+        setDateRange(undefined);
         setPage(1);
     };
 
@@ -82,38 +102,116 @@ export default function AdminOrdersPage() {
                     <h1 className="text-2xl font-bold text-slate-900">Quản lý Đơn hàng</h1>
                     <p className="text-slate-500 text-sm italic">Theo dõi, cập nhật trạng thái và xử lý đơn hàng toàn hệ thống.</p>
                 </div>
-                <Button variant="outline" onClick={resetFilters} className="border-slate-200">
-                    <X className="h-4 w-4 mr-2" /> Làm mới bộ lọc
+                <Button
+                    variant="outline"
+                    onClick={resetFilters}
+                    className={cn("border-slate-200", hasActiveFilters && "border-rose-200 text-rose-600 hover:bg-rose-50")}
+                >
+                    <FilterX className="h-4 w-4 mr-2" /> Xóa bộ lọc
                 </Button>
             </div>
 
             {/* Filter Bar */}
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col md:flex-row gap-4 items-center">
-                <div className="relative flex-1 w-full">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input
-                        placeholder="Mã đơn hàng hoặc tên khách hàng..."
-                        value={search}
-                        onChange={(e) => {
-                            setSearch(e.target.value);
-                            setPage(1);
-                        }}
-                        className="pl-10 bg-slate-50 border-none focus-visible:ring-1 focus-visible:ring-slate-200"
-                    />
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col gap-3">
+                {/* Row 1: Search + Status + Payment */}
+                <div className="flex flex-col md:flex-row gap-3 items-center">
+                    <div className="relative flex-1 w-full">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Input
+                            placeholder="Mã đơn hàng, tên hoặc SĐT khách hàng..."
+                            value={search}
+                            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                            className="pl-10 bg-slate-50 border-none focus-visible:ring-1 focus-visible:ring-slate-200"
+                        />
+                    </div>
+
+                    <div className="w-full md:w-52">
+                        <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
+                            <SelectTrigger className="bg-slate-50 border-none">
+                                <SelectValue placeholder="Trạng thái đơn hàng" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Tất cả trạng thái</SelectItem>
+                                {Object.entries(ORDER_STATUSES).map(([key, { label }]) => (
+                                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="w-full md:w-52">
+                        <Select value={paymentMethod} onValueChange={(v) => { setPaymentMethod(v); setPage(1); }}>
+                            <SelectTrigger className="bg-slate-50 border-none">
+                                <CreditCard className="h-4 w-4 mr-2 text-slate-400" />
+                                <SelectValue placeholder="Phương thức TT" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Tất cả thanh toán</SelectItem>
+                                {Object.entries(PAYMENT_METHODS).map(([key, { label, icon }]) => (
+                                    <SelectItem key={key} value={key}>
+                                        <span className="mr-1.5">{icon}</span>{label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
 
-                <div className="w-full md:w-64">
-                    <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
-                        <SelectTrigger className="bg-slate-50 border-none">
-                            <SelectValue placeholder="Trạng thái đơn hàng" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                            {Object.entries(ORDER_STATUSES).map(([key, { label }]) => (
-                                <SelectItem key={key} value={key}>{label}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                {/* Row 2: Date Range */}
+                <div className="flex items-center gap-2">
+                    <CalendarIcon className="h-4 w-4 text-slate-400 shrink-0" />
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="outline"
+                                className={cn(
+                                    "flex-1 md:w-[320px] md:flex-none justify-start text-left font-normal bg-slate-50 border-none hover:bg-slate-100 text-slate-700",
+                                    !dateRange && "text-slate-400"
+                                )}
+                            >
+                                {dateRange?.from ? (
+                                    dateRange.to ? (
+                                        <span className="font-medium text-slate-700">
+                                            {format(dateRange.from, "dd/MM/yyyy", { locale: vi })} — {format(dateRange.to, "dd/MM/yyyy", { locale: vi })}
+                                        </span>
+                                    ) : (
+                                        <span className="text-rose-500 font-medium">
+                                            {format(dateRange.from, "dd/MM/yyyy", { locale: vi })} — (chọn ngày kết thúc)
+                                        </span>
+                                    )
+                                ) : (
+                                    "Lọc theo khoảng ngày đặt hàng..."
+                                )}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                            className="w-auto p-0"
+                            align="start"
+                            sideOffset={8}
+                            avoidCollisions
+                            style={{ zIndex: 9999 }}
+                        >
+                            <Calendar
+                                initialFocus
+                                mode="range"
+                                defaultMonth={dateRange?.from}
+                                selected={dateRange}
+                                onSelect={(range) => { setDateRange(range); setPage(1); }}
+                                numberOfMonths={2}
+                                locale={vi}
+                            />
+                        </PopoverContent>
+                    </Popover>
+                    {dateRange && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-full text-slate-400 hover:text-rose-500"
+                            onClick={() => { setDateRange(undefined); setPage(1); }}
+                        >
+                            <X className="h-3.5 w-3.5" />
+                        </Button>
+                    )}
                 </div>
             </div>
 
@@ -151,7 +249,7 @@ export default function AdminOrdersPage() {
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2 text-slate-600">
-                                                <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                                                <CalendarIcon className="h-3.5 w-3.5 text-slate-400" />
                                                 <span className="text-sm">
                                                     {formatDate(order.created_at)}
                                                 </span>

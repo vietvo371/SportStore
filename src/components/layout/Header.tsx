@@ -205,36 +205,45 @@ export function Header() {
                                                 <p className="text-sm font-medium leading-none text-slate-800">{user?.ho_va_ten}</p>
                                                 <p className="text-xs leading-none text-slate-500">{user?.email}</p>
                                             </div>
-                                            {user?.vai_tro === 'quan_tri' && (
-                                                <DropdownMenuItem asChild className="cursor-pointer py-2 text-primary font-semibold">
-                                                    <Link href="/admin" className="flex items-center w-full">
-                                                        <LayoutDashboard className="mr-2 h-4 w-4" />
-                                                        <span>Quản trị hệ thống</span>
-                                                    </Link>
-                                                </DropdownMenuItem>
+                                            {user?.vai_tro === 'quan_tri' ? (
+                                                <>
+                                                    <DropdownMenuItem asChild className="cursor-pointer py-2 text-primary font-semibold">
+                                                        <Link href="/admin" className="flex items-center w-full">
+                                                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                                                            <span>Quản trị hệ thống</span>
+                                                        </Link>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={logout} className="cursor-pointer py-2 text-red-600 focus:text-red-600 focus:bg-red-50 mt-1">
+                                                        <LogOut className="mr-2 h-4 w-4" />
+                                                        <span>Đăng xuất</span>
+                                                    </DropdownMenuItem>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <DropdownMenuItem asChild className="cursor-pointer py-2">
+                                                        <Link href="/profile" className="flex items-center w-full">
+                                                            <User className="mr-2 h-4 w-4 text-slate-500" />
+                                                            <span>Tài khoản của tôi</span>
+                                                        </Link>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem asChild className="cursor-pointer py-2">
+                                                        <Link href="/profile/orders" className="flex items-center w-full">
+                                                            <Package className="mr-2 h-4 w-4 text-slate-500" />
+                                                            <span>Đơn mua</span>
+                                                        </Link>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem asChild className="cursor-pointer py-2">
+                                                        <Link href="/profile/wishlist" className="flex items-center w-full">
+                                                            <Heart className="mr-2 h-4 w-4 text-slate-500" />
+                                                            <span>Sản phẩm yêu thích</span>
+                                                        </Link>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={logout} className="cursor-pointer py-2 text-red-600 focus:text-red-600 focus:bg-red-50 mt-1">
+                                                        <LogOut className="mr-2 h-4 w-4" />
+                                                        <span>Đăng xuất</span>
+                                                    </DropdownMenuItem>
+                                                </>
                                             )}
-                                            <DropdownMenuItem asChild className="cursor-pointer py-2">
-                                                <Link href="/profile" className="flex items-center w-full">
-                                                    <User className="mr-2 h-4 w-4 text-slate-500" />
-                                                    <span>Tài khoản của tôi</span>
-                                                </Link>
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem asChild className="cursor-pointer py-2">
-                                                <Link href="/profile/orders" className="flex items-center w-full">
-                                                    <Package className="mr-2 h-4 w-4 text-slate-500" />
-                                                    <span>Đơn mua</span>
-                                                </Link>
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem asChild className="cursor-pointer py-2">
-                                                <Link href="/profile/wishlist" className="flex items-center w-full">
-                                                    <Heart className="mr-2 h-4 w-4 text-slate-500" />
-                                                    <span>Sản phẩm yêu thích</span>
-                                                </Link>
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={logout} className="cursor-pointer py-2 text-red-600 focus:text-red-600 focus:bg-red-50 mt-1">
-                                                <LogOut className="mr-2 h-4 w-4" />
-                                                <span>Đăng xuất</span>
-                                            </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </div>

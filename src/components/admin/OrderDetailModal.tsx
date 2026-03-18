@@ -100,19 +100,19 @@ export function OrderDetailModal({ orderId, open, onOpenChange }: OrderDetailMod
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 border-none shadow-2xl rounded-2xl">
-                <DialogHeader className="p-6 bg-slate-50/50 rounded-t-2xl">
+            <DialogContent className="w-[95vw] sm:max-w-5xl max-h-[92vh] overflow-y-auto p-0 border-none shadow-2xl rounded-2xl">
+                <DialogHeader className="px-8 py-5 bg-slate-50/70 border-b border-slate-100 rounded-t-2xl sticky top-0 z-10">
                     <div className="flex items-center justify-between">
                         <div>
                             <DialogTitle className="text-xl font-bold flex items-center gap-2">
                                 Chi tiết đơn hàng <span className="text-primary font-mono">#{order?.ma_don_hang}</span>
                             </DialogTitle>
-                            <DialogDescription className="text-slate-500 mt-1">
+                            <DialogDescription className="text-slate-500 mt-0.5 text-sm">
                                 Đặt ngày: {order ? formatDate(order.created_at) : '...'}
                             </DialogDescription>
                         </div>
                         {order && (
-                            <Badge variant="outline" className={`px-4 py-1.5 rounded-full font-bold border ${getStatusBadgeClass(order.trang_thai)}`}>
+                            <Badge variant="outline" className={`px-4 py-1.5 rounded-full font-bold border text-sm ${getStatusBadgeClass(order.trang_thai)}`}>
                                 {ORDER_STATUS_LABELS[order.trang_thai] || order.trang_thai}
                             </Badge>
                         )}
@@ -124,27 +124,27 @@ export function OrderDetailModal({ orderId, open, onOpenChange }: OrderDetailMod
                         <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     </div>
                 ) : (
-                    <div className="p-6 space-y-8">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            {/* Left Column: Customer & Shipping */}
-                            <div className="space-y-6">
+                    <div className="px-8 py-6 space-y-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Left Column: Customer & Payment */}
+                            <div className="space-y-5">
                                 <section>
-                                    <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 mb-4 uppercase tracking-wider">
-                                        <User className="h-4 w-4 text-primary" /> Thông tin khách hàng
+                                    <h3 className="text-xs font-bold text-slate-500 flex items-center gap-2 mb-3 uppercase tracking-widest">
+                                        <User className="h-3.5 w-3.5 text-primary" /> Thông tin khách hàng
                                     </h3>
-                                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-3">
-                                        <div className="flex justify-between items-center text-sm">
-                                            <span className="text-slate-500">Người nhận:</span>
+                                    <div className="bg-slate-50 rounded-xl p-5 border border-slate-100 space-y-3">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-slate-500">Người nhận</span>
                                             <span className="font-bold text-slate-900">{order.ten_nguoi_nhan}</span>
                                         </div>
-                                        <div className="flex justify-between items-center text-sm">
-                                            <span className="text-slate-500">Số điện thoại:</span>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-slate-500">Số điện thoại</span>
                                             <span className="font-bold text-slate-900">{order.sdt_nguoi_nhan}</span>
                                         </div>
                                         <Separator className="bg-slate-200" />
-                                        <div className="flex gap-2 text-sm">
+                                        <div className="flex gap-2">
                                             <MapPin className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
-                                            <span className="text-slate-600 leading-relaxed italic">
+                                            <span className="text-sm text-slate-600 leading-relaxed">
                                                 {order.dia_chi_giao_hang}
                                             </span>
                                         </div>
@@ -152,19 +152,19 @@ export function OrderDetailModal({ orderId, open, onOpenChange }: OrderDetailMod
                                 </section>
 
                                 <section>
-                                    <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 mb-4 uppercase tracking-wider">
-                                        <CreditCard className="h-4 w-4 text-primary" /> Thanh toán
+                                    <h3 className="text-xs font-bold text-slate-500 flex items-center gap-2 mb-3 uppercase tracking-widest">
+                                        <CreditCard className="h-3.5 w-3.5 text-primary" /> Thanh toán
                                     </h3>
-                                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-3">
-                                        <div className="flex justify-between items-center text-sm">
-                                            <span className="text-slate-500">Phương thức:</span>
-                                            <Badge variant="secondary" className="uppercase text-[10px] font-bold">
-                                                {order.phuong_thuc_tt.replace('_', ' ')}
+                                    <div className="bg-slate-50 rounded-xl p-5 border border-slate-100 space-y-3">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-slate-500">Phương thức</span>
+                                            <Badge variant="secondary" className="uppercase text-xs font-bold px-3 py-1">
+                                                {order.phuong_thuc_tt?.replace('_', ' ')}
                                             </Badge>
                                         </div>
-                                        <div className="flex justify-between items-center text-sm">
-                                            <span className="text-slate-500">Trạng thái:</span>
-                                            <Badge variant="outline" className={`text-[10px] font-bold ${order.trang_thai_tt === 'da_thanh_toan' ? 'text-emerald-600' : 'text-slate-400'}`}>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-slate-500">Trạng thái TT</span>
+                                            <Badge variant="outline" className={`text-xs font-bold px-3 py-1 ${order.trang_thai_tt === 'da_thanh_toan' ? 'text-emerald-600 border-emerald-200 bg-emerald-50' : 'text-slate-400'}`}>
                                                 {order.trang_thai_tt === 'da_thanh_toan' ? 'Đã thanh toán' : 'Chưa thanh toán'}
                                             </Badge>
                                         </div>
@@ -173,18 +173,18 @@ export function OrderDetailModal({ orderId, open, onOpenChange }: OrderDetailMod
                             </div>
 
                             {/* Right Column: Status Update */}
-                            <section className="bg-primary/5 rounded-2xl p-6 border border-primary/10">
-                                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 mb-4 uppercase tracking-wider">
-                                    <Truck className="h-4 w-4 text-primary" /> Quản lý đơn hàng
+                            <section className="bg-primary/5 rounded-2xl p-6 border border-primary/10 h-fit">
+                                <h3 className="text-xs font-bold text-slate-500 flex items-center gap-2 mb-4 uppercase tracking-widest">
+                                    <Truck className="h-3.5 w-3.5 text-primary" /> Quản lý đơn hàng
                                 </h3>
                                 <div className="space-y-4">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-bold text-slate-500 uppercase">Cập nhật trạng thái</label>
+                                        <label className="text-xs font-semibold text-slate-500 uppercase">Cập nhật trạng thái</label>
                                         <Select value={newStatus} onValueChange={setNewStatus}>
-                                            <SelectTrigger className="bg-white border-slate-200 rounded-xl font-medium">
+                                            <SelectTrigger className="bg-white border-slate-200 rounded-xl font-medium h-11">
                                                 <SelectValue />
                                             </SelectTrigger>
-                                            <SelectContent>
+                                            <SelectContent style={{ zIndex: 9999 }}>
                                                 {Object.entries(ORDER_STATUS_LABELS).map(([key, label]) => (
                                                     <SelectItem key={key} value={key}>{label}</SelectItem>
                                                 ))}
@@ -192,16 +192,16 @@ export function OrderDetailModal({ orderId, open, onOpenChange }: OrderDetailMod
                                         </Select>
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-bold text-slate-500 uppercase">Ghi chú quản trị (không bắt buộc)</label>
+                                        <label className="text-xs font-semibold text-slate-500 uppercase">Ghi chú quản trị <span className="normal-case font-normal">(không bắt buộc)</span></label>
                                         <Textarea
                                             placeholder="Nhập ghi chú cho lần cập nhật này..."
-                                            className="bg-white border-slate-200 rounded-xl resize-none text-sm h-24"
+                                            className="bg-white border-slate-200 rounded-xl resize-none text-sm h-28"
                                             value={note}
                                             onChange={(e) => setNote(e.target.value)}
                                         />
                                     </div>
                                     <Button
-                                        className="w-full rounded-xl shadow-lg shadow-primary/20"
+                                        className="w-full rounded-xl h-11 shadow-lg shadow-primary/20 font-bold"
                                         disabled={newStatus === order.trang_thai || updateStatus.isPending}
                                         onClick={handleUpdateStatus}
                                     >

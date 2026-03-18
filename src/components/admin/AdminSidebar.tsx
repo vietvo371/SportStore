@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
     LayoutDashboard,
     Package,
@@ -10,14 +10,16 @@ import {
     Star,
     Ticket,
     Users,
-    Settings,
     Home,
     BarChart3,
     Image as ImageIcon,
     Bell as BellIcon,
-    ShieldCheck
+    ShieldCheck,
+    LogOut,
+    UserCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/store/auth.store';
 
 const sidebarItems = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -40,9 +42,16 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ className, setOpen }: AdminSidebarProps) {
     const pathname = usePathname();
+    const router = useRouter();
+    const logout = useAuthStore((s) => s.logout);
 
     const handleLinkClick = () => {
         if (setOpen) setOpen(false);
+    };
+
+    const handleLogout = () => {
+        logout();
+        router.push('/login');
     };
 
     return (
@@ -77,15 +86,36 @@ export function AdminSidebar({ className, setOpen }: AdminSidebarProps) {
                 })}
             </nav>
 
-            <div className="p-4 mt-auto border-t border-slate-800 space-y-4">
+            <div className="p-4 mt-auto border-t border-slate-800 space-y-1">
+                <Link
+                    href="/admin/profile"
+                    onClick={handleLinkClick}
+                    className={cn(
+                        "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
+                        pathname === '/admin/profile'
+                            ? "bg-primary text-white shadow-lg shadow-primary/20"
+                            : "hover:bg-slate-800 hover:text-white text-slate-400"
+                    )}
+                >
+                    <UserCircle className="h-5 w-5" />
+                    Hồ sơ của tôi
+                </Link>
                 <Link
                     href="/"
+                    onClick={handleLinkClick}
                     className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition-all text-slate-400"
                 >
                     <Home className="h-5 w-5" />
                     Quay lại Cửa hàng
                 </Link>
-                <div className="px-4 py-3 rounded-xl bg-slate-800/40 border border-slate-700/30">
+                <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-rose-500/10 hover:text-rose-400 transition-all text-slate-400 text-left"
+                >
+                    <LogOut className="h-5 w-5" />
+                    Đăng xuất
+                </button>
+                <div className="px-4 py-3 rounded-xl bg-slate-800/40 border border-slate-700/30 mt-3">
                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1">Phiên bản</p>
                     <p className="text-xs text-slate-400 font-medium">SportStore v1.0.4</p>
                 </div>
