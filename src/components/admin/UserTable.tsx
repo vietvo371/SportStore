@@ -45,9 +45,10 @@ import {
 interface UserTableProps {
     users: any[];
     onEdit: (user: any) => void;
+    hideDelete?: boolean;
 }
 
-export function UserTable({ users, onEdit }: UserTableProps) {
+export function UserTable({ users, onEdit, hideDelete = false }: UserTableProps) {
     const deleteUser = useDeleteUser();
 
     return (
@@ -147,35 +148,37 @@ export function UserTable({ users, onEdit }: UserTableProps) {
                                                 <TooltipContent className="bg-slate-900 border-slate-800 text-white font-bold text-[10px] uppercase tracking-wider py-2 px-3">Cấu hình</TooltipContent>
                                             </Tooltip>
 
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        disabled={user.is_master}
-                                                        className="h-10 w-10 rounded-xl p-0 text-slate-400 hover:text-rose-600 hover:bg-rose-50 shadow-sm transition-all active:scale-95 disabled:opacity-30"
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Xoá người dùng này?</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            Tài khoản của <span className="font-medium text-slate-900">"{user.ho_va_ten}"</span> sẽ bị xoá vĩnh viễn khỏi hệ thống. Hành động này không thể hoàn tác.
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Huỷ bỏ</AlertDialogCancel>
-                                                        <AlertDialogAction
-                                                            className="bg-rose-500 hover:bg-rose-600 text-white"
-                                                            onClick={() => deleteUser.mutate(user.id)}
+                                            {!hideDelete && (
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            disabled={user.is_master}
+                                                            className="h-10 w-10 rounded-xl p-0 text-slate-400 hover:text-rose-600 hover:bg-rose-50 shadow-sm transition-all active:scale-95 disabled:opacity-30"
                                                         >
-                                                            Xác nhận xoá
-                                                        </AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>Xoá người dùng này?</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                Tài khoản của <span className="font-medium text-slate-900">"{user.ho_va_ten}"</span> sẽ bị xoá vĩnh viễn khỏi hệ thống. Hành động này không thể hoàn tác.
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Huỷ bỏ</AlertDialogCancel>
+                                                            <AlertDialogAction
+                                                                className="bg-rose-500 hover:bg-rose-600 text-white"
+                                                                onClick={() => deleteUser.mutate(user.id)}
+                                                            >
+                                                                Xác nhận xoá
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
+                                            )}
                                         </TooltipProvider>
                                     </div>
                                 </TableCell>

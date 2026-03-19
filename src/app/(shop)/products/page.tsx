@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useCategories } from '@/hooks/useCategory';
 import { useBrands } from '@/services/brand.service';
 import { Brand } from '@/types/brand.types';
+import { X } from 'lucide-react';
 
 function ProductsContent() {
     const searchParams = useSearchParams();
@@ -45,7 +46,8 @@ function ProductsContent() {
 
     const handleBrandClick = (brandSlug: string) => {
         const newBrand = brand === brandSlug ? '' : brandSlug;
-        router.push(buildUrl({ category, brand: newBrand, search }));
+        // Reset search khi chọn thương hiệu
+        router.push(buildUrl({ category, brand: newBrand }));
     };
 
     const products = data?.data || [];
@@ -70,7 +72,7 @@ function ProductsContent() {
                                 <ul className="space-y-3 text-sm flex flex-col max-h-[40vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200">
                                     <li>
                                         <a
-                                            href={buildUrl({ brand, search })}
+                                            href={buildUrl({ brand })}
                                             className={`transition-colors block py-2 ${!category ? 'text-primary font-bold' : 'text-slate-600 hover:text-primary'}`}
                                         >
                                             Tất cả sản phẩm
@@ -79,7 +81,7 @@ function ProductsContent() {
                                     {categories?.map((cat: any) => (
                                         <li key={cat.id} className="flex flex-col gap-1.5 pb-2 border-b border-slate-50 last:border-0">
                                             <a
-                                                href={buildUrl({ category: cat.duong_dan, brand, search })}
+                                                href={buildUrl({ category: cat.duong_dan, brand })}
                                                 className={`transition-colors block py-0.5 ${category === cat.duong_dan ? 'text-primary font-bold' : 'text-slate-800 font-semibold hover:text-primary'}`}
                                             >
                                                 {cat.ten}
@@ -89,7 +91,7 @@ function ProductsContent() {
                                                     {cat.danh_muc_con.map((child: any) => (
                                                         <li key={child.id} className="relative before:content-[''] before:absolute before:left-[-15px] before:top-1/2 before:-translate-y-1/2 before:w-3 before:h-[1.5px] before:bg-slate-200">
                                                             <a
-                                                                href={buildUrl({ category: child.duong_dan, brand, search })}
+                                                                href={buildUrl({ category: child.duong_dan, brand })}
                                                                 className={`transition-colors block py-0.5 text-[13px] ${category === child.duong_dan ? 'text-primary font-semibold' : 'text-slate-500 hover:text-primary'}`}
                                                             >
                                                                 {child.ten}
@@ -147,16 +149,31 @@ function ProductsContent() {
 
                 {/* Product Grid */}
                 <div className="flex-1">
-                    <div className="mb-6 flex items-center justify-between">
-                        <h1 className="text-2xl font-bold">
-                            {search
-                                ? `Tìm kiếm: "${search}"`
-                                : category
-                                    ? `Danh Mục: ${category}`
-                                    : brand
-                                        ? `Thương Hiệu: ${brands?.find((b: Brand) => b.duong_dan === brand)?.ten ?? brand}`
-                                        : 'Tất Cả Sản Phẩm'}
-                        </h1>
+                    <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <h1 className="text-2xl font-bold">
+                                {search
+                                    ? `Tìm kiếm: "${search}"`
+                                    : category
+                                        ? `Danh Mục: ${category}`
+                                        : brand
+                                            ? `Thương Hiệu: ${brands?.find((b: Brand) => b.duong_dan === brand)?.ten ?? brand}`
+                                            : 'Tất Cả Sản Phẩm'}
+                            </h1>
+                            {(search || category || brand) && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-slate-500 hover:text-rose-600 hover:bg-rose-50 shrink-0"
+                                    asChild
+                                >
+                                    <a href={pathname}>
+                                        <X className="h-4 w-4 mr-1" />
+                                        Xóa bộ lọc
+                                    </a>
+                                </Button>
+                            )}
+                        </div>
                         <p className="text-sm text-muted-foreground">
                             {meta ? `Hiển thị ${products.length} trên tổng ${meta.total} sản phẩm` : ''}
                         </p>

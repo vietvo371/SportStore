@@ -113,69 +113,73 @@ export function UserEditDialog({ open, onOpenChange, user }: UserEditDialogProps
                                     </div>
                                 )}
 
-                                <FormField
-                                    control={form.control}
-                                    name="vai_tro"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Vai trò hệ thống</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Chọn vai trò" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="khach_hang">Không cấp quyền admin</SelectItem>
-                                                    <SelectItem value="quan_tri">Cấp quyền admin</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                                {user?.vai_tro !== 'khach_hang' && (
+                                    <>
+                                        <FormField
+                                            control={form.control}
+                                            name="vai_tro"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Vai trò hệ thống</FormLabel>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Chọn vai trò" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value="khach_hang">Không cấp quyền admin</SelectItem>
+                                                            <SelectItem value="quan_tri">Cấp quyền admin</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
 
-                                <div className="space-y-4 pt-4 border-t">
-                                    <Label className="text-sm font-semibold flex items-center gap-2">
-                                        <ShieldCheck className="w-4 h-4 text-primary" />
-                                        Gán vai trò chi tiết
-                                    </Label>
-                                    {isLoadingRoles ? (
-                                        <div className="flex justify-center py-4">
-                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                        <div className="space-y-4 pt-4 border-t">
+                                            <Label className="text-sm font-semibold flex items-center gap-2">
+                                                <ShieldCheck className="w-4 h-4 text-primary" />
+                                                Gán vai trò chi tiết
+                                            </Label>
+                                            {isLoadingRoles ? (
+                                                <div className="flex justify-center py-4">
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                </div>
+                                            ) : (
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    {roles.map((role) => (
+                                                        <FormField
+                                                            key={role.id}
+                                                            control={form.control}
+                                                            name="vai_tro_ids"
+                                                            render={({ field }) => (
+                                                                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-3 hover:bg-slate-50 transition-colors">
+                                                                    <FormControl>
+                                                                        <Checkbox
+                                                                            checked={field.value?.includes(role.id)}
+                                                                            onCheckedChange={(checked) => {
+                                                                                return checked
+                                                                                    ? field.onChange([...field.value, role.id])
+                                                                                    : field.onChange(field.value?.filter((value: number) => value !== role.id));
+                                                                            }}
+                                                                        />
+                                                                    </FormControl>
+                                                                    <div className="space-y-1 leading-none">
+                                                                        <FormLabel className="text-xs font-bold cursor-pointer">
+                                                                            {role.ten}
+                                                                        </FormLabel>
+                                                                        <p className="text-[10px] text-muted-foreground">{role.ma_slug}</p>
+                                                                    </div>
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
-                                    ) : (
-                                        <div className="grid grid-cols-2 gap-3">
-                                            {roles.map((role) => (
-                                                <FormField
-                                                    key={role.id}
-                                                    control={form.control}
-                                                    name="vai_tro_ids"
-                                                    render={({ field }) => (
-                                                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-3 hover:bg-slate-50 transition-colors">
-                                                            <FormControl>
-                                                                <Checkbox
-                                                                    checked={field.value?.includes(role.id)}
-                                                                    onCheckedChange={(checked) => {
-                                                                        return checked
-                                                                            ? field.onChange([...field.value, role.id])
-                                                                            : field.onChange(field.value?.filter((value: number) => value !== role.id));
-                                                                    }}
-                                                                />
-                                                            </FormControl>
-                                                            <div className="space-y-1 leading-none">
-                                                                <FormLabel className="text-xs font-bold cursor-pointer">
-                                                                    {role.ten}
-                                                                </FormLabel>
-                                                                <p className="text-[10px] text-muted-foreground">{role.ma_slug}</p>
-                                                            </div>
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
+                                    </>
+                                )}
 
                                 <FormField
                                     control={form.control}

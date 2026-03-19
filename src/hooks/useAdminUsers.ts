@@ -25,6 +25,26 @@ export function useAdminUser(id: number | null) {
     });
 }
 
+export function useCreateUser() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: any) => adminService.createUser(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: userKeys.lists() });
+            toast.success('Đã tạo người dùng mới thành công');
+        },
+        onError: (error: any) => {
+            if (error.errors) {
+                const firstError = Object.values(error.errors)[0] as string[];
+                toast.error(firstError[0] || 'Dữ liệu không hợp lệ');
+            } else {
+                toast.error(error.message || 'Không thể tạo người dùng');
+            }
+        },
+    });
+}
+
 export function useUpdateUser() {
     const queryClient = useQueryClient();
 

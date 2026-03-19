@@ -29,6 +29,7 @@ const sidebarItems = [
     { name: 'Đánh giá', href: '/admin/reviews', icon: Star },
     { name: 'Mã giảm giá', href: '/admin/coupons', icon: Ticket },
     { name: 'Khách hàng', href: '/admin/users', icon: Users },
+    { name: 'Quản trị viên', href: '/admin/admins', icon: UserCircle },
     { name: 'Phân quyền', href: '/admin/roles', icon: ShieldCheck },
     { name: 'Xếp hạng & Thống kê', href: '/admin/reports', icon: BarChart3 },
     { name: 'Banner', href: '/admin/banners', icon: ImageIcon },

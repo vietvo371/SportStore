@@ -153,6 +153,9 @@ export const adminService = {
     getUser: async (id: number): Promise<ApiResponse<any>> => {
         return apiClient.get(`/admin/users/${id}`);
     },
+    createUser: async (data: any): Promise<ApiResponse<any>> => {
+        return apiClient.post('/admin/users', data);
+    },
     updateUser: async (id: number, data: any): Promise<ApiResponse<any>> => {
         return apiClient.put(`/admin/users/${id}`, data);
     },
