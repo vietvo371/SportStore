@@ -8,6 +8,8 @@ export interface GetProductsParams {
     category?: string;
     brand?: string;
     search?: string;
+    minPrice?: number;
+    maxPrice?: number;
     sort?: 'newest' | 'price_asc' | 'price_desc' | 'popular';
 }
 
@@ -26,10 +28,10 @@ export const productService = {
         }
     },
 
-    getProducts: async (params: any = {}): Promise<PaginatedResponse<Product>> => {
+    getProducts: async (params: GetProductsParams = {}): Promise<PaginatedResponse<Product>> => {
         try {
             // Map frontend params to backend expected params
-            const apiParams: Record<string, any> = { ...params };
+            const apiParams: Record<string, string | number | boolean | undefined> = { ...params };
 
             if (params.category) {
                 apiParams.danh_muc = params.category;
@@ -43,9 +45,17 @@ export const productService = {
                 apiParams.tu_khoa = params.search;
                 delete apiParams.search;
             }
+            if (params.minPrice !== undefined) {
+                apiParams.gia_min = params.minPrice;
+                delete apiParams.minPrice;
+            }
+            if (params.maxPrice !== undefined) {
+                apiParams.gia_max = params.maxPrice;
+                delete apiParams.maxPrice;
+            }
 
-            const response: any = await apiClient.get('/products', { params: apiParams });
-            return response as PaginatedResponse<Product>;
+            const response = await apiClient.get<PaginatedResponse<Product>>('/products', { params: apiParams });
+            return response as unknown as PaginatedResponse<Product>;
         } catch (error) {
             console.error('Failed to fetch products API:', error);
             throw error;
@@ -54,8 +64,8 @@ export const productService = {
 
     getProductBySlug: async (slug: string): Promise<Product> => {
         try {
-            const response: any = await apiClient.get(`/products/${slug}`);
-            return response.data;
+            const response = await apiClient.get<{ data: Product }>(`/products/${slug}`);
+            return response.data.data;
         } catch (error) {
             console.error(`Failed to fetch product ${slug}:`, error);
             throw error;

@@ -43,8 +43,8 @@ const createUserSchema = z.object({
     ho_va_ten: z.string().min(2, "Tên phải có ít nhất 2 ký tự"),
     email: z.string().email("Email không hợp lệ"),
     mat_khau: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
-    so_dien_thoai: z.string().default(""),
-    vai_tro: z.string().default("quan_tri"),
+    so_dien_thoai: z.string().optional().or(z.literal("")),
+    vai_tro: z.string().min(1, "Vai trò là bắt buộc"),
 });
 
 type CreateUserFormValues = z.infer<typeof createUserSchema>;
@@ -220,7 +220,7 @@ export default function AdminManagementPage() {
                                     <FormItem>
                                         <FormLabel>Họ và tên</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="Nguyễn Văn A" {...field} />
+                                            <Input placeholder="Nguyễn Văn A" {...field} value={field.value || ""} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -233,7 +233,7 @@ export default function AdminManagementPage() {
                                     <FormItem>
                                         <FormLabel>Email</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="admin@example.com" {...field} />
+                                            <Input placeholder="admin@example.com" {...field} value={field.value || ""} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -246,7 +246,7 @@ export default function AdminManagementPage() {
                                     <FormItem>
                                         <FormLabel>Mật khẩu</FormLabel>
                                         <FormControl>
-                                            <Input type="password" placeholder="******" {...field} />
+                                            <Input type="password" placeholder="******" {...field} value={field.value || ""} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -259,7 +259,7 @@ export default function AdminManagementPage() {
                                     <FormItem>
                                         <FormLabel>Số điện thoại</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="09xxxxxxx" {...field} />
+                                            <Input placeholder="09xxxxxxx" {...field} value={field.value || ""} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

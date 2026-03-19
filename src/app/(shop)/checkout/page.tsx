@@ -85,7 +85,7 @@ export default function CheckoutPage() {
             // Nếu là thanh toán online, gọi tiếp API lấy URL
             if (paymentMethod === 'vnpay' || paymentMethod === 'momo') {
                 const loadingToast = toast.loading(`Đơn hàng #${res.data.ma_don_hang} đã được tiếp nhận. Đang chuyển hướng tới cổng thanh toán...`);
-                
+
                 try {
                     const payRes = await createPaymentUrl({
                         ma_don_hang: res.data.ma_don_hang,
@@ -139,10 +139,13 @@ export default function CheckoutPage() {
 
     return (
         <div className="container mx-auto px-4 py-8 lg:py-12 bg-slate-50/50 min-h-screen">
-            <Link href="/cart" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-slate-900 mb-6 transition-colors">
+            <button
+                onClick={() => router.back()}
+                className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-slate-900 mb-6 transition-colors"
+            >
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Quay lại giỏ hàng
-            </Link>
+                Quay lại
+            </button>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
