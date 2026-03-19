@@ -1,5 +1,5 @@
 import apiClient from '@/lib/api';
-import { PaginatedResponse } from '@/types/api.types';
+import { PaginatedResponse, ApiResponse } from '@/types/api.types';
 import { Product } from '@/types/product.types';
 
 export interface GetProductsParams {
@@ -64,8 +64,8 @@ export const productService = {
 
     getProductBySlug: async (slug: string): Promise<Product> => {
         try {
-            const response = await apiClient.get<{ data: Product }>(`/products/${slug}`);
-            return response.data.data;
+            const response = await apiClient.get<ApiResponse<Product>>(`/products/${slug}`);
+            return (response as unknown as ApiResponse<Product>).data;
         } catch (error) {
             console.error(`Failed to fetch product ${slug}:`, error);
             throw error;
