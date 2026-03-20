@@ -2,9 +2,9 @@
 
 import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
-import { notFound } from 'next/navigation';
+import { notFound, useRouter } from 'next/navigation';
 import { useState, useEffect, use } from 'react';
-import { ShoppingCart, Heart } from 'lucide-react';
+import { ShoppingCart, Heart, ArrowLeft } from 'lucide-react';
 import Cookies from 'js-cookie';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +21,7 @@ import { useBehaviorTracking } from '@/hooks/useBehaviorTracking';
 
 export default function ProductDetailClient({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = use(params);
+    const router = useRouter();
     const [selectedVariant, setSelectedVariant] = useState<any>(null);
     const [quantity, setQuantity] = useState(1);
     const [activeImage, setActiveImage] = useState<string>('/placeholder.png');
@@ -125,6 +126,14 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-6xl">
+            <button 
+                onClick={() => router.back()}
+                className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900 mb-6 w-fit transition-colors"
+                aria-label="Quay lại"
+            >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Quay lại</span>
+            </button>
             <div className="flex flex-col md:flex-row gap-8 lg:gap-16">
                 {/* Image Gallery */}
                 <div className="w-full md:w-1/2 space-y-4">

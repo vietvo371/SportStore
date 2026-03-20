@@ -18,9 +18,11 @@ import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import { useNotifications, useMarkAllRead, useMarkRead } from "@/hooks/useNotifications";
 import { Badge } from "@/components/ui/badge";
+import { useRouter } from "next/navigation";
 
 export default function UserNotificationsPage() {
     const [page, setPage] = useState(1);
+    const router = useRouter();
     const { data: response, isLoading, refetch } = useNotifications({ page });
     const markRead = useMarkRead();
     const markAllRead = useMarkAllRead();
@@ -109,6 +111,20 @@ export default function UserNotificationsPage() {
                                 `}
                                 onClick={() => {
                                     if (!item.da_doc_luc) markRead.mutate(item.id);
+                                    
+                                    if (item.du_lieu_them) {
+                                        try {
+                                            const payload = typeof item.du_lieu_them === 'string' 
+                                                ? JSON.parse(item.du_lieu_them) 
+                                                : item.du_lieu_them;
+                                                
+                                            if (payload?.link) {
+                                                router.push(payload.link);
+                                            }
+                                        } catch (error) {
+                                            console.error('Lỗi parse du_lieu_them', error);
+                                        }
+                                    }
                                 }}
                             >
                                 <div className="flex gap-5">

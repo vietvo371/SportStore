@@ -45,10 +45,10 @@ export const useMarkAllRead = () => {
 export const useBroadcastNotification = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { tieu_de: string; noi_dung: string; loai: string; du_lieu_them?: any }) => 
+    mutationFn: (data: { tieu_de: string; noi_dung: string; loai: string; du_lieu_them?: any; gui_email?: boolean }) => 
       notificationService.broadcast(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: notificationKeys.admin() });
+      queryClient.invalidateQueries({ queryKey: ['notifications', 'admin'] });
       toast.success("Đã gửi thông báo quảng bá thành công");
     },
     onError: (error: any) => {

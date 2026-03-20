@@ -10,7 +10,8 @@ import {
     Calendar,
     Tag,
     Info,
-    RefreshCw
+    RefreshCw,
+    Link as LinkIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -177,6 +178,23 @@ export default function NotificationAdminPage() {
                                             <p className="text-xs text-slate-500 line-clamp-2 max-w-sm">
                                                 {item.noi_dung}
                                             </p>
+                                            {(() => {
+                                                if (!item.du_lieu_them) return null;
+                                                try {
+                                                    const payload = typeof item.du_lieu_them === 'string' 
+                                                        ? JSON.parse(item.du_lieu_them) 
+                                                        : item.du_lieu_them;
+                                                    if (payload?.link) {
+                                                        return (
+                                                            <a href={payload.link} target="_blank" rel="noreferrer" className="text-[10px] text-rose-500 font-medium hover:underline mt-1.5 flex items-center gap-1 w-fit bg-rose-50 px-2 py-0.5 rounded">
+                                                                <LinkIcon className="h-2.5 w-2.5" />
+                                                                Link đính kèm
+                                                            </a>
+                                                        );
+                                                    }
+                                                } catch(e) {}
+                                                return null;
+                                            })()}
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-1.5 text-xs text-slate-500">

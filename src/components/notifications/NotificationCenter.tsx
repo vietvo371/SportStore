@@ -21,9 +21,11 @@ import { vi } from "date-fns/locale";
 import { useNotifications, useMarkAllRead, useMarkRead } from "@/hooks/useNotifications";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export function NotificationCenter() {
     const [open, setOpen] = useState(false);
+    const router = useRouter();
     const { data: response, isLoading } = useNotifications();
     const markRead = useMarkRead();
     const markAllRead = useMarkAllRead();
@@ -93,7 +95,23 @@ export function NotificationCenter() {
                                     `}
                                     onClick={() => {
                                         if (!item.da_doc_luc) markRead.mutate(item.id);
-                                        // Logic redirect based on type can go here
+                                        
+                                        // Xử lý chuyển hướng nếu có link đính kèm
+                                        if (item.du_lieu_them) {
+                                            try {
+                                                const payload = typeof item.du_lieu_them === 'string' 
+                                                    ? JSON.parse(item.du_lieu_them) 
+                                                    : item.du_lieu_them;
+                                                    
+                                                if (payload?.link) {
+                                                    setOpen(false); // Đóng popover
+                                                    router.push(payload.link);
+                                                    return;
+                                                }
+                                            } catch (error) {
+                                                console.error('Lỗi parse du_lieu_them', error);
+                                            }
+                                        }
                                     }}
                                 >
                                     <div className="flex gap-3">
