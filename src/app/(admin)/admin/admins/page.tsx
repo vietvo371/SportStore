@@ -77,7 +77,7 @@ export default function AdminManagementPage() {
     });
 
     if ((error as any)?.status === 403) {
-        return <AccessDenied moduleName="Quản lý Quản trị viên" />;
+        return <AccessDenied moduleName="Quản lý nhân viên" />;
     }
 
     const users = response?.data || [];
@@ -104,7 +104,7 @@ export default function AdminManagementPage() {
                             <Shield className="h-6 w-6 text-amber-600" />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase italic">Quản Lý Quản Trị Viên</h1>
+                            <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase italic">Quản Lý Nhân Viên</h1>
                             <p className="text-slate-500 font-medium flex items-center gap-2 mt-0.5">
                                 <Users className="h-4 w-4 text-amber-600/60" />
                                 Thiết lập quyền hạn và quản lý tài khoản quản trị hệ thống
@@ -114,12 +114,12 @@ export default function AdminManagementPage() {
                 </div>
 
                 <div className="flex gap-4">
-                    <Button 
+                    <Button
                         onClick={() => setIsAddOpen(true)}
                         className="h-12 px-6 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs uppercase tracking-widest gap-2 shadow-lg shadow-slate-200"
                     >
                         <Plus className="h-4 w-4" />
-                        Thêm Quản trị viên
+                        Thêm nhân viên
                     </Button>
                     <div className="bg-white px-6 py-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
                         <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500 font-black">
@@ -138,7 +138,7 @@ export default function AdminManagementPage() {
                 <div className="relative w-full group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-amber-500 transition-colors" />
                     <input
-                        placeholder="Tìm kiếm theo tên, email quản trị viên..."
+                        placeholder="Tìm kiếm theo tên, email nhân viên..."
                         className="w-full pl-11 h-12 bg-slate-50 border-slate-100 rounded-2xl font-bold focus-visible:ring-amber-500/20 focus-visible:border-amber-500/30 outline-none transition-all px-4"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -158,7 +158,7 @@ export default function AdminManagementPage() {
                         <Loader2 className="h-12 w-12 animate-spin text-amber-500/30" />
                         <Activity className="h-6 w-6 text-amber-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                     </div>
-                    <p className="text-slate-400 font-black animate-pulse uppercase tracking-widest text-[10px]">Đang truy xuất danh sách quản trị viên...</p>
+                    <p className="text-slate-400 font-black animate-pulse uppercase tracking-widest text-[10px]">Đang truy xuất danh sách nhân viên...</p>
                 </div>
             ) : (
                 <div className="space-y-6">
@@ -168,7 +168,7 @@ export default function AdminManagementPage() {
                     {meta && meta.last_page > 1 && (
                         <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-100 shadow-sm shadow-slate-200/50">
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">
-                                Trang {meta.current_page} / {meta.last_page} • {meta.total} quản trị viên
+                                Trang {meta.current_page} / {meta.last_page} • {meta.total} nhân viên
                             </p>
                             <div className="flex gap-2">
                                 <Button
@@ -205,9 +205,9 @@ export default function AdminManagementPage() {
             <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle>Thêm Quản trị viên mới</DialogTitle>
+                        <DialogTitle>Thêm nhân viên mới</DialogTitle>
                         <DialogDescription>
-                            Tạo tài khoản quản trị mới cho hệ thống. Mật khẩu sẽ được cấp mặc định.
+                            Tạo tài khoản nhân viên mới cho hệ thống. Mật khẩu sẽ được cấp mặc định.
                         </DialogDescription>
                     </DialogHeader>
 
