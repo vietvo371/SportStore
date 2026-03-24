@@ -88,6 +88,7 @@ export const useAdminRoles = () => {
     return {
         roles: rolesQuery.data?.data || [],
         isLoadingRoles: rolesQuery.isLoading,
+        rolesError: rolesQuery.error,
         permissions: permissionsQuery.data?.data || {},
         isLoadingPermissions: permissionsQuery.isLoading,
         createRole: createRoleMutation.mutateAsync,

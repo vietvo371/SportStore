@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from "react";
-import { ReportFilters, ReportPeriod } from "@/hooks/useAdminReports";
+import { ReportFilters, ReportPeriod, useAdminReportsOverview } from "@/hooks/useAdminReports";
+import { AccessDenied } from "@/components/admin/AccessDenied";
 import { Calendar as CalendarIcon, FilterX } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,6 +31,12 @@ export default function ReportsManagementPage() {
         from: period === 'custom' && isCustomValid ? dateRange.from : undefined,
         to: period === 'custom' && isCustomValid ? dateRange.to : undefined
     };
+
+    // Pre-check permission via overview API
+    const { error: overviewError } = useAdminReportsOverview(filters);
+    if ((overviewError as any)?.status === 403) {
+        return <AccessDenied moduleName="Báo cáo & Thống kê" />;
+    }
 
     return (
         <div className="space-y-6">

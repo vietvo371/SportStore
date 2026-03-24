@@ -19,6 +19,7 @@ import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { useBroadcastHistory } from "@/hooks/useNotifications";
 import { BroadcastDialog } from "@/components/admin/notifications/BroadcastDialog";
+import { AccessDenied } from "@/components/admin/AccessDenied";
 import { 
     Table, 
     TableBody, 
@@ -34,7 +35,12 @@ export default function NotificationAdminPage() {
     const [search, setSearch] = useState("");
     const [isBroadcastOpen, setIsBroadcastOpen] = useState(false);
     
-    const { data: response, isLoading, refetch } = useBroadcastHistory({ page, search });
+    const { data: response, isLoading, error, refetch } = useBroadcastHistory({ page, search });
+
+    if ((error as any)?.status === 403) {
+        return <AccessDenied moduleName="Quản lý Thông báo" />;
+    }
+
     const notifications = response?.data || [];
     const meta = response?.meta;
 

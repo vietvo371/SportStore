@@ -5,6 +5,7 @@ import { useAdminBanners, useToggleBannerStatus } from '@/hooks/useAdminBanners'
 import { BannerTable } from '@/components/admin/banners/BannerTable';
 import { BannerDialog } from '@/components/admin/banners/BannerDialog';
 import { BannerDeleteDialog } from '@/components/admin/banners/BannerDeleteDialog';
+import { AccessDenied } from '@/components/admin/AccessDenied';
 import { Button } from '@/components/ui/button';
 import { Plus, Search, RefreshCw, LayoutTemplate } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -19,13 +20,17 @@ export default function AdminBannersPage() {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedBanner, setSelectedBanner] = useState<any>(null);
 
-    const { data: response, isLoading, isError, refetch } = useAdminBanners({
+    const { data: response, isLoading, isError, error, refetch } = useAdminBanners({
         page,
         per_page: 10,
         search: search || undefined,
     });
 
     const toggleStatusMutation = useToggleBannerStatus();
+
+    if ((error as any)?.status === 403) {
+        return <AccessDenied moduleName="Quản lý Banner" />;
+    }
 
     const handleSearch = () => {
         setSearch(searchInput);

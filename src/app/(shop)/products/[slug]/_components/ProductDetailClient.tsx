@@ -365,7 +365,7 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
             </div>
 
             <div className="mt-16">
-                <RecommendationSection title="Sản phẩm tương tự" subtitle="Những sản phẩm bạn có thể thích dựa trên lựa chọn này" />
+                <RecommendationSection productId={product.id} />
             </div>
         </div>
     );

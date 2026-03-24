@@ -62,8 +62,8 @@ apiClient.interceptors.response.use(
 
     // Handle 403 Forbidden
     if (error.response?.status === 403) {
-      // Chỉ hiện toast cho các hành động (POST, PUT, DELETE, PATCH)
-      // Đối với GET (load trang), chúng ta để Component tự xử lý UI Restricted
+      // Chỉ toast cho hành động (POST, PUT, DELETE, PATCH)
+      // GET 403 được xử lý bởi <AccessDenied /> component trong mỗi page — tránh spam toast
       if (error.config?.method?.toLowerCase() !== 'get') {
         toast.error(formattedError.message || 'Bạn không có quyền thực hiện hành động này');
       }

@@ -14,15 +14,26 @@ import {
 interface RecommendationSectionProps {
     title?: string;
     subtitle?: string;
+    productId?: number; // Nếu có → lấy sản phẩm tương tự; không có → gợi ý cá nhân hóa
 }
 
 export const RecommendationSection = ({ 
-    title = 'Gợi ý dành riêng cho bạn',
-    subtitle = 'Dựa trên những sản phẩm bạn đã xem và sở thích của bạn'
+    title,
+    subtitle,
+    productId
 }: RecommendationSectionProps) => {
+    const displayTitle = title || (productId ? 'Sản phẩm tương tự' : 'Gợi ý dành riêng cho bạn');
+    const displaySubtitle = subtitle || (productId 
+        ? 'Những sản phẩm liên quan bạn có thể quan tâm'
+        : 'Dựa trên những sản phẩm bạn đã xem và sở thích của bạn');
+
     const { data: recommendations = [], isLoading } = useQuery({
-        queryKey: ['products', 'recommendations'],
-        queryFn: () => recommendationService.getRecommendations(),
+        queryKey: productId 
+            ? ['products', 'related', productId] 
+            : ['products', 'recommendations'],
+        queryFn: () => productId 
+            ? recommendationService.getRelatedProducts(productId)
+            : recommendationService.getRecommendations(),
     });
 
     if (!isLoading && recommendations.length === 0) {
@@ -32,10 +43,10 @@ export const RecommendationSection = ({
     return (
         <div className="w-full">
             <div className="flex flex-col items-center justify-center mb-8 text-center">
-                <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
-                {subtitle && (
+                <h2 className="text-3xl font-bold tracking-tight">{displayTitle}</h2>
+                {displaySubtitle && (
                     <p className="text-muted-foreground mt-2 max-w-2xl px-4">
-                        {subtitle}
+                        {displaySubtitle}
                     </p>
                 )}
             </div>

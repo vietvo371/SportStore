@@ -26,7 +26,11 @@ export default function AdminLayout({
             return;
         }
 
-        if (user?.vai_tro !== "quan_tri") {
+        // Sync with BE AdminMiddleware: allow quan_tri (legacy) OR any non-customer RBAC role
+        const hasAdminRole = user?.vai_tro === 'quan_tri' 
+            || user?.cac_vai_tro?.some(r => r.ma_slug !== 'customer');
+
+        if (!hasAdminRole) {
             router.push("/");
             return;
         }

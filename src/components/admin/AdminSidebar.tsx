@@ -20,20 +20,28 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth.store';
+import { useMemo } from 'react';
 
-const sidebarItems = [
-    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-    { name: 'Sản phẩm', href: '/admin/products', icon: Package },
-    { name: 'Danh mục', href: '/admin/catalog', icon: LayoutGrid },
-    { name: 'Đơn hàng', href: '/admin/orders', icon: ShoppingCart },
-    { name: 'Đánh giá', href: '/admin/reviews', icon: Star },
-    { name: 'Mã giảm giá', href: '/admin/coupons', icon: Ticket },
-    { name: 'Khách hàng', href: '/admin/users', icon: Users },
-    { name: 'Nhân viên', href: '/admin/admins', icon: UserCircle },
-    { name: 'Phân quyền', href: '/admin/roles', icon: ShieldCheck },
-    { name: 'Xếp hạng & Thống kê', href: '/admin/reports', icon: BarChart3 },
-    { name: 'Banner', href: '/admin/banners', icon: ImageIcon },
-    { name: 'Thông báo', href: '/admin/notifications', icon: BellIcon },
+interface SidebarItem {
+    name: string;
+    href: string;
+    icon: React.ComponentType<{ className?: string }>;
+    permission?: string; // permission slug required to see this item
+}
+
+const sidebarItems: SidebarItem[] = [
+    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard, permission: 'xem_dashboard' },
+    { name: 'Sản phẩm', href: '/admin/products', icon: Package, permission: 'xem_sp' },
+    { name: 'Danh mục', href: '/admin/catalog', icon: LayoutGrid, permission: 'quan_ly_catalog' },
+    { name: 'Đơn hàng', href: '/admin/orders', icon: ShoppingCart, permission: 'xem_don' },
+    { name: 'Đánh giá', href: '/admin/reviews', icon: Star, permission: 'duyet_danh_gia' },
+    { name: 'Mã giảm giá', href: '/admin/coupons', icon: Ticket, permission: 'ma_giam_gia' },
+    { name: 'Khách hàng', href: '/admin/users', icon: Users, permission: 'xem_user' },
+    { name: 'Nhân viên', href: '/admin/admins', icon: UserCircle, permission: 'xem_user' },
+    { name: 'Phân quyền', href: '/admin/roles', icon: ShieldCheck, permission: 'phan_quyen' },
+    { name: 'Xếp hạng & Thống kê', href: '/admin/reports', icon: BarChart3, permission: 'xem_doanh_thu' },
+    { name: 'Banner', href: '/admin/banners', icon: ImageIcon, permission: 'quan_ly_banner' },
+    { name: 'Thông báo', href: '/admin/notifications', icon: BellIcon, permission: 'gui_quang_ba' },
 ];
 
 interface AdminSidebarProps {
@@ -44,7 +52,7 @@ interface AdminSidebarProps {
 export function AdminSidebar({ className, setOpen }: AdminSidebarProps) {
     const pathname = usePathname();
     const router = useRouter();
-    const logout = useAuthStore((s) => s.logout);
+    const { user, logout } = useAuthStore();
 
     const handleLinkClick = () => {
         if (setOpen) setOpen(false);
@@ -54,6 +62,25 @@ export function AdminSidebar({ className, setOpen }: AdminSidebarProps) {
         logout();
         router.push('/login');
     };
+
+    // Filter sidebar items based on user permissions
+    const visibleItems = useMemo(() => {
+        if (!user) return [];
+
+        // Master user sees everything
+        if (user.is_master) return sidebarItems;
+
+        // Collect all permission slugs from user's roles
+        const userPermissions = new Set(
+            user.cac_vai_tro?.flatMap(role => role.quyen?.map(q => q.ma_slug) || []) || []
+        );
+
+        return sidebarItems.filter(item => {
+            // Items without permission requirement are always visible
+            if (!item.permission) return true;
+            return userPermissions.has(item.permission);
+        });
+    }, [user]);
 
     return (
         <aside className={cn("w-64 bg-slate-900 text-slate-300 flex flex-col h-full border-r border-slate-800", className)}>
@@ -66,7 +93,7 @@ export function AdminSidebar({ className, setOpen }: AdminSidebarProps) {
             </div>
 
             <nav className="flex-1 p-4 space-y-1 overflow-y-auto custom-scrollbar">
-                {sidebarItems.map((item) => {
+                {visibleItems.map((item) => {
                     const isActive = pathname === item.href;
                     return (
                         <Link

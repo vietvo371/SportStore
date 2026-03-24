@@ -33,6 +33,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { RoleDialog } from "@/components/admin/RoleDialog";
+import { AccessDenied } from "@/components/admin/AccessDenied";
 import { Role } from '@/types/auth.types';
 import { 
     AlertDialog,
@@ -49,6 +50,7 @@ export default function RolesPage() {
     const { 
         roles, 
         isLoadingRoles, 
+        rolesError,
         permissions, 
         isLoadingPermissions, 
         deleteRole, 
@@ -57,6 +59,10 @@ export default function RolesPage() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingRole, setEditingRole] = useState<Role | null>(null);
     const [deletingRoleId, setDeletingRoleId] = useState<number | null>(null);
+
+    if ((rolesError as any)?.status === 403) {
+        return <AccessDenied moduleName="Phân quyền" />;
+    }
 
     const handleEdit = (role: Role) => {
         setEditingRole(role);

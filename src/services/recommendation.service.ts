@@ -16,12 +16,23 @@ export const recommendationService = {
      */
     getRecommendations: async (): Promise<Product[]> => {
         try {
-            // interceptor resolves response directly if it follows conventional pattern, 
-            // but we use any here to safely extract `data` since its an array of products
             const response: any = await apiClient.get('/recommendations');
             return response.data;
         } catch (error) {
             console.error('Failed to fetch recommendations:', error);
+            return [];
+        }
+    },
+
+    /**
+     * Lấy danh sách sản phẩm tương tự (dùng cho trang chi tiết sản phẩm)
+     */
+    getRelatedProducts: async (productId: number): Promise<Product[]> => {
+        try {
+            const response: any = await apiClient.get(`/recommendations/${productId}/related`);
+            return response.data;
+        } catch (error) {
+            console.error('Failed to fetch related products:', error);
             return [];
         }
     },

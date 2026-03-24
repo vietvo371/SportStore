@@ -9,9 +9,13 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             new QueryClient({
                 defaultOptions: {
                     queries: {
-                        // Cấu hình tuỳ theo dự án, có thể để mặc định
-                        staleTime: 60 * 1000, // 1 phút cache cho data mới
-                        refetchOnWindowFocus: false, // tắt tính năng auto refetch khi switch tab
+                        staleTime: 60 * 1000,
+                        refetchOnWindowFocus: false,
+                        retry: (failureCount, error: any) => {
+                            // Không retry cho 401/403 — lỗi quyền không có ý nghĩa khi retry
+                            if (error?.status === 401 || error?.status === 403) return false;
+                            return failureCount < 2;
+                        },
                     },
                 },
             })

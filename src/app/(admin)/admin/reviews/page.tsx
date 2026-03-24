@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAdminReviews } from "@/hooks/useAdminReviews";
 import { ReviewTable } from "@/components/admin/ReviewTable";
+import { AccessDenied } from "@/components/admin/AccessDenied";
 import {
     Star,
     Filter,
@@ -28,11 +29,15 @@ export default function ReviewModerationPage() {
     const [status, setStatus] = useState<string>("all");
     const [search, setSearch] = useState("");
 
-    const { data: response, isLoading } = useAdminReviews({
+    const { data: response, isLoading, error } = useAdminReviews({
         page,
         da_duyet: status === "all" ? undefined : status === "approved",
         search: search || undefined
     });
+
+    if ((error as any)?.status === 403) {
+        return <AccessDenied moduleName="Duyệt Đánh Giá" />;
+    }
 
     const reviews = response?.data || [];
     const meta = response?.meta;
