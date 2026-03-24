@@ -204,7 +204,7 @@ export function Header() {
                                             <div className="flex flex-col space-y-1 p-2 border-b border-slate-100 mb-1">
                                                 <p className="text-sm font-medium leading-none text-slate-800">{user?.ho_va_ten}</p>
                                                 <p className="text-xs leading-none text-slate-500">{user?.email}</p>
-                                                {user?.cac_vai_tro?.filter((r: any) => r.ma_slug !== 'customer')?.length > 0 && (
+                                                {(user?.cac_vai_tro?.filter((r: any) => r.ma_slug !== 'customer')?.length ?? 0) > 0 && (
                                                     <p className="text-[10px] font-semibold text-primary mt-1">
                                                         {user?.cac_vai_tro?.filter((r: any) => r.ma_slug !== 'customer')?.map((r: any) => r.ten).join(', ')}
                                                     </p>
