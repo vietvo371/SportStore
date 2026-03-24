@@ -57,7 +57,7 @@ export function Header() {
                                             </Link>
                                         </SheetClose>
 
-                                        {user?.vai_tro === 'quan_tri' && (
+                                        {(user?.vai_tro === 'quan_tri' || user?.cac_vai_tro?.some((r: any) => r.ma_slug !== 'customer')) && (
                                             <SheetClose asChild>
                                                 <Link href="/admin" className="px-6 py-3 text-base font-bold text-primary border-b hover:bg-slate-50 transition-colors">
                                                     Quản trị hệ thống
@@ -204,8 +204,13 @@ export function Header() {
                                             <div className="flex flex-col space-y-1 p-2 border-b border-slate-100 mb-1">
                                                 <p className="text-sm font-medium leading-none text-slate-800">{user?.ho_va_ten}</p>
                                                 <p className="text-xs leading-none text-slate-500">{user?.email}</p>
+                                                {user?.cac_vai_tro?.filter((r: any) => r.ma_slug !== 'customer')?.length > 0 && (
+                                                    <p className="text-[10px] font-semibold text-primary mt-1">
+                                                        {user?.cac_vai_tro?.filter((r: any) => r.ma_slug !== 'customer')?.map((r: any) => r.ten).join(', ')}
+                                                    </p>
+                                                )}
                                             </div>
-                                            {user?.vai_tro === 'quan_tri' ? (
+                                            {(user?.vai_tro === 'quan_tri' || user?.cac_vai_tro?.some((r: any) => r.ma_slug !== 'customer')) ? (
                                                 <>
                                                     <DropdownMenuItem asChild className="cursor-pointer py-2 text-primary font-semibold">
                                                         <Link href="/admin" className="flex items-center w-full">

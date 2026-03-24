@@ -148,7 +148,7 @@ export function UserEditDialog({ open, onOpenChange, user }: UserEditDialogProps
                                                 </div>
                                             ) : (
                                                 <div className="grid grid-cols-2 gap-3">
-                                                    {roles.map((role) => (
+                                                    {roles.filter(role => role.ma_slug !== 'customer').map((role) => (
                                                         <FormField
                                                             key={role.id}
                                                             control={form.control}

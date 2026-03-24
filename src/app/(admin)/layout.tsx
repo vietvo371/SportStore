@@ -90,7 +90,9 @@ export default function AdminLayout({
                                 <span className="text-sm font-bold text-slate-700 leading-none group-hover:text-primary transition-colors">
                                     {user?.ho_va_ten}
                                 </span>
-                                <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Administrator</span>
+                                <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
+                                    {user?.cac_vai_tro?.filter((r: any) => r.ma_slug !== 'customer')?.map((r: any) => r.ten).join(', ') || 'Administrator'}
+                                </span>
                             </div>
                             <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-primary/80 text-white flex items-center justify-center text-sm font-black shadow-lg shadow-primary/20 ring-2 ring-white">
                                 {user?.ho_va_ten?.charAt(0) || 'A'}

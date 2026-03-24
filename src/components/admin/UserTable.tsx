@@ -103,19 +103,23 @@ export function UserTable({ users, onEdit, hideDelete = false }: UserTableProps)
                                     </div>
                                 </TableCell>
                                 <TableCell className="py-6 text-center">
-                                    {user.is_master ? (
-                                        <Badge variant="secondary" className="bg-rose-100 text-rose-800 hover:bg-rose-100 flex items-center gap-1">
-                                            <Crown className="h-3 w-3" /> Master
-                                        </Badge>
-                                    ) : user.vai_tro === 'quan_tri' ? (
-                                        <Badge variant="secondary" className="bg-amber-100 text-amber-800 hover:bg-amber-100">
-                                            Admin
-                                        </Badge>
-                                    ) : (
-                                        <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-                                            User
-                                        </Badge>
-                                    )}
+                                    <div className="flex flex-wrap justify-center gap-1">
+                                        {user.is_master ? (
+                                            <Badge variant="secondary" className="bg-rose-100 text-rose-800 hover:bg-rose-100 flex items-center gap-1">
+                                                <Crown className="h-3 w-3" /> Master
+                                            </Badge>
+                                        ) : user.cac_vai_tro?.filter((r: any) => r.ma_slug !== 'customer').length > 0 ? (
+                                            user.cac_vai_tro.filter((r: any) => r.ma_slug !== 'customer').map((role: any) => (
+                                                <Badge key={role.id} variant="secondary" className="bg-amber-100 text-amber-800 hover:bg-amber-100 text-[10px]">
+                                                    {role.ten}
+                                                </Badge>
+                                            ))
+                                        ) : (
+                                            <Badge variant="secondary" className="bg-slate-100 text-slate-500 hover:bg-slate-100 text-[10px]">
+                                                Chưa gán
+                                            </Badge>
+                                        )}
+                                    </div>
                                 </TableCell>
                                 <TableCell className="py-6 text-center">
                                     <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{formatDate(user.batch_dau_luc || user.created_at)}</span>
