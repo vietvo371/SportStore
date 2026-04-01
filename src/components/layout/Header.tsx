@@ -112,13 +112,10 @@ export function Header() {
 
                     {/* Logo */}
                     <div className="flex justify-center md:justify-start">
-                        <Link href="/" className="flex items-center gap-2 group">
-                            <div className="relative w-10 h-10 overflow-hidden rounded-md flex-shrink-0 shadow-sm transition-transform group-hover:scale-105">
-                                <Image src="/logo.png" alt="SportStore Logo" fill className="object-cover" sizes="40px" />
+                        <Link href="/" className="flex items-center group">
+                            <div className="relative w-32 h-10 md:w-36 md:h-11 overflow-hidden transition-transform group-hover:scale-105">
+                                <Image src="/logo.png" alt="SportStore Logo" fill className="object-contain" sizes="(max-width: 768px) 128px, 144px" priority />
                             </div>
-                            <span className="text-xl font-bold tracking-tighter sm:text-2xl text-primary hidden sm:inline-block transition-colors group-hover:text-primary/80">
-                                SPORTSTORE
-                            </span>
                         </Link>
                     </div>
 

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import {
     LayoutDashboard,
@@ -85,10 +86,11 @@ export function AdminSidebar({ className, setOpen }: AdminSidebarProps) {
     return (
         <aside className={cn("w-64 bg-slate-900 text-slate-300 flex flex-col h-full border-r border-slate-800", className)}>
             <div className="p-6 border-b border-slate-800 flex items-center justify-between">
-                <Link href="/" className="flex items-center gap-2 group">
-                    <span className="text-xl font-bold tracking-tighter text-white group-hover:text-primary transition-colors">
-                        SPORTSTORE <span className="text-[10px] text-primary block mt-0.5 font-black uppercase tracking-widest">Admin Portal</span>
-                    </span>
+                <Link href="/" className="flex flex-col gap-1 group">
+                    <div className="relative w-36 h-10 overflow-hidden bg-white/90 backdrop-blur-sm p-1.5 rounded-xl transition-transform group-hover:scale-105">
+                        <Image src="/logo.png" alt="SportStore Logo" fill className="object-contain p-0.5" sizes="144px" />
+                    </div>
+                    <span className="text-[10px] text-primary font-black uppercase tracking-[0.3em] pl-1.5 opacity-80">Admin Portal</span>
                 </Link>
             </div>
 

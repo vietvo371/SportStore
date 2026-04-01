@@ -74,13 +74,10 @@ export default function RegisterPage() {
                 {/* Cinematic Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-black/30 z-10" />
 
-                <div className="relative z-20 flex items-center justify-end gap-3 w-full">
-                    <Link href="/" className="group flex items-center gap-3 select-none outline-none">
-                        <span className="text-3xl font-black tracking-tighter text-white drop-shadow-md">
-                            SPORTSTORE
-                        </span>
-                        <div className="relative w-12 h-12 overflow-hidden rounded-xl shadow-2xl ring-1 ring-white/20 group-hover:-translate-y-1 transition-transform">
-                            <Image src="/logo.png" alt="SportStore" fill sizes="48px" className="object-cover" />
+                <div className="relative z-20 flex items-center justify-end w-full px-4">
+                    <Link href="/" className="group flex items-center select-none outline-none">
+                        <div className="relative w-44 h-14 overflow-hidden bg-white/95 backdrop-blur-md p-2 rounded-2xl shadow-2xl ring-1 ring-white/20 transition-transform group-hover:scale-105">
+                            <Image src="/logo.png" alt="SportStore" fill className="object-contain p-1" sizes="176px" />
                         </div>
                     </Link>
                 </div>
@@ -101,13 +98,10 @@ export default function RegisterPage() {
 
                 {/* Mobile Logo Back Button */}
                 <div className="absolute top-6 left-6 lg:hidden z-10">
-                    <Link href="/" className="inline-flex items-center gap-2 outline-none">
-                        <div className="relative w-10 h-10 overflow-hidden rounded-xl shadow-lg ring-1 ring-black/5">
-                            <Image src="/logo.png" alt="SportStore" fill sizes="40px" className="object-cover" />
+                    <Link href="/" className="inline-flex items-center outline-none">
+                        <div className="relative w-36 h-11 overflow-hidden bg-white shadow-lg border border-slate-100 p-2 rounded-xl">
+                            <Image src="/logo.png" alt="SportStore" fill className="object-contain p-0.5" sizes="144px" />
                         </div>
-                        <span className="text-2xl font-black tracking-tighter text-slate-900">
-                            SPORTSTORE
-                        </span>
                     </Link>
                 </div>
 

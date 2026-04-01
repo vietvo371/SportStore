@@ -10,11 +10,10 @@ export function Footer() {
 
                     {/* Column 1: Brand Info */}
                     <div>
-                        <Link href="/" className="mb-4 inline-flex items-center gap-2 group">
-                            <div className="relative w-10 h-10 overflow-hidden rounded-md flex-shrink-0 shadow-sm transition-transform group-hover:scale-105">
-                                <Image src="/logo.png" alt="SportStore Logo" fill className="object-cover" sizes="40px" />
+                        <Link href="/" className="mb-6 inline-flex items-center group">
+                            <div className="relative w-40 h-12 overflow-hidden bg-white/90 backdrop-blur-sm p-1.5 rounded-xl shadow-sm transition-transform group-hover:scale-105">
+                                <Image src="/logo.png" alt="SportStore Logo" fill className="object-contain p-0.5" sizes="160px" />
                             </div>
-                            <span className="text-xl font-bold tracking-tighter text-white transition-colors group-hover:text-primary">SPORTSTORE</span>
                         </Link>
                         <p className="text-slate-400 text-sm leading-relaxed mb-4">
                             Chuyên cung cấp quần áo, giày dép và phụ kiện thể thao chính hãng. Cam kết chất lượng cao và dịch vụ tận tâm.
