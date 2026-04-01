@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Eye, EyeOff } from 'lucide-react';
 import { authService } from '@/services/auth.service';
 import { useAuthStore } from '@/store/auth.store';
 
@@ -17,10 +18,18 @@ export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
+    const [unverifiedToken, setUnverifiedToken] = useState<string | null>(null);
+    const [resendLoading, setResendLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const loginMutation = useMutation({
         mutationFn: () => authService.login({ email, mat_khau: password }),
         onSuccess: (data) => {
+            if (!data.user.xac_thuc_email_luc) {
+                setErrorMsg('Tài khoản của bạn chưa được xác thực. Vui lòng kiểm tra email để xác thực tài khoản trước khi đăng nhập.');
+                setUnverifiedToken(data.token);
+                return;
+            }
             setAuth(data.user, data.token);
             if (data.user.vai_tro === 'quan_tri') {
                 router.push('/admin');
@@ -29,6 +38,7 @@ export default function LoginPage() {
             }
         },
         onError: (error: any) => {
+            setUnverifiedToken(null);
             if (error?.errors) {
                 const firstError = Object.values(error.errors)[0] as string[];
                 setErrorMsg(firstError[0] || 'Dữ liệu không hợp lệ');
@@ -38,9 +48,23 @@ export default function LoginPage() {
         },
     });
 
+    const handleResend = async () => {
+        if (!unverifiedToken) return;
+        setResendLoading(true);
+        try {
+            await authService.resendVerificationEmail(unverifiedToken);
+            import('sonner').then(({ toast }) => toast.success('Đã gửi lại email xác thực thành công!'));
+        } catch (error: any) {
+            import('sonner').then(({ toast }) => toast.error(error.message || 'Gửi lại thất bại. Vui lòng thử lại sau.'));
+        } finally {
+            setResendLoading(false);
+        }
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setErrorMsg('');
+        setUnverifiedToken(null);
         loginMutation.mutate();
     };
 
@@ -113,8 +137,25 @@ export default function LoginPage() {
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {errorMsg && (
-                            <div className="p-4 rounded-2xl bg-red-50/80 border border-red-100 text-red-600 text-sm font-semibold animate-in fade-in slide-in-from-top-2 duration-300">
-                                {errorMsg}
+                            <div className="p-4 rounded-2xl bg-red-50/80 border border-red-100 flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                                <span className="text-red-600 text-sm font-semibold">{errorMsg}</span>
+                                {unverifiedToken && (
+                                    <button
+                                        type="button"
+                                        onClick={handleResend}
+                                        disabled={resendLoading}
+                                        className="text-xs font-bold text-red-700 hover:text-red-900 flex items-center gap-1.5 transition-colors uppercase tracking-wider"
+                                    >
+                                        {resendLoading ? (
+                                            <div className="h-3 w-3 border-2 border-red-700 border-t-transparent rounded-full animate-spin" />
+                                        ) : (
+                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                            </svg>
+                                        )}
+                                        {resendLoading ? 'Đang gửi...' : 'Gửi lại link xác thực'}
+                                    </button>
+                                )}
                             </div>
                         )}
 
@@ -139,19 +180,28 @@ export default function LoginPage() {
                                     <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest" htmlFor="password">
                                         Mật khẩu
                                     </label>
-                                    <Link href="#" className="text-[12px] font-bold text-slate-900 hover:text-slate-600 transition-colors">
+                                    <Link href="/forgot-password" className="text-[12px] font-bold text-slate-900 hover:text-slate-600 transition-colors">
                                         Quên mật khẩu?
                                     </Link>
                                 </div>
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    placeholder="••••••••"
-                                    required
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="h-[52px] px-5 text-[15px] font-medium rounded-2xl bg-white border-slate-200 outline-none focus-visible:border-slate-900 focus-visible:ring-0 focus-visible:shadow-[0_0_0_4px_rgba(15,23,42,0.05)] transition-all placeholder:text-slate-400"
-                                />
+                                <div className="relative group/pass">
+                                    <Input
+                                        id="password"
+                                        type={showPassword ? 'text' : 'password'}
+                                        placeholder="••••••••"
+                                        required
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="h-[52px] px-5 pr-12 text-[15px] font-medium rounded-2xl bg-white border-slate-200 outline-none focus-visible:border-slate-900 focus-visible:ring-0 focus-visible:shadow-[0_0_0_4px_rgba(15,23,42,0.05)] transition-all placeholder:text-slate-400"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 rounded-xl hover:bg-slate-50 text-slate-400 hover:text-slate-900 transition-all outline-none"
+                                    >
+                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                </div>
                             </div>
                         </div>
 

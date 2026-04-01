@@ -52,8 +52,20 @@ export const authService = {
         return res.data;
     },
 
-    resendVerificationEmail: async () => {
-        const res = await apiClient.post('/auth/email/resend');
+    resendVerificationEmail: async (token?: string) => {
+        const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+        const res: any = await apiClient.post('/auth/email/resend', {}, config);
+        return res.data;
+    },
+
+    // Password Reset
+    forgotPassword: async (email: string) => {
+        const res: any = await apiClient.post('/auth/password/email', { email });
+        return res.data;
+    },
+
+    resetPassword: async (data: any) => {
+        const res: any = await apiClient.post('/auth/password/reset', data);
         return res.data;
     }
 };
