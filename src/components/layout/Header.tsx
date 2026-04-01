@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { ShoppingCart, User, Search, Menu, LogOut, Package, Heart, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -111,8 +112,11 @@ export function Header() {
 
                     {/* Logo */}
                     <div className="flex justify-center md:justify-start">
-                        <Link href="/" className="flex items-center gap-2">
-                            <span className="text-xl font-bold tracking-tighter sm:text-2xl text-primary">
+                        <Link href="/" className="flex items-center gap-2 group">
+                            <div className="relative w-10 h-10 overflow-hidden rounded-md flex-shrink-0 shadow-sm transition-transform group-hover:scale-105">
+                                <Image src="/logo.png" alt="SportStore Logo" fill className="object-cover" sizes="40px" />
+                            </div>
+                            <span className="text-xl font-bold tracking-tighter sm:text-2xl text-primary hidden sm:inline-block transition-colors group-hover:text-primary/80">
                                 SPORTSTORE
                             </span>
                         </Link>

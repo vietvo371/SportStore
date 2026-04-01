@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProductReviews } from '@/components/product/ProductReviews';
 import { RecommendationSection } from '@/components/recommendation/RecommendationSection';
 import { useBehaviorTracking } from '@/hooks/useBehaviorTracking';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 export default function ProductDetailClient({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = use(params);
@@ -25,6 +26,7 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
     const [selectedVariant, setSelectedVariant] = useState<any>(null);
     const [quantity, setQuantity] = useState(1);
     const [activeImage, setActiveImage] = useState<string>('/placeholder.png');
+    const [isDescExpanded, setIsDescExpanded] = useState(false);
 
     const { openCart } = useCartStore();
     const { addToCart, isAdding } = useCart();
@@ -95,9 +97,9 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
 
     // Use variant price if selected, otherwise product price
     const currentPrice = selectedVariant?.gia_rieng || product.gia_khuyen_mai || product.gia_goc;
-    const isOutOfStock = selectedVariant 
-        ? selectedVariant.ton_kho <= 0 
-        : product.so_luong_ton_kho <= 0;
+    
+    const maxStock = selectedVariant ? selectedVariant.ton_kho : product.so_luong_ton_kho;
+    const isOutOfStock = maxStock <= 0;
 
     const handleAddToCart = async () => {
         if (product.bien_the && product.bien_the.length > 0 && !selectedVariant) {
@@ -201,7 +203,57 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
                         <div className="mb-8">
                             <div className="flex justify-between items-center mb-4">
                                 <span className="font-medium text-slate-900">Chọn kích cỡ:</span>
-                                <span className="text-sm text-primary cursor-pointer hover:underline">Hướng dẫn chọn size</span>
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <span className="text-sm font-semibold text-red-600 cursor-pointer hover:underline underline-offset-4">Hướng dẫn chọn size</span>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-2xl bg-white p-0 overflow-hidden outline-none">
+                                        <DialogHeader className="p-6 pb-2">
+                                            <DialogTitle className="text-2xl font-bold">Bảng kích cỡ (Size Guide)</DialogTitle>
+                                            <DialogDescription>
+                                                Sử dụng công cụ dưới đây để chọn kích cỡ phù hợp nhất với bạn.
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <div className="p-6 max-h-[70vh] overflow-y-auto">
+                                            <table className="w-full text-sm text-left text-slate-500 border rounded-xl overflow-hidden shadow-sm">
+                                                <thead className="text-xs text-slate-700 bg-slate-50 uppercase">
+                                                    <tr>
+                                                        <th className="px-6 py-4 font-bold border-b">Size</th>
+                                                        <th className="px-6 py-4 font-bold border-b">Chiều cao (cm)</th>
+                                                        <th className="px-6 py-4 font-bold border-b">Cân nặng (kg)</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr className="bg-white border-b">
+                                                        <td className="px-6 py-4 font-bold text-slate-900">S</td>
+                                                        <td className="px-6 py-4">150 - 160</td>
+                                                        <td className="px-6 py-4">45 - 55</td>
+                                                    </tr>
+                                                    <tr className="bg-slate-50 border-b">
+                                                        <td className="px-6 py-4 font-bold text-slate-900">M</td>
+                                                        <td className="px-6 py-4">160 - 168</td>
+                                                        <td className="px-6 py-4">55 - 65</td>
+                                                    </tr>
+                                                    <tr className="bg-white border-b">
+                                                        <td className="px-6 py-4 font-bold text-slate-900">L</td>
+                                                        <td className="px-6 py-4">168 - 175</td>
+                                                        <td className="px-6 py-4">65 - 75</td>
+                                                    </tr>
+                                                    <tr className="bg-slate-50 border-b">
+                                                        <td className="px-6 py-4 font-bold text-slate-900">XL</td>
+                                                        <td className="px-6 py-4">175 - 182</td>
+                                                        <td className="px-6 py-4">75 - 85</td>
+                                                    </tr>
+                                                    <tr className="bg-white">
+                                                        <td className="px-6 py-4 font-bold text-slate-900">XXL</td>
+                                                        <td className="px-6 py-4">&gt; 182</td>
+                                                        <td className="px-6 py-4">&gt; 85</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </DialogContent>
+                                </Dialog>
                             </div>
                             <div className="flex flex-wrap gap-3">
                                 {product.bien_the.map((variant: any) => {
@@ -231,31 +283,28 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
                                     );
                                 })}
                             </div>
-                            {selectedVariant && (
-                                <p className="mt-3 text-sm font-medium">
-                                    {selectedVariant.ton_kho > 0 ? (
-                                        <span className="text-emerald-600">Còn {selectedVariant.ton_kho} sản phẩm trong kho</span>
-                                    ) : (
-                                        <span className="text-rose-500 font-bold uppercase tracking-tight">Hết hàng</span>
-                                    )}
-                                </p>
-                            )}
+
                         </div>
                     )}
 
                     {/* Add to Cart Actions */}
                     <div className="flex gap-4 mt-auto">
-                        <div className="flex items-center border rounded-lg h-14">
+                        <div className={`flex items-center border rounded-lg h-14 ${isOutOfStock ? 'opacity-50 bg-slate-50' : ''}`}>
                             <button
                                 onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                                className="w-12 h-full flex items-center justify-center text-slate-500 hover:text-slate-900 transition-colors"
+                                disabled={isOutOfStock || quantity <= 1}
+                                className="w-12 h-full flex items-center justify-center text-slate-500 hover:text-slate-900 focus:outline-none disabled:opacity-50 transition-colors"
                             >
                                 -
                             </button>
-                            <span className="w-12 text-center font-medium">{quantity}</span>
+                            <span className="w-12 text-center font-medium">{isOutOfStock ? 0 : quantity}</span>
                             <button
-                                onClick={() => setQuantity(q => q + 1)}
-                                className="w-12 h-full flex items-center justify-center text-slate-500 hover:text-slate-900 transition-colors"
+                                onClick={() => {
+                                    if (quantity < maxStock) setQuantity(q => q + 1);
+                                    else toast.error(`Xin lỗi, chỉ còn ${maxStock} sản phẩm trong kho`);
+                                }}
+                                disabled={isOutOfStock || quantity >= maxStock}
+                                className="w-12 h-full flex items-center justify-center text-slate-500 hover:text-slate-900 focus:outline-none disabled:opacity-50 transition-colors"
                             >
                                 +
                             </button>
@@ -264,7 +313,7 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
                         <Button
                             size="lg"
                             variant="outline"
-                            className="flex-1 h-14 text-base gap-2 border-primary text-primary hover:bg-primary/5"
+                            className="flex-1 h-14 text-base font-semibold gap-2 border-red-500/40 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-600 transition-all rounded-xl"
                             onClick={handleAddToCart}
                             disabled={isAdding || isOutOfStock}
                         >
@@ -274,7 +323,7 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
 
                         <Button
                             size="lg"
-                            className="flex-1 h-14 text-base shadow-lg shadow-primary/20"
+                            className="flex-1 h-14 text-base font-bold bg-red-600 text-white hover:bg-red-700 shadow-xl shadow-red-600/30 hover:-translate-y-0.5 active:translate-y-0 transition-all rounded-xl border-0"
                             onClick={async () => {
                                 // 1. Check size/variant
                                 if ((product.bien_the?.length ?? 0) > 0 && !selectedVariant) {
@@ -347,10 +396,34 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
 
                     <TabsContent value="description" className="mt-4 outline-none">
                         {product.mo_ta_day_du ? (
-                            <div
-                                className="prose prose-slate max-w-none prose-img:rounded-2xl prose-headings:font-bold prose-a:text-primary"
-                                dangerouslySetInnerHTML={{ __html: product.mo_ta_day_du }}
-                            />
+                            <div className="relative">
+                                <div
+                                    className={`prose prose-slate max-w-none prose-img:rounded-2xl prose-headings:font-bold prose-a:text-primary transition-all duration-500 ${isDescExpanded ? 'max-h-[5000px]' : 'max-h-[300px] overflow-hidden'}`}
+                                    dangerouslySetInnerHTML={{ __html: product.mo_ta_day_du }}
+                                />
+                                {!isDescExpanded && (
+                                    <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white via-white/80 to-transparent flex items-end justify-center pb-2">
+                                        <Button
+                                            variant="outline"
+                                            className="px-8 bg-white/90 border-slate-200 shadow-[0_-10px_40px_rgba(255,255,255,1)] text-slate-700 font-semibold rounded-full hover:bg-slate-50 hover:text-red-600 transition-all z-10"
+                                            onClick={() => setIsDescExpanded(true)}
+                                        >
+                                            Xem thêm nội dung
+                                        </Button>
+                                    </div>
+                                )}
+                                {isDescExpanded && (
+                                    <div className="flex justify-center mt-6">
+                                        <Button
+                                            variant="ghost"
+                                            className="text-slate-500 hover:text-red-600 font-medium transition-colors"
+                                            onClick={() => setIsDescExpanded(false)}
+                                        >
+                                            Thu gọn nội dung
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
                         ) : (
                             <div className="py-12 text-center bg-slate-50 rounded-2xl border border-dashed">
                                 <p className="text-slate-500 italic">Đang cập nhật thêm thông tin mô tả chi tiết cho sản phẩm này.</p>

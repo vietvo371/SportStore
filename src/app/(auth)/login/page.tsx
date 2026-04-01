@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription } from '@/components/ui/card';
 import { authService } from '@/services/auth.service';
 import { useAuthStore } from '@/store/auth.store';
 
@@ -45,124 +45,150 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8 lg:py-12 flex items-center justify-center min-h-[85vh]">
-            <div className="flex flex-col lg:flex-row w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden border border-slate-100 bg-white">
+        <div className="container mx-auto px-4 py-8 lg:py-12 flex items-center justify-center min-h-[85vh] relative">
+            
+            {/* Background pattern for the page */}
+            <div className="fixed inset-0 z-0 bg-[#FAFAFA] bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-70" />
 
+            {/* Floating Split Card */}
+            <div className="flex flex-col lg:flex-row w-full max-w-[1100px] min-h-[650px] rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] overflow-hidden border border-slate-100/80 bg-white relative z-10">
+                
                 {/* Left Side - Visual Banner */}
-                <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative p-12 overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-primary/40 z-10 opacity-90" />
+                <div className="relative hidden w-full lg:flex lg:w-1/2 flex-col justify-between p-12 overflow-hidden bg-slate-950">
+                    {/* Background Image Original Color */}
+                <Image 
+                    src="/images/login_banner.png" 
+                    alt="Login Banner" 
+                    fill 
+                    priority
+                    className="object-cover hover:scale-105 transition-transform duration-[20s] ease-out select-none" 
+                />
+                
+                {/* Cinematic Gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-black/20 z-10" />
 
-                    {/* Decorative abstract elements */}
-                    <div className="absolute -top-24 -left-24 w-64 h-64 rounded-full bg-primary/20 blur-3xl z-10" />
-                    <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-blue-500/20 blur-3xl z-10" />
-
-                    <div className="absolute inset-0 z-0">
-                        {/* Optionally use a real sports background if available, fallback to a cool pattern or placeholder */}
-                        <div className="w-full h-full bg-[url('/placeholder.png')] bg-cover bg-center opacity-20 mix-blend-luminosity group-hover:scale-105 transition-transform duration-[20s] ease-linear" />
-                    </div>
-
-                    <div className="relative z-20 text-white flex flex-col justify-between h-full w-full">
-                        <div>
-                            <Link href="/">
-                                <span className="text-2xl font-black tracking-tighter cursor-pointer hover:text-primary transition-colors">
-                                    SPORTSTORE
-                                </span>
-                            </Link>
+                <div className="relative z-20 flex items-center gap-3">
+                    {/* Brand Logo inside Banner */}
+                    <Link href="/" className="group flex items-center gap-3 select-none outline-none">
+                        <div className="relative w-12 h-12 overflow-hidden rounded-xl shadow-2xl ring-1 ring-white/20 group-hover:scale-105 transition-transform">
+                            <Image src="/logo.png" alt="SportStore" fill sizes="48px" className="object-cover" />
                         </div>
-                        <div className="mb-12">
-                            <h2 className="text-5xl font-extrabold tracking-tight mb-6 leading-tight">
-                                Vượt Qua<br />
-                                Khởi Đầu Mới.
-                            </h2>
-                            <p className="text-lg text-slate-300 font-light max-w-sm leading-relaxed">
-                                Nâng tầm phong cách thể thao của bạn. Đăng nhập để nhận ưu đãi và mua sắm dễ dàng hơn.
-                            </p>
-                        </div>
-                    </div>
+                        <span className="text-3xl font-black tracking-tighter text-white drop-shadow-md">
+                            SPORTSTORE
+                        </span>
+                    </Link>
                 </div>
 
-                {/* Right Side - Form Container */}
-                <div className="w-full lg:w-1/2 p-8 sm:p-12 lg:p-16 flex flex-col justify-center bg-white relative">
-                    <div className="max-w-md w-full mx-auto space-y-8">
-                        <div className="text-center lg:text-left space-y-2">
-                            <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-                                Chào Mừng Trở Lại
-                            </h1>
-                            <p className="text-muted-foreground">
-                                Vui lòng đăng nhập vào tài khoản của bạn.
-                            </p>
+                <div className="relative z-20 mb-10 max-w-[500px]">
+                    <h2 className="text-6xl font-black tracking-tighter text-white mb-6 leading-[1.05] drop-shadow-xl">
+                        Vượt Qua <br />
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-rose-400 to-pink-500">Khởi Đầu Mới.</span>
+                    </h2>
+                    <p className="text-[17px] text-slate-300 font-medium leading-relaxed drop-shadow-md">
+                        Nâng tầm phong cách thể thao của bạn. Đăng nhập ngay để mở khóa những bộ sưu tập giới hạn và ưu đãi độc quyền dành riêng cho thành viên SportStore.
+                    </p>
+                </div>
+            </div>
+
+            {/* Right Side - Form Container */}
+            <div className="w-full lg:w-1/2 flex flex-col justify-center h-full min-h-[650px] p-6 sm:p-12 relative bg-white">
+
+                {/* Mobile Logo Back Button */}
+                <div className="absolute top-6 left-6 lg:hidden z-10">
+                    <Link href="/" className="inline-flex items-center gap-2 outline-none">
+                        <div className="relative w-10 h-10 overflow-hidden rounded-xl shadow-lg ring-1 ring-black/5">
+                            <Image src="/logo.png" alt="SportStore" fill sizes="40px" className="object-cover" />
                         </div>
+                        <span className="text-2xl font-black tracking-tighter text-slate-900">
+                            SPORTSTORE
+                        </span>
+                    </Link>
+                </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            {errorMsg && (
-                                <div className="p-4 text-sm font-medium text-destructive bg-destructive/10 border border-destructive/20 rounded-xl animate-in fade-in slide-in-from-top-2">
-                                    {errorMsg}
-                                </div>
-                            )}
+                {/* Form Card */}
+                <div className="w-full max-w-[440px] mx-auto bg-white rounded-[2rem] sm:p-6 z-10 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out mt-12 lg:mt-0">
+                    
+                    <div className="space-y-2 mb-10">
+                        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">
+                            Đăng Nhập
+                        </h1>
+                        <p className="text-slate-500 text-sm sm:text-base font-medium">
+                            Chào mừng trở lại! Vui lòng điền thông tin để tiếp tục.
+                        </p>
+                    </div>
 
-                            <div className="space-y-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-slate-700" htmlFor="email">
-                                        Email
-                                    </label>
-                                    <Input
-                                        id="email"
-                                        type="email"
-                                        placeholder="Nhập email của bạn"
-                                        required
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        className="h-12 px-4 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-colors"
-                                    />
-                                </div>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        {errorMsg && (
+                            <div className="p-4 rounded-2xl bg-red-50/80 border border-red-100 text-red-600 text-sm font-semibold animate-in fade-in slide-in-from-top-2 duration-300">
+                                {errorMsg}
+                            </div>
+                        )}
 
-                                <div className="space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <label className="text-sm font-semibold text-slate-700" htmlFor="password">
-                                            Mật khẩu
-                                        </label>
-                                        <Link href="#" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors">
-                                            Quên mật khẩu?
-                                        </Link>
-                                    </div>
-                                    <Input
-                                        id="password"
-                                        type="password"
-                                        placeholder="••••••••"
-                                        required
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        className="h-12 px-4 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-colors"
-                                    />
-                                </div>
+                        <div className="space-y-5">
+                            <div className="space-y-2">
+                                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest pl-1" htmlFor="email">
+                                    Địa chỉ Email
+                                </label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    placeholder="m@example.com"
+                                    required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="h-[52px] px-5 text-[15px] font-medium rounded-2xl bg-white border-slate-200 outline-none focus-visible:border-slate-900 focus-visible:ring-0 focus-visible:shadow-[0_0_0_4px_rgba(15,23,42,0.05)] transition-all placeholder:text-slate-400"
+                                />
                             </div>
 
-                            <Button
-                                type="submit"
-                                className="w-full h-12 text-base font-semibold rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all"
-                                disabled={loginMutation.isPending}
-                            >
-                                {loginMutation.isPending ? 'Đang xác thực...' : 'Đăng Nhập'}
-                            </Button>
-                        </form>
-
-                        <div className="relative flex items-center gap-4">
-                            <div className="flex-1 h-px bg-slate-200" />
-                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest shrink-0">hoặc</span>
-                            <div className="flex-1 h-px bg-slate-200" />
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between pl-1">
+                                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest" htmlFor="password">
+                                        Mật khẩu
+                                    </label>
+                                    <Link href="#" className="text-[12px] font-bold text-slate-900 hover:text-slate-600 transition-colors">
+                                        Quên mật khẩu?
+                                    </Link>
+                                </div>
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    placeholder="••••••••"
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="h-[52px] px-5 text-[15px] font-medium rounded-2xl bg-white border-slate-200 outline-none focus-visible:border-slate-900 focus-visible:ring-0 focus-visible:shadow-[0_0_0_4px_rgba(15,23,42,0.05)] transition-all placeholder:text-slate-400"
+                                />
+                            </div>
                         </div>
 
-                        <GoogleLoginButton />
+                        <Button
+                            type="submit"
+                            className="w-full h-14 text-base font-bold tracking-wide rounded-full bg-slate-950 text-white hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-slate-900/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 transition-all duration-200 mt-2"
+                            disabled={loginMutation.isPending}
+                        >
+                            {loginMutation.isPending ? 'Đang xác thực...' : 'Đăng Nhập Ngay'}
+                        </Button>
+                    </form>
 
-                        <div className="text-center text-sm text-slate-600">
-                            Bạn chưa có tài khoản?{' '}
-                            <Link href="/register" className="font-bold text-primary hover:underline transition-all">
-                                Hãy đăng ký ngay
-                            </Link>
+                    <div className="relative my-8">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t border-slate-100" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-white px-4 text-slate-400 font-bold tracking-widest">Hoặc tiếp tục với</span>
                         </div>
                     </div>
-                </div>
 
+                    <GoogleLoginButton />
+
+                    <div className="text-center text-[14px] text-slate-600 mt-8 font-medium">
+                        Bạn chưa có tài khoản?{' '}
+                        <Link href="/register" className="font-bold text-slate-950 hover:text-slate-700 underline underline-offset-4 decoration-2 decoration-slate-200 hover:decoration-slate-900 transition-all">
+                            Tạo tài khoản mới
+                        </Link>
+                    </div>
+                </div>
+            </div>
             </div>
         </div>
     );
@@ -182,19 +208,20 @@ function GoogleLoginButton() {
     };
 
     return (
-        <button
+        <Button
             type="button"
+            variant="outline"
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full h-12 flex items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-all text-sm font-semibold text-slate-700 shadow-sm hover:shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full h-14 text-[15px] font-bold rounded-full border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-800 shadow-sm focus-visible:ring-2 focus-visible:ring-slate-200 focus-visible:ring-offset-2 transition-all"
         >
             {loading ? (
-                <svg className="h-4 w-4 animate-spin text-slate-400" viewBox="0 0 24 24" fill="none">
+                <svg className="h-5 w-5 animate-spin text-slate-400 mr-2" viewBox="0 0 24 24" fill="none">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
             ) : (
-                <svg viewBox="0 0 24 24" className="h-5 w-5" xmlns="http://www.w3.org/2000/svg">
+                <svg viewBox="0 0 24 24" className="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                     <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
                     <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
@@ -202,6 +229,6 @@ function GoogleLoginButton() {
                 </svg>
             )}
             {loading ? 'Đang kết nối...' : 'Tiếp tục với Google'}
-        </button>
+        </Button>
     );
 }
