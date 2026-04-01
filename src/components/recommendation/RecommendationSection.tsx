@@ -22,8 +22,8 @@ export const RecommendationSection = ({
     subtitle,
     productId
 }: RecommendationSectionProps) => {
-    const displayTitle = title || (productId ? 'Sản phẩm tương tự' : 'Gợi ý dành riêng cho bạn');
-    const displaySubtitle = subtitle || (productId 
+    const displayTitle = typeof title === 'string' ? title : (productId ? 'Sản phẩm tương tự' : 'Gợi ý dành riêng cho bạn');
+    const displaySubtitle = typeof subtitle === 'string' ? subtitle : (productId 
         ? 'Những sản phẩm liên quan bạn có thể quan tâm'
         : 'Dựa trên những sản phẩm bạn đã xem và sở thích của bạn');
 
@@ -42,14 +42,16 @@ export const RecommendationSection = ({
 
     return (
         <div className="w-full">
-            <div className="flex flex-col items-center justify-center mb-8 text-center">
-                <h2 className="text-3xl font-bold tracking-tight">{displayTitle}</h2>
-                {displaySubtitle && (
-                    <p className="text-muted-foreground mt-2 max-w-2xl px-4">
-                        {displaySubtitle}
-                    </p>
-                )}
-            </div>
+            {(displayTitle || displaySubtitle) && (
+                <div className="flex flex-col items-center justify-center mb-8 text-center">
+                    {displayTitle && <h2 className="text-3xl font-bold tracking-tight text-slate-900">{displayTitle}</h2>}
+                    {displaySubtitle && (
+                        <p className="text-muted-foreground mt-2 max-w-2xl px-4">
+                            {displaySubtitle}
+                        </p>
+                    )}
+                </div>
+            )}
 
             {isLoading ? (
                 <div className="flex gap-4 sm:gap-6 overflow-hidden">
