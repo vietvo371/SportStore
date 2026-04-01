@@ -11,8 +11,8 @@ export function Footer() {
                     {/* Column 1: Brand Info */}
                     <div>
                         <Link href="/" className="mb-6 inline-flex items-center group">
-                            <div className="relative w-40 h-12 overflow-hidden bg-white/90 backdrop-blur-sm p-1.5 rounded-xl shadow-sm transition-transform group-hover:scale-105">
-                                <Image src="/logo.png" alt="SportStore Logo" fill className="object-contain p-0.5" sizes="160px" />
+                            <div className="relative w-48 h-20 overflow-hidden transition-transform group-hover:scale-105">
+                                <Image src="/sportstore-logo.png" alt="SportStore Logo" fill className="object-contain" sizes="192px" />
                             </div>
                         </Link>
                         <p className="text-slate-400 text-sm leading-relaxed mb-4">

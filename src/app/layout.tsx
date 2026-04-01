@@ -92,11 +92,10 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favici.png?v=logo-new', sizes: 'any' },
     ],
-    apple: '/apple-touch-icon.png',
-    shortcut: '/favicon-32x32.png',
+    apple: '/favici.png?v=logo-new',
+    shortcut: '/favici.png?v=logo-new',
   },
   manifest: '/manifest.webmanifest',
   verification: {

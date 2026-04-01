@@ -3,12 +3,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { ProductCard } from '@/components/product/ProductCard';
 import { recommendationService } from '@/services/recommendation.service';
+import { useState, useEffect } from 'react';
 import {
     Carousel,
     CarouselContent,
     CarouselItem,
     CarouselNext,
     CarouselPrevious,
+    type CarouselApi,
 } from "@/components/ui/carousel";
 
 interface RecommendationSectionProps {
@@ -22,6 +24,8 @@ export const RecommendationSection = ({
     subtitle,
     productId
 }: RecommendationSectionProps) => {
+    const [api, setApi] = useState<CarouselApi>();
+
     const displayTitle = typeof title === 'string' ? title : (productId ? 'Sản phẩm tương tự' : 'Gợi ý dành riêng cho bạn');
     const displaySubtitle = typeof subtitle === 'string' ? subtitle : (productId 
         ? 'Những sản phẩm liên quan bạn có thể quan tâm'
@@ -35,6 +39,17 @@ export const RecommendationSection = ({
             ? recommendationService.getRelatedProducts(productId)
             : recommendationService.getRecommendations(),
     });
+
+    // Auto-play logic
+    useEffect(() => {
+        if (!api) return;
+
+        const intervalId = setInterval(() => {
+            api.scrollNext();
+        }, 4000); // 4 seconds interval for recommendations
+
+        return () => clearInterval(intervalId);
+    }, [api]);
 
     if (!isLoading && recommendations.length === 0) {
         return null;
@@ -66,6 +81,7 @@ export const RecommendationSection = ({
             ) : (
                 <div className="relative px-0 md:px-12">
                     <Carousel
+                        setApi={setApi}
                         opts={{
                             align: "start",
                             loop: true,

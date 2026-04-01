@@ -113,8 +113,8 @@ export default function ForgotPasswordPage() {
                 )}
 
                 <div className="mt-12 pt-8 border-t border-slate-50 flex items-center justify-center">
-                    <div className="relative w-32 h-8">
-                        <Image src="/logo.png" alt="SportStore" fill className="object-contain opacity-40 grayscale" />
+                    <div className="relative w-40 h-18">
+                        <Image src="/sportstore-logo.png" alt="SportStore" fill className="object-contain" />
                     </div>
                 </div>
             </div>

@@ -104,8 +104,8 @@ export default function RegisterPage() {
 
                     <div className="relative z-20 flex items-center justify-end w-full px-4">
                         <Link href="/" className="group flex items-center select-none outline-none">
-                            <div className="relative w-44 h-14 overflow-hidden bg-white/95 backdrop-blur-md p-2 rounded-2xl shadow-2xl ring-1 ring-white/20 transition-transform group-hover:scale-105">
-                                <Image src="/logo.png" alt="SportStore" fill className="object-contain p-1" sizes="176px" />
+                            <div className="relative w-52 h-24 overflow-hidden transition-transform group-hover:scale-105">
+                                <Image src="/sportstore-logo.png" alt="SportStore" fill className="object-contain" sizes="208px" />
                             </div>
                         </Link>
                     </div>
@@ -127,8 +127,8 @@ export default function RegisterPage() {
                     {/* Mobile Logo Back Button */}
                     <div className="absolute top-6 left-6 lg:hidden z-10">
                         <Link href="/" className="inline-flex items-center outline-none">
-                            <div className="relative w-36 h-11 overflow-hidden bg-white shadow-lg border border-slate-100 p-2 rounded-xl">
-                                <Image src="/logo.png" alt="SportStore" fill className="object-contain p-0.5" sizes="144px" />
+                            <div className="relative w-32 h-15 overflow-hidden">
+                                <Image src="/sportstore-logo.png" alt="SportStore" fill className="object-contain" sizes="128px" />
                             </div>
                         </Link>
                     </div>

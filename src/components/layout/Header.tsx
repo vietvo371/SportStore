@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription, SheetC
 
 import { useCategories } from '@/hooks/useCategory';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
+import { toast } from 'sonner';
 
 export function Header() {
     const { itemCount, openCart } = useCartStore();
@@ -27,6 +28,12 @@ export function Header() {
         if (searchQuery.trim()) {
             router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
         }
+    };
+
+    const handleLogout = () => {
+        logout();
+        toast.success('Đăng xuất thành công!');
+        router.push('/login');
     };
 
     useEffect(() => {
@@ -77,7 +84,7 @@ export function Header() {
                                                             <span>{cat.ten}</span>
                                                         </Link>
                                                     </SheetClose>
-                                                    
+
                                                     {/* Nhánh danh mục con */}
                                                     {cat.danh_muc_con && cat.danh_muc_con.length > 0 && (
                                                         <div className="flex flex-col bg-slate-50/30 pb-2">
@@ -113,8 +120,8 @@ export function Header() {
                     {/* Logo */}
                     <div className="flex justify-center md:justify-start">
                         <Link href="/" className="flex items-center group">
-                            <div className="relative w-32 h-10 md:w-36 md:h-11 overflow-hidden transition-transform group-hover:scale-105">
-                                <Image src="/logo.png" alt="SportStore Logo" fill className="object-contain" sizes="(max-width: 768px) 128px, 144px" priority />
+                            <div className="relative w-28 h-13 md:w-32 md:h-15 overflow-hidden transition-transform group-hover:scale-105">
+                                <Image src="/sportstore-logo.png" alt="SportStore Logo" fill className="object-contain" sizes="(max-width: 768px) 128px, 144px" priority />
                             </div>
                         </Link>
                     </div>
@@ -219,7 +226,7 @@ export function Header() {
                                                             <span>Quản trị hệ thống</span>
                                                         </Link>
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={logout} className="cursor-pointer py-2 text-red-600 focus:text-red-600 focus:bg-red-50 mt-1">
+                                                    <DropdownMenuItem onClick={handleLogout} className="cursor-pointer py-2 text-red-600 focus:text-red-600 focus:bg-red-50 mt-1">
                                                         <LogOut className="mr-2 h-4 w-4" />
                                                         <span>Đăng xuất</span>
                                                     </DropdownMenuItem>
@@ -244,7 +251,7 @@ export function Header() {
                                                             <span>Sản phẩm yêu thích</span>
                                                         </Link>
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={logout} className="cursor-pointer py-2 text-red-600 focus:text-red-600 focus:bg-red-50 mt-1">
+                                                    <DropdownMenuItem onClick={handleLogout} className="cursor-pointer py-2 text-red-600 focus:text-red-600 focus:bg-red-50 mt-1">
                                                         <LogOut className="mr-2 h-4 w-4" />
                                                         <span>Đăng xuất</span>
                                                     </DropdownMenuItem>

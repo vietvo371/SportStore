@@ -71,4 +71,14 @@ export const productService = {
             throw error;
         }
     },
+
+    getSizeCharts: async (params: { loai: string; thuong_hieu_id?: number }): Promise<any[]> => {
+        try {
+            const response = await apiClient.get<ApiResponse<any[]>>('/size-charts', { params });
+            return (response as unknown as ApiResponse<any[]>).data;
+        } catch (error) {
+            console.error('Failed to fetch size charts:', error);
+            return [];
+        }
+    },
 };

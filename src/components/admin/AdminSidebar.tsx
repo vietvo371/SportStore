@@ -23,6 +23,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth.store';
 import { useMemo } from 'react';
+import { toast } from 'sonner';
 
 interface SidebarItem {
     name: string;
@@ -63,6 +64,7 @@ export function AdminSidebar({ className, setOpen }: AdminSidebarProps) {
 
     const handleLogout = () => {
         logout();
+        toast.success('Đăng xuất thành công!');
         router.push('/login');
     };
 
@@ -89,8 +91,8 @@ export function AdminSidebar({ className, setOpen }: AdminSidebarProps) {
         <aside className={cn("w-64 bg-slate-900 text-slate-300 flex flex-col h-full border-r border-slate-800", className)}>
             <div className="p-6 border-b border-slate-800 flex items-center justify-between">
                 <Link href="/" className="flex flex-col gap-1 group">
-                    <div className="relative w-36 h-10 overflow-hidden bg-white/90 backdrop-blur-sm p-1.5 rounded-xl transition-transform group-hover:scale-105">
-                        <Image src="/logo.png" alt="SportStore Logo" fill className="object-contain p-0.5" sizes="144px" />
+                    <div className="relative w-40 h-18 overflow-hidden transition-transform group-hover:scale-105">
+                        <Image src="/sportstore-logo.png" alt="SportStore Logo" fill className="object-contain" sizes="160px" />
                     </div>
                     <span className="text-[10px] text-primary font-black uppercase tracking-[0.3em] pl-1.5 opacity-80">Admin Portal</span>
                 </Link>

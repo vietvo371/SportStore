@@ -19,6 +19,7 @@ import { ProductReviews } from '@/components/product/ProductReviews';
 import { RecommendationSection } from '@/components/recommendation/RecommendationSection';
 import { useBehaviorTracking } from '@/hooks/useBehaviorTracking';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { SizeGuide } from '@/components/product/SizeGuide';
 
 export default function ProductDetailClient({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = use(params);
@@ -100,6 +101,16 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
     
     const maxStock = selectedVariant ? selectedVariant.ton_kho : product.so_luong_ton_kho;
     const isOutOfStock = maxStock <= 0;
+
+    // Determine product type (loai) for size chart
+    const getProductType = () => {
+        const categoryName = product?.danh_muc?.ten?.toLowerCase() || '';
+        if (categoryName.includes('giày') || categoryName.includes('dép')) return 'giay' as const;
+        if (categoryName.includes('quần')) return 'quan' as const;
+        return 'ao' as const; // Default to 'ao'
+    };
+
+    const productType = getProductType();
 
     const handleAddToCart = async () => {
         if (product.bien_the && product.bien_the.length > 0 && !selectedVariant) {
@@ -205,52 +216,21 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
                                 <span className="font-medium text-slate-900">Chọn kích cỡ:</span>
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <span className="text-sm font-semibold text-red-600 cursor-pointer hover:underline underline-offset-4">Hướng dẫn chọn size</span>
+                                        <span className="text-sm font-semibold text-red-600 cursor-pointer hover:underline underline-offset-4 transition-all hover:text-red-700 active:scale-95">Hướng dẫn chọn size</span>
                                     </DialogTrigger>
-                                    <DialogContent className="max-w-2xl bg-white p-0 overflow-hidden outline-none">
-                                        <DialogHeader className="p-6 pb-2">
-                                            <DialogTitle className="text-2xl font-bold">Bảng kích cỡ (Size Guide)</DialogTitle>
-                                            <DialogDescription>
-                                                Sử dụng công cụ dưới đây để chọn kích cỡ phù hợp nhất với bạn.
+                                    <DialogContent className="max-w-xl bg-white p-0 overflow-hidden outline-none border-none shadow-2xl rounded-3xl">
+                                        <DialogHeader className="p-8 pb-2 space-y-2">
+                                            <DialogTitle className="text-3xl font-extrabold text-slate-900 tracking-tight">Tìm size phù hợp nhất</DialogTitle>
+                                            <DialogDescription className="text-slate-500 text-base">
+                                                Gợi ý chính xác dựa trên thông số từ hệ thống SportStore.
                                             </DialogDescription>
                                         </DialogHeader>
-                                        <div className="p-6 max-h-[70vh] overflow-y-auto">
-                                            <table className="w-full text-sm text-left text-slate-500 border rounded-xl overflow-hidden shadow-sm">
-                                                <thead className="text-xs text-slate-700 bg-slate-50 uppercase">
-                                                    <tr>
-                                                        <th className="px-6 py-4 font-bold border-b">Size</th>
-                                                        <th className="px-6 py-4 font-bold border-b">Chiều cao (cm)</th>
-                                                        <th className="px-6 py-4 font-bold border-b">Cân nặng (kg)</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr className="bg-white border-b">
-                                                        <td className="px-6 py-4 font-bold text-slate-900">S</td>
-                                                        <td className="px-6 py-4">150 - 160</td>
-                                                        <td className="px-6 py-4">45 - 55</td>
-                                                    </tr>
-                                                    <tr className="bg-slate-50 border-b">
-                                                        <td className="px-6 py-4 font-bold text-slate-900">M</td>
-                                                        <td className="px-6 py-4">160 - 168</td>
-                                                        <td className="px-6 py-4">55 - 65</td>
-                                                    </tr>
-                                                    <tr className="bg-white border-b">
-                                                        <td className="px-6 py-4 font-bold text-slate-900">L</td>
-                                                        <td className="px-6 py-4">168 - 175</td>
-                                                        <td className="px-6 py-4">65 - 75</td>
-                                                    </tr>
-                                                    <tr className="bg-slate-50 border-b">
-                                                        <td className="px-6 py-4 font-bold text-slate-900">XL</td>
-                                                        <td className="px-6 py-4">175 - 182</td>
-                                                        <td className="px-6 py-4">75 - 85</td>
-                                                    </tr>
-                                                    <tr className="bg-white">
-                                                        <td className="px-6 py-4 font-bold text-slate-900">XXL</td>
-                                                        <td className="px-6 py-4">&gt; 182</td>
-                                                        <td className="px-6 py-4">&gt; 85</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
+                                        
+                                        <div className="pb-4">
+                                            <SizeGuide 
+                                                loai={productType} 
+                                                thuong_hieu_id={product.thuong_hieu_id} 
+                                            />
                                         </div>
                                     </DialogContent>
                                 </Dialog>

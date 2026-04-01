@@ -2,20 +2,35 @@
 
 import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
 import {
     Carousel,
     CarouselContent,
     CarouselItem,
     CarouselNext,
     CarouselPrevious,
+    type CarouselApi,
 } from '@/components/ui/carousel';
 import { bannerService } from '@/services/banner.service';
 
 export function HeroBanner() {
+    const [api, setApi] = useState<CarouselApi>();
+
     const { data: banners = [], isLoading } = useQuery({
         queryKey: ['banners', 'home_main'],
         queryFn: () => bannerService.getBanners('home_main'),
     });
+
+    // Auto-play logic
+    useEffect(() => {
+        if (!api) return;
+
+        const intervalId = setInterval(() => {
+            api.scrollNext();
+        }, 5000); // 5 seconds interval
+
+        return () => clearInterval(intervalId);
+    }, [api]);
 
     if (isLoading) {
         return <div className="w-full h-[70vh] md:h-[85vh] bg-slate-100 animate-pulse" />;
@@ -36,6 +51,7 @@ export function HeroBanner() {
 
     return (
         <Carousel
+            setApi={setApi}
             className="w-full"
             opts={{
                 loop: true,
