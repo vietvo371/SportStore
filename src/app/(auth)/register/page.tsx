@@ -60,13 +60,22 @@ export default function RegisterPage() {
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setErrorMsg('');
+
+        // Kiểm tra họ tên ít nhất 2 từ
+        const nameRegex = /^[\p{L}]+(?:\s+[\p{L}]+)+$/u;
+        if (!nameRegex.test(hoTen.trim())) {
+            setErrorMsg('Vui lòng nhập đầy đủ cả họ và tên (ít nhất 2 từ).');
+            return;
+        }
+
         if (password !== passwordConfirm) {
             setErrorMsg('Mật khẩu xác nhận không khớp.');
             return;
         }
+
         registerMutation.mutate();
     };
 
@@ -184,6 +193,7 @@ export default function RegisterPage() {
                                             <Input
                                                 id="hoTen"
                                                 type="text"
+                                                autoComplete="off"
                                                 placeholder="Nguyễn Văn A"
                                                 required
                                                 value={hoTen}

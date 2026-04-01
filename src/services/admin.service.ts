@@ -239,6 +239,30 @@ export const adminService = {
     toggleBannerStatus: async (id: number): Promise<ApiResponse<any>> => {
         return apiClient.patch(`/admin/banners/${id}/status`);
     },
+
+    // Size Charts
+    getSizeCharts: async (params: any = {}): Promise<PaginatedResponse<any>> => {
+        const queryParams = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== '') {
+                queryParams.append(key, String(value));
+            }
+        });
+        const queryString = queryParams.toString();
+        return apiClient.get(`/admin/size-charts${queryString ? `?${queryString}` : ''}`);
+    },
+    getSizeChart: async (id: number): Promise<ApiResponse<any>> => {
+        return apiClient.get(`/admin/size-charts/${id}`);
+    },
+    createSizeChart: async (data: any): Promise<ApiResponse<any>> => {
+        return apiClient.post('/admin/size-charts', data);
+    },
+    updateSizeChart: async (id: number, data: any): Promise<ApiResponse<any>> => {
+        return apiClient.put(`/admin/size-charts/${id}`, data);
+    },
+    deleteSizeChart: async (id: number): Promise<ApiResponse<any>> => {
+        return apiClient.delete(`/admin/size-charts/${id}`);
+    },
 };
 
 export const adminKeys = {

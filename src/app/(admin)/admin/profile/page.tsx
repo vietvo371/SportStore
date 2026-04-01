@@ -51,6 +51,7 @@ export default function AdminProfilePage() {
         register,
         handleSubmit,
         reset,
+        watch,
         formState: { errors, isDirty },
     } = useForm<ProfileForm>({
         defaultValues: {
@@ -232,7 +233,10 @@ export default function AdminProfilePage() {
                         <h3 className="font-semibold text-slate-800">Thông tin cơ bản</h3>
                     </div>
 
-                    <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
+                    <form onSubmit={handleSubmit(onSubmit)} autoComplete="off" className="p-6 space-y-5">
+                        {/* Honeypot at the beginning of the form */}
+                        <input type="text" name="email" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, zIndex: -1, pointerEvents: 'none' }} autoComplete="username" />
+                        <input type="password" name="password" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, zIndex: -1, pointerEvents: 'none' }} autoComplete="current-password" />
                         {/* Email readonly */}
                         <div className="space-y-1.5">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wide flex items-center gap-1.5">
@@ -249,9 +253,18 @@ export default function AdminProfilePage() {
                                 </label>
                                 <Input
                                     id="ho_va_ten"
-                                    placeholder="Nhập họ và tên..."
-                                    className="h-11"
-                                    {...register('ho_va_ten', { required: 'Vui lòng nhập họ và tên' })}
+                                    autoComplete="off"
+                                    readOnly
+                                    onFocus={(e) => e.target.removeAttribute('readonly')}
+                                    placeholder="Nguyễn Văn A"
+                                    className="h-11 focus:ring-primary/20"
+                                    {...register('ho_va_ten', { 
+                                        required: 'Vui lòng nhập họ và tên',
+                                        pattern: {
+                                            value: /^[\p{L}]+(?:\s+[\p{L}]+)+$/u,
+                                            message: 'Vui lòng nhập đầy đủ cả họ và tên (ít nhất 2 từ)'
+                                        }
+                                    })}
                                 />
                                 {errors.ho_va_ten && <p className="text-xs text-red-500">{errors.ho_va_ten.message}</p>}
                             </div>
@@ -262,13 +275,16 @@ export default function AdminProfilePage() {
                                 </label>
                                 <Input
                                     id="so_dien_thoai"
+                                    autoComplete="off"
+                                    readOnly
+                                    onFocus={(e) => e.target.removeAttribute('readonly')}
                                     placeholder="0xxx xxx xxx"
-                                    className="h-11"
+                                    className="h-11 focus:ring-primary/20"
                                     {...register('so_dien_thoai', {
                                         pattern: {
                                             value: /(84|0[3|5|7|8|9])+([0-9]{8})\b/g,
-                                            message: 'Số điện thoại không hợp lệ',
-                                        },
+                                            message: 'Số điện thoại không hợp lệ'
+                                        }
                                     })}
                                 />
                                 {errors.so_dien_thoai && <p className="text-xs text-red-500">{errors.so_dien_thoai.message}</p>}
@@ -319,6 +335,10 @@ export default function AdminProfilePage() {
                             </div>
                         ) : (
                             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                                {/* Honeypot to catch browser autofill */}
+                                <input type="text" name="email" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, zIndex: -1, pointerEvents: 'none' }} autoComplete="username" />
+                                <input type="password" name="password" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, zIndex: -1, pointerEvents: 'none' }} autoComplete="current-password" />
+                                
                                 {/* Current password */}
                                 <div className="space-y-1.5">
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Mật khẩu hiện tại</label>
@@ -326,6 +346,7 @@ export default function AdminProfilePage() {
                                         <Input
                                             type={showPwCu ? 'text' : 'password'}
                                             className="h-10 pr-10"
+                                            autoComplete="current-password"
                                             {...register('mat_khau_cu', { required: 'Bắt buộc' })}
                                         />
                                         <button type="button" onClick={() => setShowPwCu(!showPwCu)}
@@ -343,6 +364,7 @@ export default function AdminProfilePage() {
                                         <Input
                                             type={showPwMoi ? 'text' : 'password'}
                                             className="h-10 pr-10"
+                                            autoComplete="new-password"
                                             {...register('mat_khau_moi', {
                                                 required: 'Bắt buộc',
                                                 minLength: { value: 8, message: 'Ít nhất 8 ký tự' },
@@ -363,7 +385,11 @@ export default function AdminProfilePage() {
                                         <Input
                                             type={showPwConfirm ? 'text' : 'password'}
                                             className="h-10 pr-10"
-                                            {...register('mat_khau_moi_confirmation', { required: 'Bắt buộc' })}
+                                            autoComplete="new-password"
+                                            {...register('mat_khau_moi_confirmation', {
+                                                required: 'Bắt buộc',
+                                                validate: (val) => val === watch('mat_khau_moi') || 'Mật khẩu không khớp',
+                                            })}
                                         />
                                         <button type="button" onClick={() => setShowPwConfirm(!showPwConfirm)}
                                             className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
