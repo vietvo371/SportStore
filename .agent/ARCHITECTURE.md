@@ -146,6 +146,41 @@ NEXT_PUBLIC_APP_NAME=SportStore
 
 ---
 
+## Sơ đồ Database (ERD)
+
+```mermaid
+erDiagram
+    ThuongHieu ||--o{ SanPham : "cung cấp"
+    ThuongHieu ||--o{ BangSize : "định nghĩa quy tắc"
+    DanhMuc ||--o{ SanPham : "phân loại"
+    SanPham ||--o{ BienTheSanPham : "có nhiều"
+    SanPham ||--o{ HinhAnhSanPham : "có nhiều"
+    
+    BangSize {
+        int id
+        int thuong_hieu_id "FK (null nếu dùng chung)"
+        string loai "ao | quan | giay"
+        string ten_size "S, M, L, 40, 41..."
+        float chieu_cao_min
+        float chieu_cao_max
+        float can_nang_min
+        float can_nang_max
+        float chieu_dai_chan_min
+        float chieu_dai_chan_max
+    }
+    
+    SanPham {
+        int id
+        int danh_muc_id
+        int thuong_hieu_id
+        string ten_san_pham
+        string duong_dan
+        decimal gia_goc
+    }
+```
+
+---
+
 ## Mapping BE → FE (luôn đồng bộ)
 
 | BE endpoint | FE service | FE page/component |
@@ -156,4 +191,5 @@ NEXT_PUBLIC_APP_NAME=SportStore
 | `POST /orders` | `order.service.ts` | `/checkout` |
 | `POST /chatbot/message` | `chatbot.service.ts` | `ChatWidget` |
 | `GET /recommendations` | `recommendation.service.ts` | `RecommendedSection` |
+| `GET /size-charts` | `admin.service.ts` | `ProductDetail / Admin` |
 | `GET /admin/roles` | `rbac.service.ts` | `/admin/roles` |

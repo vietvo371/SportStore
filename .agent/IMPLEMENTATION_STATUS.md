@@ -26,14 +26,15 @@
 | Chi tiết SP `[slug]` | 🟢 DONE | `src/app/(shop)/products/[slug]/` | Gallery, variants, reviews |
 | Auth (`/login`, `/register`) | 🟢 DONE | `src/app/(auth)/` | Form + Zustand auth store |
 | Giỏ hàng (Drawer) | 🟢 DONE | `src/components/cart/` | Slide-in drawer |
-| Checkout `/checkout` | � DONE | `src/app/(shop)/checkout/` | Form, coupon, summary |
-| Đơn hàng `/orders` | � DONE | `src/app/(shop)/profile/orders/` | List + detail |
-| AI Chatbot Widget | 🔴 TODO | `src/components/chatbot/` | Float widget, session |
-| Wishlist `/wishlist` | � DONE | `src/app/(shop)/profile/wishlist/` | - |
-| Recommendation Section | 🔴 TODO | `src/components/recommendation/` | Homepage + Product detail |
+| Checkout `/checkout` | 🟢 DONE | `src/app/(shop)/checkout/` | Form, coupon, summary |
+| Đơn hàng `/orders` | 🟢 DONE | `src/app/(shop)/profile/orders/` | List + detail |
+| AI Chatbot Widget | 🟢 DONE | `src/components/chatbot/` | Float widget, session |
+| Wishlist `/wishlist` | 🟢 DONE | `src/app/(shop)/profile/wishlist/` | - |
+| Recommendation Section | 🟢 DONE | `src/components/recommendation/` | Homepage + Product detail |
 | Admin `/admin` | 🟢 DONE | `src/app/(admin)/admin/` | Product, Order, Coupon CRUD |
 | Phân quyền (RBAC) | 🟢 DONE | `src/app/(admin)/admin/roles` | UI Quản lý vai trò & quyền |
-| Profile `/profile` | � DONE | `src/app/(shop)/profile/` | Info + addresses |
+| Bảng Size | 🟢 DONE | `src/app/(admin)/admin/size-charts` | Quản lý quy tắc Size |
+| Profile `/profile` | 🟢 DONE | `src/app/(shop)/profile/` | Info + addresses |
 
 ---
 
@@ -84,3 +85,11 @@
 - Cập nhật User Interface hiển thị Badge Master (Crown icon) cho các tài khoản đặc biệt.
 - Vô hiệu hóa các nút xóa và chỉnh sửa cho tài khoản Master để đảm bảo an toàn hệ thống.
 - Cập nhật Typescript interfaces (`User`) để đồng bộ với backend.
+87: 
+88: ### Session 8 — 04/2026 — Branding, UX & Size Chart
+89: - Cập nhật Logo mới trên toàn bộ hệ thống (Header, Footer, Auth, Admin).
+90: - Xử lý triệt để caching logo bằng cách đổi tên file và dùng query string.
+91: - Kích hoạt Autoplay cho Hero Banner (5s) và Recommendation Section (4s).
+92: - Triển khai module Bảng Size (BangSize) tại Backend & Frontend.
+93: - Cập nhật tài liệu Kiến trúc (ARCHITECTURE.md) và Sơ đồ ERD cho Bảng Size.
+94: - Dọn dẹp folder `public/`, xóa bỏ các file vercel/next mặc định.

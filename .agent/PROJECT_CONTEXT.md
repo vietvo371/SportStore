@@ -97,6 +97,11 @@ Chatbot:
 Recommendations:
   GET  /recommendations     → Danh sách gợi ý (cá nhân hóa)
   POST /behaviors           → Ghi nhận hành vi (view, click...)
+
+Size Charts:
+  GET  /size-charts         → Tra cứu tất cả quy tắc size
+  GET  /admin/size-charts   → Quản trị bảng size (Admin)
+  POST /admin/size-charts   → Tạo quy tắc mới (Admin)
 ```
 
 ---
@@ -110,6 +115,21 @@ Recommendations:
 4. 401 response → redirect /login
 5. POST /auth/logout → xóa cookie
 ```
+
+---
+
+## 📐 Logic Tra Cứu Size (Size Matching)
+
+Hệ thống cung cấp gợi ý size tự động dựa trên các tiêu chí:
+
+1.  **Phân loại Sản phẩm (`loai`):**
+    - `ao` & `quan`: So khớp dựa trên mảng giao thoa giữa **Chiều cao** và **Cân nặng** người dùng.
+    - `giay`: So khớp dựa trên **Chiều dài bàn chân** (mm).
+2.  **Ưu tiên Thương hiệu:**
+    - Nếu thương hiệu có bảng size riêng (`thuong_hieu_id` match) → Dùng quy tắc riêng đó.
+    - Nếu không → Dùng quy tắc mặc định (`thuong_hieu_id` is null).
+3.  **Dữ liệu đầu vào:**
+    - Thông số được lưu trong `BangSize` dưới dạng dải `min` - `max` (ví dụ: size M dành cho 160cm - 170cm).
 
 ---
 
