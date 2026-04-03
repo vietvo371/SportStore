@@ -110,7 +110,7 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
         // Find if this image is associated with any variant
         if (product?.bien_the) {
             const variantWithImage = product.bien_the.find((v: any) => v.hinh_anh === imageUrl);
-            if (variantWithImage && variantWithImage.mau_sac !== selectedColor) {
+            if (variantWithImage && variantWithImage.mau_sac && variantWithImage.mau_sac !== selectedColor) {
                 handleColorChange(variantWithImage.mau_sac);
             }
         }
@@ -226,7 +226,7 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
                     {imagesList && imagesList.length > 1 && (
                         <div className="flex gap-4 overflow-x-auto pb-2">
                             {imagesList.map((img) => {
-                                const imgUrl = img.url || img.duong_dan_anh || '';
+                                const imgUrl = img.url || '';
                                 return (
                                     <div
                                         key={img.id}
@@ -275,7 +275,7 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
                             <div className="flex flex-wrap gap-3">
                                 {uniqueColors.map((color: any) => {
                                     const isSelected = selectedColor === color;
-                                    const variantWithColor = product.bien_the.find((v: any) => v.mau_sac === color);
+                                    const variantWithColor = product.bien_the?.find((v: any) => v.mau_sac === color);
                                     const hexColor = variantWithColor?.ma_mau_hex;
 
                                     return (
