@@ -185,21 +185,21 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
                 {/* Product Info */}
                 <div className="w-full md:w-1/2 flex flex-col">
                     {product.thuong_hieu && (
-                        <span className="text-sm text-primary font-semibold uppercase tracking-wider mb-2">
+                        <span className="text-[11px] md:text-sm text-primary font-bold uppercase tracking-[0.1em] mb-2 px-3 py-1 bg-primary/5 rounded-full w-fit">
                             {product.thuong_hieu.ten}
                         </span>
                     )}
 
-                    <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 leading-tight">
+                    <h1 className="text-2xl md:text-4xl font-black text-slate-900 mb-4 leading-[1.2] md:leading-tight">
                         {product.ten_san_pham}
                     </h1>
 
-                    <div className="flex items-end gap-4 mb-6 pb-6 border-b">
-                        <span className="text-3xl font-bold text-slate-900">
+                    <div className="flex items-baseline gap-3 mb-6 pb-6 border-b">
+                        <span className="text-2xl md:text-3xl font-black text-slate-900">
                             {formatCurrency(currentPrice)}
                         </span>
                         {product.gia_khuyen_mai && product.gia_khuyen_mai < product.gia_goc && (
-                            <span className="text-lg text-muted-foreground line-through mb-1">
+                            <span className="text-base md:text-lg text-muted-foreground line-through opacity-70">
                                 {formatCurrency(product.gia_goc)}
                             </span>
                         )}
@@ -268,107 +268,105 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
                     )}
 
                     {/* Add to Cart Actions */}
-                    <div className="flex gap-4 mt-auto">
-                        <div className={`flex items-center border rounded-lg h-14 ${isOutOfStock ? 'opacity-50 bg-slate-50' : ''}`}>
-                            <button
-                                onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                                disabled={isOutOfStock || quantity <= 1}
-                                className="w-12 h-full flex items-center justify-center text-slate-500 hover:text-slate-900 focus:outline-none disabled:opacity-50 transition-colors"
+                    <div className="grid grid-cols-1 sm:flex sm:items-center gap-3 md:gap-4 mt-auto">
+                        <div className="flex gap-3 h-14">
+                            <div className={`flex items-center border border-slate-200 rounded-xl h-full bg-slate-50/50 ${isOutOfStock ? 'opacity-50 bg-slate-100' : ''}`}>
+                                <button
+                                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                                    disabled={isOutOfStock || quantity <= 1}
+                                    className="w-10 h-full flex items-center justify-center text-slate-500 hover:text-primary transition-colors disabled:opacity-30"
+                                >
+                                    -
+                                </button>
+                                <span className="w-10 text-center font-bold text-slate-800">{isOutOfStock ? 0 : quantity}</span>
+                                <button
+                                    onClick={() => {
+                                        if (quantity < maxStock) setQuantity(q => q + 1);
+                                        else toast.error(`Xin lỗi, chỉ còn ${maxStock} sản phẩm trong kho`);
+                                    }}
+                                    disabled={isOutOfStock || quantity >= maxStock}
+                                    className="w-10 h-full flex items-center justify-center text-slate-500 hover:text-primary transition-colors disabled:opacity-30"
+                                >
+                                    +
+                                </button>
+                            </div>
+
+                            <Button
+                                size="lg"
+                                variant="outline"
+                                className="flex-1 h-full text-sm font-bold gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-600 transition-all rounded-xl shadow-sm"
+                                onClick={handleAddToCart}
+                                disabled={isAdding || isOutOfStock}
                             >
-                                -
-                            </button>
-                            <span className="w-12 text-center font-medium">{isOutOfStock ? 0 : quantity}</span>
-                            <button
-                                onClick={() => {
-                                    if (quantity < maxStock) setQuantity(q => q + 1);
-                                    else toast.error(`Xin lỗi, chỉ còn ${maxStock} sản phẩm trong kho`);
-                                }}
-                                disabled={isOutOfStock || quantity >= maxStock}
-                                className="w-12 h-full flex items-center justify-center text-slate-500 hover:text-slate-900 focus:outline-none disabled:opacity-50 transition-colors"
-                            >
-                                +
-                            </button>
+                                <ShoppingCart className="h-5 w-5" />
+                                <span className="hidden xs:inline">{isAdding ? 'Đang thêm...' : isOutOfStock ? 'Hết hàng' : 'Thêm Vào Giỏ'}</span>
+                                <span className="xs:hidden">{isOutOfStock ? 'Hết' : 'Thêm'}</span>
+                            </Button>
                         </div>
 
-                        <Button
-                            size="lg"
-                            variant="outline"
-                            className="flex-1 h-14 text-base font-semibold gap-2 border-red-500/40 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-600 transition-all rounded-xl"
-                            onClick={handleAddToCart}
-                            disabled={isAdding || isOutOfStock}
-                        >
-                            <ShoppingCart className="h-5 w-5" />
-                            {isAdding ? 'Đang thêm...' : isOutOfStock ? 'Hết hàng' : 'Thêm Vào Giỏ'}
-                        </Button>
+                        <div className="flex gap-3 h-14">
+                            <Button
+                                size="lg"
+                                className="flex-1 h-full text-sm sm:text-base font-black bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-600/20 active:scale-95 transition-all rounded-xl border-0"
+                                onClick={async () => {
+                                    if ((product.bien_the?.length ?? 0) > 0 && !selectedVariant) {
+                                        toast.error('Vui lòng chọn kích cỡ/phân loại sản phẩm.');
+                                        return;
+                                    }
+                                    if (isOutOfStock) {
+                                        toast.error('Sản phẩm hiện đang hết hàng.');
+                                        return;
+                                    }
+                                    const token = Cookies.get('token');
+                                    if (!token) {
+                                        toast.error('Vui lòng đăng nhập để đặt hàng.');
+                                        window.location.href = `/login?callbackUrl=${window.location.pathname}`;
+                                        return;
+                                    }
+                                    try {
+                                        await addToCart({
+                                            san_pham_id: product.id,
+                                            so_luong: quantity,
+                                            bien_the_id: selectedVariant?.id,
+                                        });
+                                        trackAction(product.id, 'mua_hang');
+                                        window.location.href = '/checkout';
+                                    } catch (error: any) {
+                                        toast.error(error.message || 'Lỗi xử lý đặt hàng');
+                                    }
+                                }}
+                                disabled={isAdding || isOutOfStock}
+                            >
+                                {isOutOfStock ? 'Hết hàng' : 'Đặt Hàng Ngay'}
+                            </Button>
 
-                        <Button
-                            size="lg"
-                            className="flex-1 h-14 text-base font-bold bg-red-600 text-white hover:bg-red-700 shadow-xl shadow-red-600/30 hover:-translate-y-0.5 active:translate-y-0 transition-all rounded-xl border-0"
-                            onClick={async () => {
-                                // 1. Check size/variant
-                                if ((product.bien_the?.length ?? 0) > 0 && !selectedVariant) {
-                                    toast.error('Vui lòng chọn kích cỡ/phân loại sản phẩm.');
-                                    return;
-                                }
-
-                                if (isOutOfStock) {
-                                    toast.error('Sản phẩm hiện đang hết hàng.');
-                                    return;
-                                }
-
-                                // 2. Check Auth
-                                const token = Cookies.get('token');
-                                if (!token) {
-                                    toast.error('Vui lòng đăng nhập để đặt hàng.');
-                                    window.location.href = `/login?callbackUrl=${window.location.pathname}`;
-                                    return;
-                                }
-
-                                // 3. Logic Mua ngay = Add to cart + Redirect
-                                try {
-                                    await addToCart({
-                                        san_pham_id: product.id,
-                                        so_luong: quantity,
-                                        bien_the_id: selectedVariant?.id,
-                                    });
-                                    trackAction(product.id, 'mua_hang');
-                                    
-                                    window.location.href = '/checkout';
-                                } catch (error: any) {
-                                    toast.error(error.message || 'Lỗi xử lý đặt hàng');
-                                }
-                            }}
-                            disabled={isAdding || isOutOfStock}
-                        >
-                            {isOutOfStock ? 'Hết hàng' : 'Đặt Hàng Ngay'}
-                        </Button>
-
-                        <Button
-                            size="icon"
-                            variant="outline"
-                            className={`h-14 w-14 border-slate-200 transition-all ${isWished ? 'text-rose-500 border-rose-200 bg-rose-50 hover:bg-rose-100' : 'text-slate-400 hover:text-slate-900 bg-white hover:bg-slate-50'}`}
-                            onClick={handleWishlist}
-                            disabled={isToggling}
-                            title={isWished ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}
-                        >
-                            <Heart className="h-6 w-6" fill={isWished ? 'currentColor' : 'none'} />
-                        </Button>
+                            <Button
+                                size="icon"
+                                variant="outline"
+                                className={`h-14 w-14 shrink-0 rounded-xl border-slate-200 transition-all ${isWished ? 'text-rose-500 border-rose-200 bg-rose-50 shadow-inner' : 'text-slate-400 hover:text-slate-900 bg-white hover:bg-slate-50'}`}
+                                onClick={handleWishlist}
+                                disabled={isToggling}
+                                title={isWished ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}
+                            >
+                                <Heart className="h-6 w-6" fill={isWished ? 'currentColor' : 'none'} />
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div className="mt-16 border-t pt-8">
                 <Tabs defaultValue="description" className="w-full">
-                    <TabsList variant="line" className="flex w-full justify-start items-center bg-transparent border-b rounded-none h-auto p-0 gap-8 mb-8 overflow-x-auto no-scrollbar">
+                    <TabsList variant="line" className="flex w-full justify-start items-center bg-transparent border-b rounded-none h-auto p-0 gap-4 md:gap-8 mb-8 overflow-x-auto no-scrollbar">
                         <TabsTrigger
                             value="description"
-                            className="text-lg py-4 px-1 font-bold text-slate-400 data-[state=active]:text-slate-900 data-[state=active]:bg-transparent transition-all hover:text-slate-600 relative after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[3px] after:bg-primary after:opacity-0 data-[state=active]:after:opacity-100 after:transition-all after:rounded-t-full"
+                            className="text-base md:text-lg py-4 px-1 font-bold text-slate-400 data-[state=active]:text-slate-900 data-[state=active]:bg-transparent transition-all hover:text-slate-600 relative after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[3px] after:bg-primary after:opacity-0 data-[state=active]:after:opacity-100 after:transition-all after:rounded-t-full"
                         >
                             Mô tả sản phẩm
                         </TabsTrigger>
                         <TabsTrigger
                             value="reviews"
-                            className="text-lg py-4 px-1 font-bold text-slate-400 data-[state=active]:text-slate-900 data-[state=active]:bg-transparent transition-all hover:text-slate-600 relative after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[3px] after:bg-primary after:opacity-0 data-[state=active]:after:opacity-100 after:transition-all after:rounded-t-full"
+                            className="text-base md:text-lg py-4 px-1 font-bold text-slate-400 data-[state=active]:text-slate-900 data-[state=active]:bg-transparent transition-all hover:text-slate-600 relative after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[3px] after:bg-primary after:opacity-0 data-[state=active]:after:opacity-100 after:transition-all after:rounded-t-full"
                         >
                             Đánh giá ({product.so_luot_danh_gia || 0})
                         </TabsTrigger>

@@ -74,15 +74,15 @@ export function ProductCard({ product }: ProductCardProps) {
                         )}
                     </div>
                 </CardContent>
-                <CardFooter className="flex flex-col flex-1 items-start p-4 gap-2">
+                <CardFooter className="flex flex-col flex-1 items-start p-3 sm:p-4 gap-1.5 md:gap-2">
                     {product.thuong_hieu ? (
-                        <span className="text-xs text-muted-foreground uppercase font-semibold h-4">
+                        <span className="text-[10px] sm:text-xs text-muted-foreground uppercase font-bold h-4">
                             {product.thuong_hieu.ten}
                         </span>
                     ) : (
                         <span className="h-4" /> // Placeholder for alignment
                     )}
-                    <h3 className="font-medium line-clamp-2 text-sm md:text-base group-hover:text-primary transition-colors min-h-[2.5rem] md:min-h-[3rem]">
+                    <h3 className="font-semibold line-clamp-2 text-xs sm:text-sm md:text-base group-hover:text-primary transition-colors min-h-[2rem] sm:min-h-[2.5rem] md:min-h-[3rem] leading-tight sm:leading-normal">
                         {product.ten_san_pham}
                     </h3>
                     <div className="flex items-center gap-2 mt-auto pt-2">

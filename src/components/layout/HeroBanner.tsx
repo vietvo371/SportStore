@@ -61,18 +61,18 @@ export function HeroBanner() {
             <CarouselContent>
                 {banners.map((banner) => (
                     <CarouselItem key={banner.id}>
-                        <div className="relative w-full h-[70vh] md:h-[85vh]">
+                        <div className="relative w-full h-[60vh] md:h-[85vh]">
                             <Image
                                 src={banner.hinh_anh}
                                 alt={banner.tieu_de || 'SportStore Banner'}
                                 fill
                                 unoptimized
-                                className="object-cover"
+                                className="object-cover object-center"
                                 priority={banner.thu_tu === 1}
                             />
 
                             {/* Cinematic Gradient overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-black/10 z-10" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-black/10 z-10" />
 
                             {/* Content Overlay */}
                             {(banner.tieu_de || banner.mo_ta) && (

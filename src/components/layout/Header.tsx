@@ -42,14 +42,14 @@ export function Header() {
 
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="container mx-auto px-6 sm:px-6 lg:px-8">
                 <div className="flex h-16 items-center justify-between">
                     {/* Mobile Menu Button */}
                     <div className="flex items-center md:hidden">
                         <Sheet>
                             <SheetTrigger asChild>
-                                <Button variant="ghost" size="icon" className="mr-2">
-                                    <Menu className="h-5 w-5" />
+                                <Button variant="ghost" size="icon" className="">
+                                    <Menu className="h-6 w-6 text-slate-700" />
                                     <span className="sr-only">Toggle Menu</span>
                                 </Button>
                             </SheetTrigger>

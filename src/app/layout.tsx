@@ -109,8 +109,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <html lang="vi" suppressHydrationWarning className="overflow-x-hidden">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden`}>
         <Providers>
           <TooltipProvider>
             <EmailVerifyBanner />

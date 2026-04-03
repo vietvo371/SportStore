@@ -26,11 +26,11 @@ export default function Home() {
 
 
             {/* Featured Products Section (With Watermark Typography and Deep Contrast) */}
-            <section className="container mx-auto px-4 mt-12 mb-16 relative">
+            <section className="container mx-auto px-4 mt-12 mb-16 relative overflow-hidden">
                 
                 {/* Background Watermark */}
-                <div className="absolute top-0 right-0 z-0 pointer-events-none select-none overflow-hidden h-full flex items-start justify-end opacity-[0.02]">
-                    <span className="text-[12rem] md:text-[20rem] font-black leading-none whitespace-nowrap -rotate-90 origin-top-right translate-x-32 mt-32">TRENDING</span>
+                <div className="absolute top-0 right-0 z-0 pointer-events-none select-none overflow-hidden h-full flex items-start justify-end opacity-[0.015]">
+                    <span className="text-[8rem] md:text-[20rem] font-black leading-none whitespace-nowrap -rotate-90 origin-top-right translate-x-32 mt-32">TRENDING</span>
                 </div>
 
                 <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 relative z-10 gap-6">
@@ -39,20 +39,20 @@ export default function Home() {
                             <span className="h-[3px] w-8 sm:w-12 bg-red-600 block rounded-full"></span>
                             <span className="text-red-600 font-bold tracking-[0.2em] uppercase text-[10px] sm:text-xs">Sản phẩm mới</span>
                         </div>
-                        <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-slate-900 uppercase">
+                        <h2 className="text-[2rem] leading-[1.1] sm:text-5xl md:text-6xl font-black tracking-tighter text-slate-900 uppercase">
                             Mới Nhất <span className="text-slate-200 font-light mx-1 lg:mx-2 select-none italic">/</span> <span className="text-red-600 drop-shadow-sm">Nổi Bật</span>
                         </h2>
                     </div>
                     
                     <Link href="/products" className="group">
-                        <Button variant="outline" className="h-12 px-8 rounded-full border-slate-300 font-bold text-slate-700 hover:bg-slate-900 hover:text-white transition-all w-full sm:w-auto">
+                        <Button variant="outline" className="h-11 md:h-12 px-8 rounded-full border-slate-300 font-bold text-slate-700 hover:bg-slate-900 hover:text-white transition-all w-full sm:w-auto">
                             Khám Phá Tất Cả
                         </Button>
                     </Link>
                 </div>
 
                 {isLoading ? (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 relative z-10">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-8 relative z-10">
                         {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                             <div key={i} className="flex flex-col gap-3">
                                 <div className="w-full aspect-square bg-slate-100 animate-pulse rounded-2xl" />
@@ -62,7 +62,7 @@ export default function Home() {
                         ))}
                     </div>
                 ) : featuredProducts.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 relative z-10">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-8 relative z-10">
                         {featuredProducts.map((product) => (
                             <ProductCard key={product.id} product={product} />
                         ))}
@@ -75,7 +75,7 @@ export default function Home() {
             </section>
 
             {/* Recommendations Section (Clean Light Minimalist UI) */}
-            <section className="container mx-auto px-4 py-16 border-t border-slate-100 relative" id="recommendations">
+            <section className="container mx-auto px-4 py-16 border-t border-slate-100 relative overflow-hidden" id="recommendations">
                 
                 {/* Very subtle background accent */}
                 <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-red-50 opacity-50 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
