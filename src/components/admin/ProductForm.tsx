@@ -52,6 +52,8 @@ const productSchema = z.object({
         id: z.number().optional(),
         kich_co: z.string().min(1, "Thiếu size"),
         mau_sac: z.string().optional().nullable(),
+        ma_mau_hex: z.string().optional().nullable(),
+        hinh_anh: z.string().optional().nullable(),
         gia_rieng: z.number().min(0).optional().nullable(),
         ton_kho: z.number().min(0, "Tồn kho không được âm"),
     })).min(1, "Sản phẩm phải có ít nhất 1 phân loại (Size/Màu)"),
@@ -99,6 +101,8 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                 id: bt.id,
                 kich_co: bt.kich_co || "",
                 mau_sac: bt.mau_sac || "",
+                ma_mau_hex: bt.ma_mau_hex || "#000000",
+                hinh_anh: bt.hinh_anh || null,
                 gia_rieng: bt.gia_rieng ? parseFloat(bt.gia_rieng as any) : null,
                 ton_kho: bt.ton_kho,
             })) || [],
@@ -468,7 +472,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                 type="button"
                                 variant="outline"
                                 size="sm"
-                                onClick={() => appendVariant({ kich_co: "", mau_sac: "", ton_kho: 0, gia_rieng: null })}
+                                onClick={() => appendVariant({ kich_co: "", mau_sac: "Mặc định", ma_mau_hex: "#000000", hinh_anh: null, ton_kho: 0, gia_rieng: null })}
                             >
                                 <Plus className="h-4 w-4 mr-1" /> Thêm biến thể
                             </Button>
@@ -477,26 +481,82 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                         <div className="space-y-3">
                             {variantFields.map((field, index) => (
                                 <div key={field.id} className="grid grid-cols-12 gap-3 items-end p-3 rounded-lg border border-slate-200 bg-white shadow-sm">
-                                    <div className="col-span-3">
-                                        <FormLabel className="text-xs">Kích cỡ (Size)</FormLabel>
+                                    <div className="col-span-1">
+                                        <FormLabel className="text-[10px] uppercase font-bold text-slate-500">Ảnh</FormLabel>
+                                        <div
+                                            className="relative h-9 w-9 rounded border border-dashed border-slate-300 bg-slate-50 overflow-hidden cursor-pointer hover:bg-slate-100 transition-colors flex items-center justify-center group/img"
+                                            onClick={() => {
+                                                const input = document.createElement("input");
+                                                input.type = "file";
+                                                input.accept = "image/*";
+                                                input.onchange = async (e) => {
+                                                    const file = (e.target as HTMLInputElement).files?.[0];
+                                                    if (file) {
+                                                        try {
+                                                            const res = await adminService.uploadImage(file);
+                                                            form.setValue(`bien_the.${index}.hinh_anh`, res.data.url);
+                                                        } catch (err: any) {
+                                                            toast.error("Lỗi upload ảnh biến thể");
+                                                        }
+                                                    }
+                                                };
+                                                input.click();
+                                            }}
+                                        >
+                                            {form.watch(`bien_the.${index}.hinh_anh`) ? (
+                                                <>
+                                                    <Image
+                                                        src={form.watch(`bien_the.${index}.hinh_anh`) || ""}
+                                                        alt="Variant"
+                                                        fill
+                                                        className="object-cover"
+                                                        unoptimized
+                                                    />
+                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity">
+                                                        <X className="h-3 w-3 text-white" onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            form.setValue(`bien_the.${index}.hinh_anh`, null);
+                                                        }} />
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <ImageIcon className="h-4 w-4 text-slate-400" />
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="col-span-2">
+                                        <FormLabel className="text-[10px] uppercase font-bold text-slate-500">Size</FormLabel>
                                         <Input
-                                            placeholder="VD: L, XL, 42..."
+                                            placeholder="L, XL..."
+                                            className="h-9 text-sm"
                                             {...form.register(`bien_the.${index}.kich_co`)}
                                         />
                                     </div>
-                                    <div className="col-span-3">
-                                        <FormLabel className="text-xs">Màu sắc</FormLabel>
+                                    <div className="col-span-2">
+                                        <FormLabel className="text-[10px] uppercase font-bold text-slate-500">Màu sắc</FormLabel>
                                         <Input
-                                            placeholder="VD: Đen, Trắng..."
+                                            placeholder="Đen, Trắng..."
+                                            className="h-9 text-sm"
                                             {...form.register(`bien_the.${index}.mau_sac`)}
                                         />
                                     </div>
-                                    <div className="col-span-2">
-                                        <FormLabel className="text-xs">Tồn kho</FormLabel>
+                                    <div className="col-span-1">
+                                        <FormLabel className="text-[10px] uppercase font-bold text-slate-500">Màu</FormLabel>
+                                        <div className="relative h-9">
+                                            <Input
+                                                type="color"
+                                                className="absolute inset-0 w-full h-full p-0 border-0 bg-transparent cursor-pointer"
+                                                {...form.register(`bien_the.${index}.ma_mau_hex`)}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="col-span-1">
+                                        <FormLabel className="text-[10px] uppercase font-bold text-slate-500">Tồn kho</FormLabel>
                                         <Input
                                             type="number"
                                             inputMode="numeric"
                                             placeholder="0"
+                                            className="h-9 text-sm"
                                             min={0}
                                             {...form.register(`bien_the.${index}.ton_kho`, {
                                                 setValueAs: (v: any) => v === "" ? 0 : parseInt(v, 10),
@@ -504,11 +564,12 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                         />
                                     </div>
                                     <div className="col-span-3">
-                                        <FormLabel className="text-xs">Giá riêng (₫)</FormLabel>
+                                        <FormLabel className="text-[10px] uppercase font-bold text-slate-500">Giá riêng (₫)</FormLabel>
                                         <Input
                                             type="number"
                                             inputMode="numeric"
-                                            placeholder="Để trống nếu = giá gốc"
+                                            placeholder="Bỏ trống = Gốc"
+                                            className="h-9 text-sm"
                                             min={0}
                                             {...form.register(`bien_the.${index}.gia_rieng`, {
                                                 setValueAs: (v: any) => v === "" ? null : parseFloat(v),
@@ -520,7 +581,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                             type="button"
                                             variant="ghost"
                                             size="icon"
-                                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                            className="h-9 w-9 text-rose-500 hover:text-rose-600 hover:bg-rose-50"
                                             onClick={() => removeVariant(index)}
                                         >
                                             <Trash2 className="h-4 w-4" />

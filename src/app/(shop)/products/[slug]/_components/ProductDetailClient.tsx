@@ -25,6 +25,7 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
     const { slug } = use(params);
     const router = useRouter();
     const [selectedVariant, setSelectedVariant] = useState<any>(null);
+    const [selectedColor, setSelectedColor] = useState<string | null>(null);
     const [quantity, setQuantity] = useState(1);
     const [activeImage, setActiveImage] = useState<string>('/placeholder.png');
     const [isDescExpanded, setIsDescExpanded] = useState(false);
@@ -68,12 +69,52 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
         }
     }, [product]);
 
-    // Update image when variant is selected
+    // Initial variant selection
+    useEffect(() => {
+        if (product?.bien_the && product.bien_the.length > 0) {
+            const firstVariant = product.bien_the[0];
+            setSelectedColor(firstVariant.mau_sac);
+            setSelectedVariant(firstVariant);
+        }
+    }, [product]);
+
+    // Update image/variant when color or size changes
     useEffect(() => {
         if (selectedVariant?.hinh_anh) {
             setActiveImage(selectedVariant.hinh_anh);
         }
     }, [selectedVariant]);
+
+    // Handle color change: try to preserve size, otherwise pick first available size
+    const handleColorChange = (color: string) => {
+        setSelectedColor(color);
+        if (!product?.bien_the) return;
+        const sizesForColor = product.bien_the.filter((v: any) => v.mau_sac === color);
+
+        // Try to find if currently selected size exists in new color
+        const matchingSizeVariant = sizesForColor.find((v: any) => v.kich_co === selectedVariant?.kich_co);
+
+        if (matchingSizeVariant && matchingSizeVariant.ton_kho > 0) {
+            setSelectedVariant(matchingSizeVariant);
+        } else {
+            // Pick first available size for this color
+            const firstAvailable = sizesForColor.find((v: any) => v.ton_kho > 0) || sizesForColor[0];
+            setSelectedVariant(firstAvailable);
+        }
+    };
+
+    // New: Handle image click to select corresponding color if the image belongs to a variant
+    const handleImageClick = (imageUrl: string) => {
+        setActiveImage(imageUrl);
+
+        // Find if this image is associated with any variant
+        if (product?.bien_the) {
+            const variantWithImage = product.bien_the.find((v: any) => v.hinh_anh === imageUrl);
+            if (variantWithImage && variantWithImage.mau_sac !== selectedColor) {
+                handleColorChange(variantWithImage.mau_sac);
+            }
+        }
+    };
 
     if (isLoading) {
         return (
@@ -89,17 +130,31 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
             </div>
         );
     }
-
     if (isError || !product) {
         return notFound();
     }
 
-    const imagesList = product.hinh_anh || product.hinh_anh_san_pham;
+    // Aggregate general product images and unique variant-specific images
+    const generalImages = (product.hinh_anh || product.hinh_anh_san_pham || []).map((img: any) => ({
+        id: `gen-${img.id || Math.random()}`,
+        url: img.url || img.duong_dan_anh || ''
+    }));
+
+    const variantImages = (product.bien_the || [])
+        .filter((v: any) => v.hinh_anh)
+        .map((v: any, idx: number) => ({
+            id: `var-${v.id || idx}`,
+            url: v.hinh_anh
+        }));
+
+    // Combine and remove duplicates (by URL)
+    const allImages = [...generalImages, ...variantImages];
+    const imagesList = Array.from(new Map(allImages.map(img => [img.url, img])).values());
 
     // Use variant price if selected, otherwise product price
     const currentPrice = selectedVariant?.gia_rieng || product.gia_khuyen_mai || product.gia_goc;
-    
-    const maxStock = selectedVariant ? selectedVariant.ton_kho : product.so_luong_ton_kho;
+
+    const maxStock = selectedVariant ? selectedVariant.ton_kho : (product.so_luong_ton_kho || 0);
     const isOutOfStock = maxStock <= 0;
 
     // Determine product type (loai) for size chart
@@ -111,6 +166,10 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
     };
 
     const productType = getProductType();
+
+    // Group variants by color
+    const uniqueColors = Array.from(new Set(product.bien_the?.map((v: any) => v.mau_sac) || []));
+    const filteredSizes = product.bien_the?.filter((v: any) => v.mau_sac === selectedColor) || [];
 
     const handleAddToCart = async () => {
         if (product.bien_the && product.bien_the.length > 0 && !selectedVariant) {
@@ -139,7 +198,7 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-6xl">
-            <button 
+            <button
                 onClick={() => router.back()}
                 className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900 mb-6 w-fit transition-colors"
                 aria-label="Quay lại"
@@ -171,7 +230,7 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
                                 return (
                                     <div
                                         key={img.id}
-                                        onClick={() => setActiveImage(imgUrl)}
+                                        onClick={() => handleImageClick(imgUrl)}
                                         className={`relative w-20 h-20 rounded-lg overflow-hidden border shrink-0 cursor-pointer hover:ring-2 ring-primary transition-all ${activeImage === imgUrl ? 'ring-2 ring-primary border-primary' : 'border-slate-200'}`}
                                     >
                                         <Image src={imgUrl} alt="Thumbnail" fill unoptimized className="object-cover" />
@@ -209,8 +268,54 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
                         {product.mo_ta_ngan || 'Sản phẩm thể thao cao cấp chính hãng.'}
                     </p>
 
-                    {/* Variants Selector (Size) */}
-                    {product.bien_the && product.bien_the.length > 0 && (
+                    {/* Color Selection */}
+                    {(uniqueColors.length > 0) && (
+                        <div className="mb-8">
+                            <span className="block font-medium text-slate-900 mb-4">Chọn màu sắc:</span>
+                            <div className="flex flex-wrap gap-3">
+                                {uniqueColors.map((color: any) => {
+                                    const isSelected = selectedColor === color;
+                                    const variantWithColor = product.bien_the.find((v: any) => v.mau_sac === color);
+                                    const hexColor = variantWithColor?.ma_mau_hex;
+
+                                    return (
+                                        <button
+                                            key={color}
+                                            onClick={() => handleColorChange(color)}
+                                            style={{
+                                                borderColor: isSelected && hexColor ? hexColor : undefined,
+                                                backgroundColor: isSelected && hexColor ? `${hexColor}10` : isSelected ? undefined : 'white',
+                                                boxShadow: isSelected && hexColor ? `0 0 0 1px ${hexColor}` : undefined
+                                            }}
+                                            className={`group relative flex items-center gap-2 px-4 py-2 rounded-xl border transition-all
+                                                ${isSelected
+                                                    ? (!hexColor ? 'border-primary bg-primary/5 ring-1 ring-primary' : '')
+                                                    : 'border-slate-200 hover:border-slate-400'}`}
+                                        >
+                                            {hexColor && (
+                                                <span
+                                                    className="w-4 h-4 rounded-full border border-slate-200 shadow-sm transition-transform group-hover:scale-110"
+                                                    style={{ backgroundColor: hexColor }}
+                                                />
+                                            )}
+                                            <span className={`text-sm font-bold transition-colors ${isSelected ? 'text-slate-900' : 'text-slate-500 group-hover:text-slate-700'}`}>
+                                                {color}
+                                            </span>
+                                            {isSelected && (
+                                                <span
+                                                    className="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white shadow-sm"
+                                                    style={{ backgroundColor: hexColor || 'var(--primary)' }}
+                                                />
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Size Selection */}
+                    {filteredSizes.length > 0 && (
                         <div className="mb-8">
                             <div className="flex justify-between items-center mb-4">
                                 <span className="font-medium text-slate-900">Chọn kích cỡ:</span>
@@ -225,27 +330,27 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
                                                 Gợi ý chính xác dựa trên thông số từ hệ thống SportStore.
                                             </DialogDescription>
                                         </DialogHeader>
-                                        
+
                                         <div className="pb-4">
-                                            <SizeGuide 
-                                                loai={productType} 
-                                                thuong_hieu_id={product.thuong_hieu_id} 
+                                            <SizeGuide
+                                                loai={productType}
+                                                thuong_hieu_id={product.thuong_hieu_id}
                                             />
                                         </div>
                                     </DialogContent>
                                 </Dialog>
                             </div>
                             <div className="flex flex-wrap gap-3">
-                                {product.bien_the.map((variant: any) => {
+                                {filteredSizes.map((variant: any) => {
                                     const outOfStock = variant.ton_kho <= 0;
                                     const isSelected = selectedVariant?.id === variant.id;
-                                    
+
                                     return (
                                         <button
                                             key={variant.id}
                                             onClick={() => !outOfStock && setSelectedVariant(variant)}
                                             disabled={outOfStock}
-                                            className={`h-12 min-w-[3rem] px-4 rounded-lg border font-medium transition-all relative
+                                            className={`h-12 min-w-[3.5rem] px-4 rounded-lg border font-bold transition-all relative
                                                 ${isSelected
                                                     ? 'border-primary bg-primary text-primary-foreground shadow-md'
                                                     : outOfStock
