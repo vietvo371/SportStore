@@ -14,13 +14,15 @@ export default function AdminLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const { user, isAuthenticated } = useAuthStore();
+    const { user, isAuthenticated, _hasHydrated } = useAuthStore();
     const router = useRouter();
     const [isAuthorized, setIsAuthorized] = useState(false);
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
-        // Wait for hydration and check auth
+        // Wait for hydration from localStorage before checking auth
+        if (!_hasHydrated) return;
+
         if (!isAuthenticated) {
             router.push("/login?callbackUrl=/admin");
             return;
@@ -36,7 +38,7 @@ export default function AdminLayout({
         }
 
         setIsAuthorized(true);
-    }, [isAuthenticated, user, router]);
+    }, [isAuthenticated, user, router, _hasHydrated]);
 
     if (!isAuthorized) {
         return (

@@ -19,9 +19,7 @@ const navItems = [
 export default function ProfileLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const router = useRouter();
-    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-    const logout = useAuthStore((state) => state.logout);
-    const user = useAuthStore((state) => state.user);
+    const { isAuthenticated, _hasHydrated, logout, user } = useAuthStore();
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
@@ -29,13 +27,13 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
     }, []);
 
     useEffect(() => {
-        if (isMounted && !isAuthenticated) {
+        if (isMounted && _hasHydrated && !isAuthenticated) {
             router.push('/login');
         }
-    }, [isMounted, isAuthenticated, router]);
+    }, [isMounted, _hasHydrated, isAuthenticated, router]);
 
     // Don't render until hydration is complete to avoid flashes
-    if (!isMounted || !isAuthenticated) return null;
+    if (!isMounted || !_hasHydrated || !isAuthenticated) return null;
 
     const handleLogout = () => {
         logout();
