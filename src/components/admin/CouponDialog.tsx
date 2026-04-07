@@ -37,6 +37,7 @@ const couponSchema = z.object({
     loai_giam: z.enum(["phan_tram", "so_tien_co_dinh"]),
     gia_tri: z.coerce.number().min(0, "Giá trị không được âm"),
     gia_tri_don_hang_min: z.coerce.number().min(0).optional(),
+    giam_toi_da: z.coerce.number().min(0).optional(),
     gioi_han_su_dung: z.coerce.number().min(1, "Giới hạn sử dụng phải ít nhất là 1").optional(),
     bat_dau_luc: z.string().optional(),
     het_han_luc: z.string().optional(),
@@ -49,6 +50,13 @@ const couponSchema = z.object({
     message: "Ngày hết hạn phải sau ngày bắt đầu",
     path: ["het_han_luc"],
 });
+
+const formatDateTimeLocal = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+    return date.toISOString().slice(0, 16);
+};
 
 interface CouponDialogProps {
     open: boolean;
@@ -68,11 +76,14 @@ export function CouponDialog({ open, onOpenChange, coupon }: CouponDialogProps) 
             loai_giam: "phan_tram",
             gia_tri: 0,
             gia_tri_don_hang_min: 0,
+            giam_toi_da: 0,
             gioi_han_su_dung: 100,
             bat_dau_luc: "",
             het_han_luc: "",
         },
     });
+
+    const watchLoaiGiam = form.watch("loai_giam");
 
     useEffect(() => {
         if (coupon && open) {
@@ -81,9 +92,10 @@ export function CouponDialog({ open, onOpenChange, coupon }: CouponDialogProps) 
                 loai_giam: coupon.loai_giam,
                 gia_tri: coupon.gia_tri,
                 gia_tri_don_hang_min: coupon.gia_tri_don_hang_min || 0,
+                giam_toi_da: coupon.giam_toi_da || 0,
                 gioi_han_su_dung: coupon.gioi_han_su_dung || 100,
-                bat_dau_luc: coupon.bat_dau_luc ? new Date(coupon.bat_dau_luc).toISOString().split('T')[0] : "",
-                het_han_luc: coupon.het_han_luc ? new Date(coupon.het_han_luc).toISOString().split('T')[0] : "",
+                bat_dau_luc: coupon.bat_dau_luc ? formatDateTimeLocal(coupon.bat_dau_luc) : "",
+                het_han_luc: coupon.het_han_luc ? formatDateTimeLocal(coupon.het_han_luc) : "",
             });
         } else if (!isEdit && open) {
             form.reset({
@@ -91,14 +103,25 @@ export function CouponDialog({ open, onOpenChange, coupon }: CouponDialogProps) 
                 loai_giam: "phan_tram",
                 gia_tri: 0,
                 gia_tri_don_hang_min: 0,
+                giam_toi_da: 0,
                 gioi_han_su_dung: 100,
-                bat_dau_luc: new Date().toISOString().split('T')[0],
+                // Defaults to current time + 1 hour as start
+                bat_dau_luc: (() => {
+                    const d = new Date();
+                    d.setHours(d.getHours() + 1);
+                    return formatDateTimeLocal(d.toISOString());
+                })(),
                 het_han_luc: "",
             });
         }
     }, [coupon, open, form, isEdit]);
 
     const onSubmit = async (values: z.infer<typeof couponSchema>) => {
+        // Clear giam_toi_da if loai_giam is so_tien_co_dinh
+        if (values.loai_giam === 'so_tien_co_dinh') {
+            values.giam_toi_da = 0;
+        }
+
         if (isEdit) {
             await updateCoupon.mutateAsync({ id: coupon.id, data: values });
         } else {
@@ -111,8 +134,8 @@ export function CouponDialog({ open, onOpenChange, coupon }: CouponDialogProps) 
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[550px] rounded-2xl shadow-lg bg-white overflow-hidden p-0 border border-slate-100">
-                <div className="bg-slate-50 border-b border-slate-100 p-6">
+            <DialogContent className="sm:max-w-[550px] rounded-2xl shadow-lg bg-white overflow-hidden p-0 border border-slate-100 max-h-[90vh] flex flex-col">
+                <div className="bg-slate-50 border-b border-slate-100 p-6 flex-shrink-0">
                     <DialogHeader>
                         <DialogTitle className="text-xl font-bold text-slate-900">
                             {isEdit ? "Chỉnh sửa mã giảm giá" : "Tạo mã giảm giá"}
@@ -123,7 +146,7 @@ export function CouponDialog({ open, onOpenChange, coupon }: CouponDialogProps) 
                     </DialogHeader>
                 </div>
 
-                <div className="p-8 pb-10">
+                <div className="p-8 pb-10 overflow-y-auto flex-1">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                             <div className="grid grid-cols-2 gap-6">
@@ -204,11 +227,31 @@ export function CouponDialog({ open, onOpenChange, coupon }: CouponDialogProps) 
                                     )}
                                 />
 
+                                {watchLoaiGiam === 'phan_tram' && (
+                                    <FormField
+                                        control={form.control}
+                                        name="giam_toi_da"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-sm font-semibold text-slate-700">Giảm tối đa (VNĐ)</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        type="number"
+                                                        {...field}
+                                                        className="rounded-xl border-slate-200 bg-white h-11 focus-visible:ring-primary/20 focus-visible:border-primary transition-all"
+                                                    />
+                                                </FormControl>
+                                                <FormMessage className="text-xs" />
+                                            </FormItem>
+                                        )}
+                                    />
+                                )}
+
                                 <FormField
                                     control={form.control}
                                     name="gioi_han_su_dung"
                                     render={({ field }) => (
-                                        <FormItem>
+                                        <FormItem className={watchLoaiGiam === 'phan_tram' ? "" : "col-span-2"}>
                                             <FormLabel className="text-sm font-semibold text-slate-700">Tổng lượt dùng</FormLabel>
                                             <FormControl>
                                                 <Input
@@ -227,10 +270,10 @@ export function CouponDialog({ open, onOpenChange, coupon }: CouponDialogProps) 
                                     name="bat_dau_luc"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-sm font-semibold text-slate-700">Ngày bắt đầu</FormLabel>
+                                            <FormLabel className="text-sm font-semibold text-slate-700">Từ thời gian</FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    type="date"
+                                                    type="datetime-local"
                                                     {...field}
                                                     className="rounded-xl border-slate-200 bg-white h-11 focus-visible:ring-primary/20 focus-visible:border-primary transition-all"
                                                 />
@@ -245,10 +288,10 @@ export function CouponDialog({ open, onOpenChange, coupon }: CouponDialogProps) 
                                     name="het_han_luc"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-sm font-semibold text-slate-700">Ngày hết hạn</FormLabel>
+                                            <FormLabel className="text-sm font-semibold text-slate-700">Đến thời gian</FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    type="date"
+                                                    type="datetime-local"
                                                     {...field}
                                                     className="rounded-xl border-slate-200 bg-white h-11 focus-visible:ring-primary/20 focus-visible:border-primary transition-all"
                                                 />
@@ -259,7 +302,7 @@ export function CouponDialog({ open, onOpenChange, coupon }: CouponDialogProps) 
                                 />
                             </div>
 
-                            <DialogFooter className="px-8 pb-6 pt-4 gap-2 border-t border-slate-100 sm:justify-end">
+                            <DialogFooter className="px-8 pb-6 pt-4 gap-2 border-t border-slate-100 sm:justify-end mt-8">
                                 <Button
                                     type="button"
                                     variant="outline"

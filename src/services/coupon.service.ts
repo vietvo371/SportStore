@@ -7,4 +7,8 @@ export const couponService = {
         // Assuming ApiResponse struct: response.data is the payload if successfully unwrapped by interceptor
         return response.data;
     },
+    getAvailableCoupons: async (): Promise<any[]> => {
+        const response: any = await apiClient.get('/coupons');
+        return response.data;
+    }
 };

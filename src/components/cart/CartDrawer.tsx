@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 import { useCart } from '@/hooks/useCart';
 import Image from 'next/image';
 import { toast } from 'sonner';
+import { AvailableCoupons } from './AvailableCoupons';
 
 export function CartDrawer() {
     const { isOpen, closeCart, itemCount } = useCartStore();
@@ -138,6 +139,9 @@ export function CartDrawer() {
                                     </div>
                                 );
                             })}
+                            <div className="pt-4 border-t border-slate-100">
+                                <AvailableCoupons />
+                            </div>
                         </div>
                     )}
                 </div>

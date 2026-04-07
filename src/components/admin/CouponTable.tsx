@@ -126,14 +126,19 @@ export function CouponTable({ coupons, onEdit }: CouponTableProps) {
                                 </TableCell>
                                 <TableCell className="py-6 text-center">
                                     <div className="flex flex-col items-center">
-                                        <span className="text-sm font-black text-slate-900">
+                                        <span className="text-sm font-black text-slate-900 shadow-sm px-2 py-0.5 whitespace-nowrap bg-amber-100/50 rounded-md">
                                             {coupon.loai_giam === 'phan_tram'
                                                 ? `${coupon.gia_tri}%`
                                                 : formatCurrency(coupon.gia_tri)}
                                         </span>
+                                        {coupon.loai_giam === 'phan_tram' && coupon.giam_toi_da > 0 && (
+                                            <span className="text-[10px] font-bold text-slate-500 mt-1 whitespace-nowrap">
+                                                Tối đa: {formatCurrency(coupon.giam_toi_da)}
+                                            </span>
+                                        )}
                                         {coupon.gia_tri_don_hang_min > 0 && (
-                                            <span className="text-[10px] font-bold text-slate-400">
-                                                Min: {formatCurrency(coupon.gia_tri_don_hang_min)}
+                                            <span className="text-[10px] font-bold text-slate-400 whitespace-nowrap">
+                                                Đơn từ: {formatCurrency(coupon.gia_tri_don_hang_min)}
                                             </span>
                                         )}
                                     </div>
