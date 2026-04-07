@@ -114,6 +114,12 @@ export const adminService = {
     deleteReview: async (id: number): Promise<ApiResponse<any>> => {
         return apiClient.delete(`/admin/reviews/${id}`);
     },
+    getBadWords: async (): Promise<ApiResponse<string[]>> => {
+        return apiClient.get('/admin/reviews/bad-words');
+    },
+    updateBadWords: async (data: { bad_words: string[] }): Promise<ApiResponse<string[]>> => {
+        return apiClient.put('/admin/reviews/bad-words', data);
+    },
 
     // Coupons
     getCoupons: async (params: any = {}): Promise<PaginatedResponse<any>> => {

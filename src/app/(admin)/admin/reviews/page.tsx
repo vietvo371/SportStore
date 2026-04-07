@@ -24,6 +24,8 @@ import {
     TabsTrigger,
 } from "@/components/ui/tabs";
 
+import { BadWordsConfig } from "@/components/admin/BadWordsConfig";
+
 export default function ReviewModerationPage() {
     const [page, setPage] = useState(1);
     const [status, setStatus] = useState<string>("all");
@@ -105,10 +107,13 @@ export default function ReviewModerationPage() {
                     />
                 </div>
 
-                <Button variant="outline" className="h-12 px-6 rounded-2xl border-slate-100 font-bold hover:bg-slate-50 gap-2 shrink-0">
-                    <Filter className="h-4 w-4" />
-                    Lọc nâng cao
-                </Button>
+                <div className="flex items-center gap-3 shrink-0">
+                    <BadWordsConfig />
+                    <Button variant="outline" className="h-12 px-6 rounded-2xl border-slate-100 font-bold hover:bg-slate-50 gap-2 shrink-0">
+                        <Filter className="h-4 w-4" />
+                        Lọc nâng cao
+                    </Button>
+                </div>
             </div>
 
             {/* Main Content */}
