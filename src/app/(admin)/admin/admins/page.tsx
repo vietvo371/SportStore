@@ -139,6 +139,7 @@ export default function AdminManagementPage() {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-amber-500 transition-colors" />
                     <input
                         placeholder="Tìm kiếm theo tên, email nhân viên..."
+                        autoComplete="off"
                         className="w-full pl-11 h-12 bg-slate-50 border-slate-100 rounded-2xl font-bold focus-visible:ring-amber-500/20 focus-visible:border-amber-500/30 outline-none transition-all px-4"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useCategories } from '@/hooks/useCategory';
 import { useBrands } from '@/services/brand.service';
 import { Brand } from '@/types/brand.types';
-import { X } from 'lucide-react';
+import { X, ArrowLeft } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Slider } from '@/components/ui/slider';
 import { formatCurrency } from '@/lib/utils';
@@ -216,30 +216,36 @@ function ProductsContent() {
 
                 {/* Product Grid */}
                 <div className="flex-1">
+                    {/* Header: tiêu đề + nút quay lại */}
                     <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div className="flex items-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-3">
+                            {category && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => router.push(pathname)}
+                                    className="text-slate-500 hover:text-slate-900 pl-0 gap-1.5 shrink-0"
+                                >
+                                    <ArrowLeft className="h-4 w-4" />
+                                    Quay lại
+                                </Button>
+                            )}
                             <h1 className="text-2xl font-bold">
                                 {search
                                     ? `Tìm kiếm: "${search}"`
                                     : category
-                                        ? `Danh Mục: ${category}`
+                                        ? (() => {
+                                            const cat = categories?.find(
+                                                (c: any) => c.duong_dan === category
+                                            ) || categories?.flatMap((c: any) => c.danh_muc_con || []).find(
+                                                (c: any) => c.duong_dan === category
+                                            );
+                                            return cat ? `Danh mục: ${cat.ten}` : category;
+                                        })()
                                         : brand
                                             ? `Thương Hiệu: ${brands?.find((b: Brand) => b.duong_dan === brand)?.ten ?? brand}`
                                             : 'Tất Cả Sản Phẩm'}
                             </h1>
-                            {(search || category || brand || minPrice || maxPrice) && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-slate-500 hover:text-rose-600 hover:bg-rose-50 shrink-0"
-                                    asChild
-                                >
-                                    <a href={pathname}>
-                                        <X className="h-4 w-4 mr-1" />
-                                        Xóa bộ lọc
-                                    </a>
-                                </Button>
-                            )}
                         </div>
                         <p className="text-sm text-muted-foreground">
                             {meta ? `Hiển thị ${products.length} trên tổng ${meta.total} sản phẩm` : ''}

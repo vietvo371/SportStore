@@ -143,7 +143,7 @@ export default function RolesPage() {
             <Card>
                 <CardHeader>
                     <CardTitle>Danh sách vai trò</CardTitle>
-                    <CardDescription>Các vai trò được định nghĩa trong hệ thống RBAC.</CardDescription>
+                    <CardDescription>Các vai trò được định nghĩa trong hệ thống phân quyền.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Table>

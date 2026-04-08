@@ -139,7 +139,7 @@ export default function ReportsManagementPage() {
                         🎁 Thống kê Marketing
                     </TabsTrigger>
                     <TabsTrigger value="chatbot" className="rounded-lg data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-none font-medium px-4 py-2 shrink-0">
-                        🤖 AI Chatbot Logs
+                        🤖 Nhật ký Chatbot
                     </TabsTrigger>
                 </TabsList>
                 

@@ -1,16 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useAuthStore } from '@/store/auth.store';
 import { authService } from '@/services/auth.service';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Loader2, Save, KeyRound, Eye, EyeOff } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
+import { Loader2, Save, KeyRound, Eye, EyeOff, ArrowLeft, Lock, ShieldCheck, User } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ProfileForm {
     ho_va_ten: string;
@@ -25,11 +26,12 @@ export default function ProfilePage() {
     const updateUser = useAuthStore((state) => state.updateUser);
     const [isLoading, setIsLoading] = useState(false);
     const [isPasswordMode, setIsPasswordMode] = useState(false);
+    const router = useRouter();
 
-    // Password visibility states
     const [showOldPassword, setShowOldPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const pwdFieldId = useId();
 
     const {
         register,
@@ -66,6 +68,15 @@ export default function ProfilePage() {
     }, [updateUser, reset]);
 
     const onSubmit = async (data: ProfileForm) => {
+        // Kiểm tra có thay đổi gì không
+        const hoVaTenChanged = data.ho_va_ten.trim() !== (user?.ho_va_ten || '').trim();
+        const soDienThoaiChanged = (data.so_dien_thoai || '').trim() !== ((user?.so_dien_thoai) || '').trim();
+
+        if (!hoVaTenChanged && !soDienThoaiChanged) {
+            toast.error('Vui lòng thay đổi thông tin trước khi lưu.');
+            return;
+        }
+
         setIsLoading(true);
         try {
             const payload: Record<string, string> = {
@@ -85,7 +96,13 @@ export default function ProfilePage() {
 
             if (isPasswordMode) {
                 setIsPasswordMode(false);
-                reset({ ...data, mat_khau_cu: '', mat_khau_moi: '', mat_khau_moi_confirmation: '' });
+                reset({
+                    ho_va_ten: data.ho_va_ten,
+                    so_dien_thoai: data.so_dien_thoai,
+                    mat_khau_cu: '',
+                    mat_khau_moi: '',
+                    mat_khau_moi_confirmation: '',
+                });
             }
         } catch (error: any) {
             const errMsgs = error?.errors ? Object.values(error.errors).flat().join(', ') : error?.message;
@@ -96,163 +113,343 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="max-w-3xl space-y-6">
-            <Card className="border-slate-200/60 shadow-sm overflow-hidden">
-                <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
-                    <CardTitle className="text-xl">Hồ sơ Của Tôi</CardTitle>
-                    <CardDescription>
-                        Quản lý thông tin bảo mật để tài khoản được tốt hơn.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6">
-                    <form onSubmit={handleSubmit(onSubmit)} autoComplete="off" className="space-y-6">
-                        {/* Honeypot at the beginning of the form */}
-                        <input type="text" name="email" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, zIndex: -1, pointerEvents: 'none' }} autoComplete="username" />
-                        <input type="password" name="password" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, zIndex: -1, pointerEvents: 'none' }} autoComplete="current-password" />
+        <div className="max-w-4xl space-y-6">
+            {/* Back Button */}
+            <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.back()}
+                className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 pl-0 gap-1.5"
+            >
+                <ArrowLeft className="h-4 w-4" />
+                Quay lại
+            </Button>
 
-                        {/* Static Email */}
-                        <div className="space-y-2">
-                            <Label className="text-muted-foreground">Địa chỉ Email (Đăng nhập)</Label>
-                            <Input value={user?.email || ''} disabled className="bg-slate-50 cursor-not-allowed" />
-                            <p className="text-xs text-muted-foreground mt-1">
-                                Email không thể thay đổi sau khi đăng ký.
+            {/* ── Card 1: Thông tin tài khoản ── */}
+            <Card className="border-slate-200/60 shadow-sm overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center gap-4 px-6 py-5 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
+                    <div className="h-11 w-11 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <User className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                        <h2 className="text-lg font-bold text-slate-900">Thông tin tài khoản</h2>
+                        <p className="text-sm text-slate-500">Cập nhật họ tên và số điện thoại của bạn</p>
+                    </div>
+                </div>
+
+                <CardContent className="p-6">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                        {/* Email (readonly) */}
+                        <div className="space-y-1.5">
+                            <Label className="text-sm font-semibold text-slate-700">Địa chỉ Email</Label>
+                            <Input
+                                value={user?.email || ''}
+                                disabled
+                                className="bg-slate-100 cursor-not-allowed border-slate-200 text-slate-500"
+                            />
+                            <p className="text-xs text-slate-400">
+                                Email không thể thay đổi sau khi đăng ký
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="ho_va_ten">Họ và Tên <span className="text-red-500">*</span></Label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div className="space-y-1.5">
+                                <Label htmlFor="ho_va_ten" className="text-sm font-semibold text-slate-700">
+                                    Họ và Tên <span className="text-red-500">*</span>
+                                </Label>
                                 <Input
                                     id="ho_va_ten"
-                                    autoComplete="name"
                                     readOnly
                                     onFocus={(e) => e.target.removeAttribute('readonly')}
                                     {...register('ho_va_ten', {
                                         required: 'Vui lòng nhập họ và tên',
                                         pattern: {
                                             value: /^[\p{L}]+(?:\s+[\p{L}]+)+$/u,
-                                            message: 'Vui lòng nhập đầy đủ cả họ và tên (ít nhất 2 từ)'
-                                        }
+                                            message: 'Vui lòng nhập đầy đủ cả họ và tên (ít nhất 2 từ)',
+                                        },
                                     })}
-                                    className="focus:ring-primary/20"
+                                    className="focus-visible:ring-primary/30"
                                 />
-                                {errors.ho_va_ten && <p className="text-sm text-red-500">{errors.ho_va_ten.message}</p>}
+                                {errors.ho_va_ten && (
+                                    <p className="text-xs text-red-500 font-medium">{errors.ho_va_ten.message}</p>
+                                )}
                             </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="so_dien_thoai">Số điện thoại</Label>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="so_dien_thoai" className="text-sm font-semibold text-slate-700">
+                                    Số điện thoại
+                                </Label>
                                 <Input
                                     id="so_dien_thoai"
-                                    autoComplete="tel"
                                     readOnly
                                     onFocus={(e) => e.target.removeAttribute('readonly')}
                                     {...register('so_dien_thoai', {
-                                        pattern: { value: /(84|0[3|5|7|8|9])+([0-9]{8})\b/g, message: 'Số điện thoại không hợp lệ' }
+                                        pattern: {
+                                            value: /(84|0[3|5|7|8|9])+([0-9]{8})\b/g,
+                                            message: 'Số điện thoại không hợp lệ',
+                                        },
                                     })}
-                                    className="focus:ring-primary/20"
+                                    className="focus-visible:ring-primary/30"
                                 />
-                                {errors.so_dien_thoai && <p className="text-sm text-red-500">{errors.so_dien_thoai.message}</p>}
+                                {errors.so_dien_thoai && (
+                                    <p className="text-xs text-red-500 font-medium">{errors.so_dien_thoai.message}</p>
+                                )}
                             </div>
-                        </div>
-
-                        <Separator className="my-6 opacity-60" />
-
-                        {/* Password Section */}
-                        <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center space-x-2 text-slate-800 font-semibold">
-                                    <KeyRound className="h-5 w-5 text-slate-400" />
-                                    <span>Bảo mật mật khẩu</span>
-                                </div>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setIsPasswordMode(!isPasswordMode)}
-                                >
-                                    {isPasswordMode ? 'Hủy đổi mật khẩu' : 'Đổi mật khẩu'}
-                                </Button>
-                            </div>
-
-                            {isPasswordMode && (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 animate-in fade-in slide-in-from-top-2">
-                                    {/* Honeypot to catch browser autofill */}
-                                    <input type="text" name="email" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, zIndex: -1, pointerEvents: 'none' }} autoComplete="username" />
-                                    <input type="password" name="password" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, zIndex: -1, pointerEvents: 'none' }} autoComplete="current-password" />
-
-                                    <div className="space-y-2 md:col-span-2">
-                                        <Label htmlFor="mat_khau_cu">Mật khẩu hiện tại</Label>
-                                        <div className="relative group/pass">
-                                            <Input
-                                                id="mat_khau_cu"
-                                                type={showOldPassword ? 'text' : 'password'}
-                                                autoComplete="current-password"
-                                                className="pr-12"
-                                                {...register('mat_khau_cu', { required: isPasswordMode ? 'Vui lòng nhập mật khẩu hiện tại' : false })}
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowOldPassword(!showOldPassword)}
-                                                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-xl hover:bg-slate-50 text-slate-400 hover:text-slate-900 transition-all outline-none"
-                                            >
-                                                {showOldPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                                            </button>
-                                        </div>
-                                        {errors.mat_khau_cu && <p className="text-sm text-red-500">{errors.mat_khau_cu.message}</p>}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="mat_khau_moi">Mật khẩu mới</Label>
-                                        <div className="relative group/pass">
-                                            <Input
-                                                id="mat_khau_moi"
-                                                type={showNewPassword ? 'text' : 'password'}
-                                                autoComplete="new-password"
-                                                className="pr-12"
-                                                {...register('mat_khau_moi', {
-                                                    required: isPasswordMode ? 'Vui lòng nhập mật khẩu mới' : false,
-                                                    minLength: { value: 8, message: 'Ít nhất 8 ký tự' }
-                                                })}
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowNewPassword(!showNewPassword)}
-                                                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-xl hover:bg-slate-50 text-slate-400 hover:text-slate-900 transition-all outline-none"
-                                            >
-                                                {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                                            </button>
-                                        </div>
-                                        {errors.mat_khau_moi && <p className="text-sm text-red-500">{errors.mat_khau_moi.message}</p>}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="mat_khau_moi_confirmation">Xác nhận mật khẩu mới</Label>
-                                        <div className="relative group/pass">
-                                            <Input
-                                                id="mat_khau_moi_confirmation"
-                                                type={showConfirmPassword ? 'text' : 'password'}
-                                                autoComplete="new-password"
-                                                className="pr-12"
-                                                {...register('mat_khau_moi_confirmation', { required: isPasswordMode ? 'Vui lòng xác nhận mật khẩu' : false })}
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-xl hover:bg-slate-50 text-slate-400 hover:text-slate-900 transition-all outline-none"
-                                            >
-                                                {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
                         </div>
 
                         <div className="flex justify-end pt-2">
-                            <Button type="submit" size="lg" disabled={isLoading} className="rounded-xl shadow-lg shadow-primary/20">
-                                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                Lưu Thay Đổi
+                            <Button
+                                type="submit"
+                                size="lg"
+                                disabled={isLoading}
+                                className="rounded-xl shadow-lg shadow-primary/20 gap-2"
+                            >
+                                {isLoading ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Save className="h-4 w-4" />
+                                )}
+                                Lưu thay đổi
                             </Button>
                         </div>
                     </form>
+                </CardContent>
+            </Card>
+
+            {/* ── Card 2: Bảo mật & Mật khẩu ── */}
+            <Card className="border-slate-200/60 shadow-sm overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center gap-4 px-6 py-5 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
+                    <div className="h-11 w-11 rounded-2xl bg-amber-50 flex items-center justify-center shrink-0">
+                        <ShieldCheck className="h-5 w-5 text-amber-500" />
+                    </div>
+                    <div>
+                        <h2 className="text-lg font-bold text-slate-900">Bảo mật tài khoản</h2>
+                        <p className="text-sm text-slate-500">Đổi mật khẩu để bảo vệ tài khoản của bạn</p>
+                    </div>
+                </div>
+
+                <CardContent className="p-6">
+                    {!isPasswordMode ? (
+                        <div className="flex items-center justify-between py-3 px-4 bg-amber-50/60 border border-amber-100 rounded-xl">
+                            <div className="flex items-center gap-3">
+                                <Lock className="h-5 w-5 text-amber-500" />
+                                <div>
+                                    <p className="text-sm font-semibold text-slate-800">Mật khẩu hiện tại</p>
+                                    <p className="text-xs text-slate-500">••••••••••••</p>
+                                </div>
+                            </div>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setIsPasswordMode(true)}
+                                className="rounded-lg border-amber-200 text-amber-700 hover:bg-amber-100 hover:border-amber-300 gap-1.5"
+                            >
+                                <KeyRound className="h-4 w-4" />
+                                Đổi mật khẩu
+                            </Button>
+                        </div>
+                    ) : (
+                        <div className="space-y-5">
+                            <div className="flex items-center justify-between">
+                                <p className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                                    <Lock className="h-4 w-4 text-slate-400" />
+                                    Nhập thông tin mật khẩu mới
+                                </p>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                        setIsPasswordMode(false);
+                                        reset({
+                                            ho_va_ten: user?.ho_va_ten || '',
+                                            so_dien_thoai: user?.so_dien_thoai || '',
+                                            mat_khau_cu: '',
+                                            mat_khau_moi: '',
+                                            mat_khau_moi_confirmation: '',
+                                        });
+                                    }}
+                                    className="text-slate-400 hover:text-slate-600 text-xs h-7 px-2"
+                                >
+                                    Hủy
+                                </Button>
+                            </div>
+
+                            <form
+                                onSubmit={handleSubmit(onSubmit)}
+                                className="space-y-4"
+                                autoComplete="off"
+                                method="post"
+                            >
+                                {/* Mật khẩu hiện tại — type=text + webkit masking để trình duyệt không mở kho mật khẩu */}
+                                <div className="space-y-1.5">
+                                    <Label htmlFor={`${pwdFieldId}-cu`} className="text-sm font-semibold text-slate-700">
+                                        Mật khẩu hiện tại <span className="text-red-500">*</span>
+                                    </Label>
+                                    <div className="relative">
+                                        <Input
+                                            id={`${pwdFieldId}-cu`}
+                                            type="text"
+                                            inputMode="text"
+                                            autoComplete="off"
+                                            spellCheck={false}
+                                            autoCapitalize="off"
+                                            data-lpignore="true"
+                                            data-1p-ignore="true"
+                                            data-form-type="other"
+                                            {...register('mat_khau_cu', {
+                                                required: 'Vui lòng nhập mật khẩu hiện tại',
+                                            })}
+                                            readOnly
+                                            onFocus={(e) => e.currentTarget.removeAttribute('readonly')}
+                                            className={cn(
+                                                'pr-12',
+                                                !showOldPassword && '[-webkit-text-security:disc] [text-security:disc]'
+                                            )}
+                                            placeholder="Nhập mật khẩu hiện tại"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowOldPassword(!showOldPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg text-slate-400 hover:text-slate-600 transition-colors"
+                                        >
+                                            {showOldPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                        </button>
+                                    </div>
+                                    {errors.mat_khau_cu && (
+                                        <p className="text-xs text-red-500 font-medium">{errors.mat_khau_cu.message}</p>
+                                    )}
+                                </div>
+
+                                {/* Mật khẩu mới */}
+                                <div className="space-y-1.5">
+                                    <Label htmlFor={`${pwdFieldId}-moi`} className="text-sm font-semibold text-slate-700">
+                                        Mật khẩu mới <span className="text-red-500">*</span>
+                                    </Label>
+                                    <div className="relative">
+                                        <Input
+                                            id={`${pwdFieldId}-moi`}
+                                            type="text"
+                                            inputMode="text"
+                                            autoComplete="off"
+                                            spellCheck={false}
+                                            autoCapitalize="off"
+                                            data-lpignore="true"
+                                            data-1p-ignore="true"
+                                            data-form-type="other"
+                                            {...register('mat_khau_moi', {
+                                                required: 'Vui lòng nhập mật khẩu mới',
+                                                minLength: { value: 8, message: 'Mật khẩu mới phải ít nhất 8 ký tự' },
+                                            })}
+                                            readOnly
+                                            onFocus={(e) => e.currentTarget.removeAttribute('readonly')}
+                                            className={cn(
+                                                'pr-12',
+                                                !showNewPassword && '[-webkit-text-security:disc] [text-security:disc]'
+                                            )}
+                                            placeholder="Nhập mật khẩu mới (ít nhất 8 ký tự)"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowNewPassword(!showNewPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg text-slate-400 hover:text-slate-600 transition-colors"
+                                        >
+                                            {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                        </button>
+                                    </div>
+                                    {errors.mat_khau_moi && (
+                                        <p className="text-xs text-red-500 font-medium">{errors.mat_khau_moi.message}</p>
+                                    )}
+                                </div>
+
+                                {/* Xác nhận mật khẩu mới */}
+                                <div className="space-y-1.5">
+                                    <Label htmlFor={`${pwdFieldId}-xn`} className="text-sm font-semibold text-slate-700">
+                                        Xác nhận mật khẩu mới <span className="text-red-500">*</span>
+                                    </Label>
+                                    <div className="relative">
+                                        <Input
+                                            id={`${pwdFieldId}-xn`}
+                                            type="text"
+                                            inputMode="text"
+                                            autoComplete="off"
+                                            spellCheck={false}
+                                            autoCapitalize="off"
+                                            data-lpignore="true"
+                                            data-1p-ignore="true"
+                                            data-form-type="other"
+                                            {...register('mat_khau_moi_confirmation', {
+                                                required: 'Vui lòng xác nhận mật khẩu mới',
+                                            })}
+                                            readOnly
+                                            onFocus={(e) => e.currentTarget.removeAttribute('readonly')}
+                                            className={cn(
+                                                'pr-12',
+                                                !showConfirmPassword && '[-webkit-text-security:disc] [text-security:disc]'
+                                            )}
+                                            placeholder="Nhập lại mật khẩu mới"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg text-slate-400 hover:text-slate-600 transition-colors"
+                                        >
+                                            {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                        </button>
+                                    </div>
+                                    {errors.mat_khau_moi_confirmation && (
+                                        <p className="text-xs text-red-500 font-medium">{errors.mat_khau_moi_confirmation.message}</p>
+                                    )}
+                                </div>
+
+                                {/* Hướng dẫn bảo mật */}
+                                <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
+                                    <p className="text-xs text-blue-700 font-semibold mb-1">Mật khẩu mới cần đảm bảo:</p>
+                                    <ul className="text-xs text-blue-600 space-y-0.5 pl-4 list-disc">
+                                        <li>Ít nhất 8 ký tự</li>
+                                        <li>Khác với mật khẩu cũ</li>
+                                        <li>Khuyến nghị kết hợp chữ hoa, chữ thường, số và ký tự đặc biệt</li>
+                                    </ul>
+                                </div>
+
+                                <div className="flex gap-3 pt-2">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => {
+                                            setIsPasswordMode(false);
+                                            reset({
+                                                ho_va_ten: user?.ho_va_ten || '',
+                                                so_dien_thoai: user?.so_dien_thoai || '',
+                                                mat_khau_cu: '',
+                                                mat_khau_moi: '',
+                                                mat_khau_moi_confirmation: '',
+                                            });
+                                        }}
+                                        className="rounded-xl"
+                                    >
+                                        Hủy bỏ
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        size="lg"
+                                        disabled={isLoading}
+                                        className="rounded-xl shadow-lg shadow-primary/20 gap-2"
+                                    >
+                                        {isLoading ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <ShieldCheck className="h-4 w-4" />
+                                        )}
+                                        Cập nhật mật khẩu
+                                    </Button>
+                                </div>
+                            </form>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
         </div>

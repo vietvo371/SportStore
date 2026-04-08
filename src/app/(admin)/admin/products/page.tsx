@@ -321,7 +321,7 @@ export default function AdminProductsPage() {
                                                     </Badge>
                                                     {product.thuong_hieu && (
                                                         <span className="text-[10px] text-slate-400 italic ml-1">
-                                                            Brand: {product.thuong_hieu.ten}
+                                                            Thương hiệu: {product.thuong_hieu.ten}
                                                         </span>
                                                     )}
                                                 </div>

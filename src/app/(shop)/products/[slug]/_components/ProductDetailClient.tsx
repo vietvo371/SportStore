@@ -405,7 +405,7 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
                             >
                                 <ShoppingCart className="h-5 w-5" />
                                 <span className="hidden xs:inline">{isAdding ? 'Đang thêm...' : isOutOfStock ? 'Hết hàng' : 'Thêm Vào Giỏ'}</span>
-                                <span className="xs:hidden">{isOutOfStock ? 'Hết' : 'Thêm'}</span>
+                                <span className="xs:hidden">{isOutOfStock ? 'Hết' : 'Thêm Vào Giỏ'}</span>
                             </Button>
                         </div>
 

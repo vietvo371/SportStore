@@ -75,7 +75,7 @@ export default function SizeChartManagementPage() {
                     <div className="flex flex-wrap gap-3">
                          <div className="px-4 py-2 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md hidden sm:flex items-center gap-3">
                             <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                            <span className="text-xs font-bold text-slate-300 uppercase tracking-widest">Chatbot Ready</span>
+                            <span className="text-xs font-bold text-slate-300 uppercase tracking-widest">Chatbot Sẵn sàng</span>
                          </div>
                         <Button
                             onClick={handleAddClick}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useId } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuthStore } from '@/store/auth.store';
 import { authService } from '@/services/auth.service';
@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 import {
     Loader2,
     Save,
@@ -46,6 +47,7 @@ export default function AdminProfilePage() {
     const [avatarUploading, setAvatarUploading] = useState(false);
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const pwdFieldId = useId();
 
     const {
         register,
@@ -112,6 +114,15 @@ export default function AdminProfilePage() {
     };
 
     const onSubmit = async (data: ProfileForm) => {
+        // Kiểm tra có thay đổi gì không
+        const hoVaTenChanged = data.ho_va_ten.trim() !== (user?.ho_va_ten || '').trim();
+        const soDienThoaiChanged = (data.so_dien_thoai || '').trim() !== ((user?.so_dien_thoai) || '').trim();
+
+        if (!hoVaTenChanged && !soDienThoaiChanged) {
+            toast.error('Vui lòng thay đổi thông tin trước khi lưu.');
+            return;
+        }
+
         setIsLoading(true);
         try {
             const payload: Record<string, string> = {
@@ -233,10 +244,7 @@ export default function AdminProfilePage() {
                         <h3 className="font-semibold text-slate-800">Thông tin cơ bản</h3>
                     </div>
 
-                    <form onSubmit={handleSubmit(onSubmit)} autoComplete="off" className="p-6 space-y-5">
-                        {/* Honeypot at the beginning of the form */}
-                        <input type="text" name="email" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, zIndex: -1, pointerEvents: 'none' }} autoComplete="username" />
-                        <input type="password" name="password" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, zIndex: -1, pointerEvents: 'none' }} autoComplete="current-password" />
+                    <form onSubmit={handleSubmit(onSubmit)} autoComplete="off" method="post" className="p-6 space-y-5">
                         {/* Email readonly */}
                         <div className="space-y-1.5">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wide flex items-center gap-1.5">
@@ -253,7 +261,6 @@ export default function AdminProfilePage() {
                                 </label>
                                 <Input
                                     id="ho_va_ten"
-                                    autoComplete="off"
                                     readOnly
                                     onFocus={(e) => e.target.removeAttribute('readonly')}
                                     placeholder="Nguyễn Văn A"
@@ -275,7 +282,6 @@ export default function AdminProfilePage() {
                                 </label>
                                 <Input
                                     id="so_dien_thoai"
-                                    autoComplete="off"
                                     readOnly
                                     onFocus={(e) => e.target.removeAttribute('readonly')}
                                     placeholder="0xxx xxx xxx"
@@ -334,20 +340,35 @@ export default function AdminProfilePage() {
                                 </Button>
                             </div>
                         ) : (
-                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 animate-in fade-in slide-in-from-top-2">
-                                {/* Honeypot to catch browser autofill */}
-                                <input type="text" name="email" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, zIndex: -1, pointerEvents: 'none' }} autoComplete="username" />
-                                <input type="password" name="password" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, zIndex: -1, pointerEvents: 'none' }} autoComplete="current-password" />
-                                
-                                {/* Current password */}
+                            <form
+                                onSubmit={handleSubmit(onSubmit)}
+                                className="space-y-4 animate-in fade-in slide-in-from-top-2"
+                                autoComplete="off"
+                                method="post"
+                            >
+                                {/* Current password — text + webkit masking: tránh kho mật khẩu Chrome */}
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Mật khẩu hiện tại</label>
+                                    <label htmlFor={`${pwdFieldId}-cu`} className="text-xs font-bold text-slate-500 uppercase tracking-wide">
+                                        Mật khẩu hiện tại
+                                    </label>
                                     <div className="relative">
                                         <Input
-                                            type={showPwCu ? 'text' : 'password'}
-                                            className="h-10 pr-10"
-                                            autoComplete="current-password"
+                                            id={`${pwdFieldId}-cu`}
+                                            type="text"
+                                            inputMode="text"
+                                            spellCheck={false}
+                                            autoCapitalize="off"
+                                            data-lpignore="true"
+                                            data-1p-ignore="true"
+                                            data-form-type="other"
+                                            className={cn(
+                                                'h-10 pr-10',
+                                                !showPwCu && '[-webkit-text-security:disc] [text-security:disc]'
+                                            )}
+                                            autoComplete="off"
                                             {...register('mat_khau_cu', { required: 'Bắt buộc' })}
+                                            readOnly
+                                            onFocus={(e) => e.currentTarget.removeAttribute('readonly')}
                                         />
                                         <button type="button" onClick={() => setShowPwCu(!showPwCu)}
                                             className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -359,16 +380,30 @@ export default function AdminProfilePage() {
 
                                 {/* New password */}
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Mật khẩu mới</label>
+                                    <label htmlFor={`${pwdFieldId}-moi`} className="text-xs font-bold text-slate-500 uppercase tracking-wide">
+                                        Mật khẩu mới
+                                    </label>
                                     <div className="relative">
                                         <Input
-                                            type={showPwMoi ? 'text' : 'password'}
-                                            className="h-10 pr-10"
-                                            autoComplete="new-password"
+                                            id={`${pwdFieldId}-moi`}
+                                            type="text"
+                                            inputMode="text"
+                                            spellCheck={false}
+                                            autoCapitalize="off"
+                                            data-lpignore="true"
+                                            data-1p-ignore="true"
+                                            data-form-type="other"
+                                            className={cn(
+                                                'h-10 pr-10',
+                                                !showPwMoi && '[-webkit-text-security:disc] [text-security:disc]'
+                                            )}
+                                            autoComplete="off"
                                             {...register('mat_khau_moi', {
                                                 required: 'Bắt buộc',
                                                 minLength: { value: 8, message: 'Ít nhất 8 ký tự' },
                                             })}
+                                            readOnly
+                                            onFocus={(e) => e.currentTarget.removeAttribute('readonly')}
                                         />
                                         <button type="button" onClick={() => setShowPwMoi(!showPwMoi)}
                                             className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -380,16 +415,30 @@ export default function AdminProfilePage() {
 
                                 {/* Confirm password */}
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Xác nhận mật khẩu</label>
+                                    <label htmlFor={`${pwdFieldId}-xn`} className="text-xs font-bold text-slate-500 uppercase tracking-wide">
+                                        Xác nhận mật khẩu
+                                    </label>
                                     <div className="relative">
                                         <Input
-                                            type={showPwConfirm ? 'text' : 'password'}
-                                            className="h-10 pr-10"
-                                            autoComplete="new-password"
+                                            id={`${pwdFieldId}-xn`}
+                                            type="text"
+                                            inputMode="text"
+                                            spellCheck={false}
+                                            autoCapitalize="off"
+                                            data-lpignore="true"
+                                            data-1p-ignore="true"
+                                            data-form-type="other"
+                                            className={cn(
+                                                'h-10 pr-10',
+                                                !showPwConfirm && '[-webkit-text-security:disc] [text-security:disc]'
+                                            )}
+                                            autoComplete="off"
                                             {...register('mat_khau_moi_confirmation', {
                                                 required: 'Bắt buộc',
                                                 validate: (val) => val === watch('mat_khau_moi') || 'Mật khẩu không khớp',
                                             })}
+                                            readOnly
+                                            onFocus={(e) => e.currentTarget.removeAttribute('readonly')}
                                         />
                                         <button type="button" onClick={() => setShowPwConfirm(!showPwConfirm)}
                                             className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">

@@ -89,6 +89,7 @@ export default function UserManagementPage() {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-primary transition-colors" />
                     <input
                         placeholder="Tìm kiếm theo tên, email hoặc số điện thoại khách hàng..."
+                        autoComplete="off"
                         className="w-full pl-11 h-12 bg-slate-50 border-slate-100 rounded-2xl font-bold focus-visible:ring-primary/20 focus-visible:border-primary/30 outline-none transition-all px-4"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}

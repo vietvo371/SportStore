@@ -90,7 +90,7 @@ export default function ForgotPasswordPage() {
                                 <div className="relative">
                                     <Input
                                         id="email"
-                                        type="email"
+                                        // type="email"
                                         placeholder="m@example.com"
                                         required
                                         value={email}
