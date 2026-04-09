@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
     Dialog,
     DialogContent,
@@ -12,8 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Megaphone, Send, Loader2, Info, Tag, Link as LinkIcon, Search } from "lucide-react";
-import { useBroadcastNotification } from "@/hooks/useNotifications";
+import { Megaphone, Send, Loader2, Info, Tag, Link as LinkIcon, Search, Users, Target, ShoppingBag, Eye, Heart } from "lucide-react";
+import { useBroadcastNotification, usePreviewTargetCount } from "@/hooks/useNotifications";
 import {
     Select,
     SelectContent,
@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { productService } from "@/services/product.service";
 import { categoryService } from "@/services/category.service";
@@ -34,19 +36,20 @@ interface BroadcastDialogProps {
 
 export function BroadcastDialog({ open, onOpenChange }: BroadcastDialogProps) {
     const broadcastMutation = useBroadcastNotification();
+    const previewMutation = usePreviewTargetCount();
     const [tieuDe, setTieuDe] = useState('');
     const [noi_dung, setNoiDung] = useState('');
     const [loai, setLoai] = useState('khuyen_mai');
-    
+
+    // Targeting states
+    const [targetMode, setTargetMode] = useState<'tat_ca' | 'muc_tieu'>('tat_ca');
+    const [selectedTargetCategoryIds, setSelectedTargetCategoryIds] = useState<number[]>([]);
+
     // Link states
     const [linkType, setLinkType] = useState('none');
-    
-    // Custom Link state
     const [customLink, setCustomLink] = useState('');
-    
-    // Category states
     const [selectedCategoryId, setSelectedCategoryId] = useState('');
-    
+
     // Email state
     const [sendEmail, setSendEmail] = useState(false);
 
@@ -80,10 +83,33 @@ export function BroadcastDialog({ open, onOpenChange }: BroadcastDialogProps) {
     });
     const searchedProducts = searchProductsData?.data || [];
 
+    // Preview target count khi chọn danh mục targeting
+    const previewData = previewMutation.data as any;
+
+    const handlePreview = useCallback(() => {
+        if (selectedTargetCategoryIds.length > 0) {
+            previewMutation.mutate(selectedTargetCategoryIds);
+        }
+    }, [selectedTargetCategoryIds]);
+
+    useEffect(() => {
+        if (targetMode === 'muc_tieu' && selectedTargetCategoryIds.length > 0) {
+            const timer = setTimeout(handlePreview, 400);
+            return () => clearTimeout(timer);
+        }
+    }, [selectedTargetCategoryIds, targetMode, handlePreview]);
+
+    const toggleTargetCategory = (id: number) => {
+        setSelectedTargetCategoryIds(prev =>
+            prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
+        );
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!tieuDe.trim() || !noi_dung.trim()) return;
+        if (targetMode === 'muc_tieu' && selectedTargetCategoryIds.length === 0) return;
 
         let finalLink = undefined;
         if (loai === 'khuyen_mai') {
@@ -103,7 +129,9 @@ export function BroadcastDialog({ open, onOpenChange }: BroadcastDialogProps) {
                 noi_dung: noi_dung,
                 loai: loai,
                 du_lieu_them: finalLink ? { link: finalLink } : undefined,
-                gui_email: sendEmail
+                gui_email: sendEmail,
+                che_do: targetMode,
+                danh_muc_ids: targetMode === 'muc_tieu' ? selectedTargetCategoryIds : undefined,
             });
             setTieuDe('');
             setNoiDung('');
@@ -114,6 +142,8 @@ export function BroadcastDialog({ open, onOpenChange }: BroadcastDialogProps) {
             setSelectedCategoryId('');
             setCustomLink('');
             setSendEmail(false);
+            setTargetMode('tat_ca');
+            setSelectedTargetCategoryIds([]);
             onOpenChange(false);
         } catch (error) {
             console.error(error);
@@ -124,7 +154,7 @@ export function BroadcastDialog({ open, onOpenChange }: BroadcastDialogProps) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden bg-white">
+            <DialogContent className="sm:max-w-[540px] max-h-[90vh] p-0 overflow-hidden bg-white">
                 <DialogHeader className="p-6 pb-0">
                     <DialogTitle className="text-xl font-bold flex items-center gap-2">
                         <Megaphone className="h-5 w-5 text-rose-500" />
@@ -132,7 +162,7 @@ export function BroadcastDialog({ open, onOpenChange }: BroadcastDialogProps) {
                     </DialogTitle>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                <form onSubmit={handleSubmit} className="p-6 pt-4 space-y-5 overflow-y-auto max-h-[calc(90vh-80px)]">
                     <div className="space-y-4">
                         <div className="space-y-2">
                             <Label htmlFor="loai" className="font-semibold text-slate-700">Loại thông báo</Label>
@@ -176,21 +206,130 @@ export function BroadcastDialog({ open, onOpenChange }: BroadcastDialogProps) {
                                 value={noi_dung}
                                 onChange={(e) => setNoiDung(e.target.value)}
                                 placeholder="Mô tả chi tiết chương trình khuyến mãi hoặc thông báo của bạn..."
-                                className="min-h-[120px] focus-visible:ring-rose-500 bg-slate-50 border-slate-200 resize-none"
+                                className="min-h-[100px] focus-visible:ring-rose-500 bg-slate-50 border-slate-200 resize-none"
                                 required
                             />
                         </div>
 
+                        {/* Targeting Section */}
                         {loai === 'khuyen_mai' && (
-                            <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200 border-t border-slate-100 pt-4 mt-2">
+                            <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200 border-t border-slate-100 pt-4">
+                                <Label className="font-semibold text-slate-700 flex items-center gap-2">
+                                    <Target className="h-4 w-4 text-slate-400" />
+                                    Đối tượng nhận thông báo
+                                </Label>
+
+                                <RadioGroup
+                                    value={targetMode}
+                                    onValueChange={(v) => setTargetMode(v as 'tat_ca' | 'muc_tieu')}
+                                    className="flex flex-wrap gap-4"
+                                >
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="tat_ca" id="t-all" />
+                                        <Label htmlFor="t-all" className="cursor-pointer font-normal flex items-center gap-1.5">
+                                            <Users className="h-3.5 w-3.5 text-slate-400" />
+                                            Tất cả khách hàng
+                                        </Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="muc_tieu" id="t-targeted" />
+                                        <Label htmlFor="t-targeted" className="cursor-pointer font-normal flex items-center gap-1.5">
+                                            <Target className="h-3.5 w-3.5 text-rose-500" />
+                                            Theo sở thích / lịch sử mua
+                                        </Label>
+                                    </div>
+                                </RadioGroup>
+
+                                {targetMode === 'muc_tieu' && (
+                                    <div className="animate-in fade-in slide-in-from-top-1 duration-200 space-y-3 pl-1">
+                                        <p className="text-[11px] text-slate-500">
+                                            Chọn danh mục sản phẩm. Hệ thống sẽ tự động lọc khách hàng đã mua, xem, hoặc yêu thích sản phẩm thuộc các danh mục này.
+                                        </p>
+                                        <div className="max-h-[180px] overflow-y-auto border border-slate-200 rounded-lg p-3 space-y-1.5 bg-slate-50/50">
+                                            {flatCategories.map((c: any) => (
+                                                <label
+                                                    key={c.id}
+                                                    className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-md cursor-pointer transition-colors ${selectedTargetCategoryIds.includes(c.id) ? 'bg-rose-50 border border-rose-200' : 'hover:bg-slate-100 border border-transparent'}`}
+                                                >
+                                                    <Checkbox
+                                                        checked={selectedTargetCategoryIds.includes(c.id)}
+                                                        onCheckedChange={() => toggleTargetCategory(c.id)}
+                                                        className="data-[state=checked]:bg-rose-500 data-[state=checked]:border-rose-500"
+                                                    />
+                                                    <span className={`text-sm ${c.depth > 0 ? 'text-slate-500' : 'font-medium text-slate-800'}`}>
+                                                        {"— ".repeat(c.depth)}{c.ten}
+                                                    </span>
+                                                </label>
+                                            ))}
+                                        </div>
+
+                                        {selectedTargetCategoryIds.length > 0 && (
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {selectedTargetCategoryIds.map(id => {
+                                                    const cat = flatCategories.find((c: any) => c.id === id);
+                                                    return cat ? (
+                                                        <Badge
+                                                            key={id}
+                                                            variant="secondary"
+                                                            className="bg-rose-100 text-rose-700 hover:bg-rose-200 cursor-pointer text-xs"
+                                                            onClick={() => toggleTargetCategory(id)}
+                                                        >
+                                                            {cat.ten} ×
+                                                        </Badge>
+                                                    ) : null;
+                                                })}
+                                            </div>
+                                        )}
+
+                                        {/* Preview Count */}
+                                        {selectedTargetCategoryIds.length > 0 && (
+                                            <div className="rounded-lg border border-blue-200 bg-blue-50/50 p-3 space-y-2">
+                                                {previewMutation.isPending ? (
+                                                    <div className="flex items-center gap-2 text-sm text-blue-600">
+                                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                        Đang phân tích khách hàng...
+                                                    </div>
+                                                ) : previewData?.data ? (
+                                                    <>
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-sm font-semibold text-blue-900">
+                                                                Sẽ gửi đến {previewData.data.tong_muc_tieu} / {previewData.data.tong_tat_ca} khách hàng
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex flex-wrap gap-3 text-[11px] text-blue-700">
+                                                            <span className="flex items-center gap-1">
+                                                                <ShoppingBag className="h-3 w-3" />
+                                                                Đã mua: {previewData.data.tu_mua_hang}
+                                                            </span>
+                                                            <span className="flex items-center gap-1">
+                                                                <Eye className="h-3 w-3" />
+                                                                Đã xem/click: {previewData.data.tu_hanh_vi}
+                                                            </span>
+                                                            <span className="flex items-center gap-1">
+                                                                <Heart className="h-3 w-3" />
+                                                                Yêu thích: {previewData.data.tu_yeu_thich}
+                                                            </span>
+                                                        </div>
+                                                    </>
+                                                ) : null}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Link Section */}
+                        {loai === 'khuyen_mai' && (
+                            <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200 border-t border-slate-100 pt-4">
                                 <Label className="font-semibold text-slate-700 flex items-center gap-2">
                                     <LinkIcon className="h-4 w-4 text-slate-400" />
                                     Hành động khi click (Liên kết)
                                 </Label>
-                                
-                                <RadioGroup 
-                                    value={linkType} 
-                                    onValueChange={setLinkType} 
+
+                                <RadioGroup
+                                    value={linkType}
+                                    onValueChange={setLinkType}
                                     className="flex flex-wrap gap-4"
                                 >
                                     <div className="flex items-center space-x-2">
@@ -325,23 +464,26 @@ export function BroadcastDialog({ open, onOpenChange }: BroadcastDialogProps) {
                     <div className="p-4 rounded-lg bg-rose-50/50 border border-rose-100/50">
                         <p className="text-xs text-rose-600 flex items-start gap-2 italic">
                             <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-                            Lưu ý: Thông báo này sẽ được gửi tới TẤT CẢ người dùng trong hệ thống ngay sau khi bạn nhấn "Phát sóng".
+                            {targetMode === 'muc_tieu' && selectedTargetCategoryIds.length > 0 && previewData?.data
+                                ? `Thông báo sẽ được gửi tới ${previewData.data.tong_muc_tieu} khách hàng có nhu cầu với danh mục đã chọn.`
+                                : 'Lưu ý: Thông báo này sẽ được gửi tới TẤT CẢ người dùng trong hệ thống ngay sau khi bạn nhấn "Phát sóng".'
+                            }
                         </p>
                     </div>
 
                     <DialogFooter className="pt-2">
-                        <Button 
-                            type="button" 
-                            variant="ghost" 
+                        <Button
+                            type="button"
+                            variant="ghost"
                             onClick={() => onOpenChange(false)}
                             disabled={isSubmitting}
                             className="bg-slate-100 hover:bg-slate-200 text-slate-700"
                         >
                             Hủy bỏ
                         </Button>
-                        <Button 
-                            type="submit" 
-                            disabled={isSubmitting || !tieuDe || !noi_dung}
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting || !tieuDe || !noi_dung || (targetMode === 'muc_tieu' && selectedTargetCategoryIds.length === 0)}
                             className="bg-rose-600 hover:bg-rose-700 text-white min-w-[140px] shadow-lg shadow-rose-200"
                         >
                             {isSubmitting ? (

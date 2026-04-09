@@ -45,15 +45,28 @@ export const useMarkAllRead = () => {
 export const useBroadcastNotification = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { tieu_de: string; noi_dung: string; loai: string; du_lieu_them?: any; gui_email?: boolean }) => 
-      notificationService.broadcast(data),
+    mutationFn: (data: {
+      tieu_de: string;
+      noi_dung: string;
+      loai: string;
+      du_lieu_them?: any;
+      gui_email?: boolean;
+      che_do?: 'tat_ca' | 'muc_tieu';
+      danh_muc_ids?: number[];
+    }) => notificationService.broadcast(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications', 'admin'] });
-      toast.success("Đã gửi thông báo quảng bá thành công");
+      toast.success("Đã gửi thông báo thành công");
     },
     onError: (error: any) => {
       toast.error(error.message || "Lỗi khi gửi thông báo");
     }
+  });
+};
+
+export const usePreviewTargetCount = () => {
+  return useMutation({
+    mutationFn: (danhMucIds: number[]) => notificationService.previewTargetCount(danhMucIds),
   });
 };
 
