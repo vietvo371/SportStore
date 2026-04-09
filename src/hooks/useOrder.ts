@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { orderService } from '@/services/order.service';
-import { OrderPayload } from '@/types/order.types';
+import { OrderPayload, BuyNowPayload } from '@/types/order.types';
 import Cookies from 'js-cookie';
 
 export const orderKeys = {
@@ -12,6 +12,10 @@ export const orderKeys = {
 export const useOrder = () => {
     const placeOrderMutation = useMutation({
         mutationFn: (payload: OrderPayload) => orderService.placeOrder(payload),
+    });
+
+    const buyNowMutation = useMutation({
+        mutationFn: (payload: BuyNowPayload) => orderService.buyNow(payload),
     });
 
     const createPaymentUrlMutation = useMutation({
@@ -31,6 +35,8 @@ export const useOrder = () => {
         placeOrder: placeOrderMutation.mutateAsync,
         isPlacing: placeOrderMutation.isPending,
         placeOrderError: placeOrderMutation.error,
+        buyNow: buyNowMutation.mutateAsync,
+        isBuyingNow: buyNowMutation.isPending,
         createPaymentUrl: createPaymentUrlMutation.mutateAsync,
         isCreatingPaymentUrl: createPaymentUrlMutation.isPending,
         verifyVNPayReturn: verifyVNPayReturnMutation.mutateAsync,

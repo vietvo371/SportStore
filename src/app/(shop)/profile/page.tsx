@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useId } from 'react';
+import { useState, useEffect, useId, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useAuthStore } from '@/store/auth.store';
@@ -10,7 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Loader2, Save, KeyRound, Eye, EyeOff, ArrowLeft, Lock, ShieldCheck, User } from 'lucide-react';
+import { Loader2, Save, KeyRound, Eye, EyeOff, ArrowLeft, Lock, ShieldCheck, User, Camera } from 'lucide-react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 interface ProfileForm {
@@ -32,6 +33,9 @@ export default function ProfilePage() {
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const pwdFieldId = useId();
+    const avatarInputRef = useRef<HTMLInputElement>(null);
+    const [avatarUploading, setAvatarUploading] = useState(false);
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
     const {
         register,
@@ -112,6 +116,49 @@ export default function ProfilePage() {
         }
     };
 
+    const currentAvatar = avatarPreview || user?.anh_dai_dien || null;
+    const initials =
+        user?.ho_va_ten
+            ?.split(' ')
+            .filter(Boolean)
+            .slice(-2)
+            .map((w: string) => w[0])
+            .join('')
+            .toUpperCase() || 'K';
+
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (file.size > 2 * 1024 * 1024) {
+            toast.error('Ảnh không được vượt quá 2MB');
+            return;
+        }
+
+        const objectUrl = URL.createObjectURL(file);
+        setAvatarPreview(objectUrl);
+        setAvatarUploading(true);
+
+        try {
+            const upload = await authService.uploadAvatar(file);
+            const url = upload?.url;
+            if (!url) throw new Error('Không nhận được URL ảnh');
+
+            const updated = await authService.updateProfile({ anh_dai_dien: url });
+            updateUser(updated);
+            setAvatarPreview(null);
+            toast.success('Cập nhật ảnh đại diện thành công!');
+        } catch (error: any) {
+            const msg = error?.message || 'Upload ảnh thất bại';
+            toast.error(typeof msg === 'string' ? msg : 'Upload ảnh thất bại');
+            setAvatarPreview(null);
+        } finally {
+            URL.revokeObjectURL(objectUrl);
+            setAvatarUploading(false);
+            if (avatarInputRef.current) avatarInputRef.current.value = '';
+        }
+    };
+
     return (
         <div className="max-w-4xl space-y-6">
             {/* Back Button */}
@@ -134,11 +181,77 @@ export default function ProfilePage() {
                     </div>
                     <div>
                         <h2 className="text-lg font-bold text-slate-900">Thông tin tài khoản</h2>
-                        <p className="text-sm text-slate-500">Cập nhật họ tên và số điện thoại của bạn</p>
+                        <p className="text-sm text-slate-500">Cập nhật ảnh đại diện, họ tên và số điện thoại</p>
                     </div>
                 </div>
 
                 <CardContent className="p-6">
+                    {/* Ảnh đại diện */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-6 pb-6 mb-6 border-b border-slate-100">
+                        <div className="relative shrink-0 group mx-auto sm:mx-0">
+                            <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl ring-4 ring-slate-100 overflow-hidden bg-gradient-to-br from-primary/15 to-slate-100 flex items-center justify-center shadow-inner">
+                                {currentAvatar ? (
+                                    <Image
+                                        src={currentAvatar}
+                                        alt={user?.ho_va_ten || 'Ảnh đại diện'}
+                                        width={112}
+                                        height={112}
+                                        unoptimized
+                                        className="object-cover w-full h-full"
+                                    />
+                                ) : (
+                                    <span className="text-2xl sm:text-3xl font-black text-primary/70">{initials}</span>
+                                )}
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => avatarInputRef.current?.click()}
+                                disabled={avatarUploading}
+                                className="absolute inset-0 rounded-2xl bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 cursor-pointer disabled:cursor-not-allowed"
+                                aria-label="Đổi ảnh đại diện"
+                            >
+                                {avatarUploading ? (
+                                    <Loader2 className="h-6 w-6 text-white animate-spin" />
+                                ) : (
+                                    <>
+                                        <Camera className="h-6 w-6 text-white" />
+                                        <span className="text-[10px] font-bold text-white uppercase tracking-wide">
+                                            Đổi ảnh
+                                        </span>
+                                    </>
+                                )}
+                            </button>
+                            <input
+                                ref={avatarInputRef}
+                                type="file"
+                                accept="image/jpeg,image/png,image/jpg,image/gif,image/webp"
+                                className="hidden"
+                                onChange={handleAvatarChange}
+                            />
+                        </div>
+                        <div className="flex-1 text-center sm:text-left space-y-2">
+                            <p className="text-sm font-semibold text-slate-800">Ảnh đại diện</p>
+                            <p className="text-xs text-slate-500">
+                                JPG, PNG, GIF hoặc WebP — tối đa 2MB. Ảnh hiển thị trên tài khoản của bạn.
+                            </p>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                disabled={avatarUploading}
+                                onClick={() => avatarInputRef.current?.click()}
+                                className="rounded-xl gap-2"
+                            >
+                                {avatarUploading ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Camera className="h-4 w-4" />
+                                )}
+                                Tải ảnh lên
+                            </Button>
+                        </div>
+                    </div>
+
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         {/* Email (readonly) */}
                         <div className="space-y-1.5">

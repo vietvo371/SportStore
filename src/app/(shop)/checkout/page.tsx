@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useCart } from '@/hooks/useCart';
 import { useAddress } from '@/hooks/useAddress';
 import { useOrder } from '@/hooks/useOrder';
 import { useCartStore } from '@/store/cart.store';
+import { useBuyNowStore } from '@/store/buyNow.store';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,12 +24,29 @@ import { CouponResponse } from '@/types/coupon.types';
 import { Tag, X } from 'lucide-react';
 
 export default function CheckoutPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex justify-center items-center min-h-[60vh]">
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            </div>
+        }>
+            <CheckoutContent />
+        </Suspense>
+    );
+}
+
+function CheckoutContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { cart, isLoading: isCartLoading } = useCart();
     const { addresses, isLoading: isAddressesLoading } = useAddress();
-    const { placeOrder, isPlacing, createPaymentUrl, isCreatingPaymentUrl } = useOrder();
+    const { placeOrder, isPlacing, buyNow, isBuyingNow, createPaymentUrl, isCreatingPaymentUrl } = useOrder();
     const { validateCoupon, isValidating: isVerifyingCoupon } = useCoupon();
     const clearCartStore = useCartStore((state) => state.clearCart);
+
+    const buyNowItem = useBuyNowStore((s) => s.buyNowItem);
+    const clearBuyNowItem = useBuyNowStore((s) => s.clearBuyNowItem);
+    const isBuyNowMode = searchParams.get('buyNow') === '1' && !!buyNowItem;
 
     const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
     const [paymentMethod, setPaymentMethod] = useState<'cod' | 'chuyen_khoan' | 'vnpay' | 'momo'>('cod');
@@ -37,6 +55,25 @@ export default function CheckoutPage() {
     // Coupon States
     const [couponInput, setCouponInput] = useState('');
     const [appliedCoupon, setAppliedCoupon] = useState<CouponResponse | null>(null);
+
+    // Computed values for dual mode
+    const displayItems = isBuyNowMode && buyNowItem
+        ? [{
+            id: 'buy-now',
+            san_pham: buyNowItem.san_pham,
+            bien_the: buyNowItem.bien_the,
+            don_gia: buyNowItem.don_gia,
+            so_luong: buyNowItem.so_luong,
+        }]
+        : cart?.items || [];
+
+    const tamTinh = isBuyNowMode && buyNowItem
+        ? buyNowItem.don_gia * buyNowItem.so_luong
+        : cart?.tam_tinh || 0;
+
+    const tongSoLuong = isBuyNowMode && buyNowItem
+        ? buyNowItem.so_luong
+        : cart?.tong_so_luong || 0;
 
     useEffect(() => {
         if (addresses && addresses.length > 0) {
@@ -47,12 +84,12 @@ export default function CheckoutPage() {
 
     const handleApplyCoupon = async () => {
         if (!couponInput.trim()) return;
-        if (!cart?.tam_tinh) return;
+        if (!tamTinh) return;
 
         try {
             const res = await validateCoupon({
                 ma_code: couponInput.trim(),
-                tam_tinh: cart.tam_tinh,
+                tam_tinh: tamTinh,
             });
             setAppliedCoupon(res);
             toast.success(`Áp dụng mã ${res.ma_code} thành công! Giảm ${new Intl.NumberFormat('vi-VN').format(res.so_tien_giam)}đ`);
@@ -75,14 +112,27 @@ export default function CheckoutPage() {
         }
 
         try {
-            const res = await placeOrder({
-                dia_chi_id: selectedAddressId,
-                phuong_thuc_tt: paymentMethod,
-                ma_coupon: appliedCoupon?.ma_code,
-                ghi_chu: note,
-            });
+            let res;
 
-            // Nếu là thanh toán online, gọi tiếp API lấy URL
+            if (isBuyNowMode && buyNowItem) {
+                res = await buyNow({
+                    san_pham_id: buyNowItem.san_pham_id,
+                    bien_the_id: buyNowItem.bien_the_id,
+                    so_luong: buyNowItem.so_luong,
+                    dia_chi_id: selectedAddressId,
+                    phuong_thuc_tt: paymentMethod,
+                    ma_coupon: appliedCoupon?.ma_code,
+                    ghi_chu: note,
+                });
+            } else {
+                res = await placeOrder({
+                    dia_chi_id: selectedAddressId,
+                    phuong_thuc_tt: paymentMethod,
+                    ma_coupon: appliedCoupon?.ma_code,
+                    ghi_chu: note,
+                });
+            }
+
             if (paymentMethod === 'vnpay' || paymentMethod === 'momo') {
                 const loadingToast = toast.loading(`Đơn hàng #${res.data.ma_don_hang} đã được tiếp nhận. Đang chuyển hướng tới cổng thanh toán...`);
 
@@ -93,19 +143,24 @@ export default function CheckoutPage() {
                     });
 
                     if (payRes.data.payment_url) {
+                        if (isBuyNowMode) clearBuyNowItem();
                         window.location.href = payRes.data.payment_url;
                         return;
                     }
                 } catch (error) {
                     toast.dismiss(loadingToast);
                     toast.error('Đơn hàng đã được tạo nhưng không thể khởi tạo thanh toán trực tuyến ngay bây giờ. Vui lòng thanh toán tại Lịch sử đơn hàng.');
+                    if (isBuyNowMode) clearBuyNowItem();
                     router.push('/profile/orders');
                     return;
                 }
             } else {
                 toast.success('Đặt hàng thành công!');
-                clearCartStore();
-                // Redirect to success page
+                if (isBuyNowMode) {
+                    clearBuyNowItem();
+                } else {
+                    clearCartStore();
+                }
                 router.push(`/checkout/success?order=${res.data.ma_don_hang}`);
             }
         } catch (error: any) {
@@ -114,7 +169,10 @@ export default function CheckoutPage() {
         }
     };
 
-    if (isCartLoading || isAddressesLoading) {
+    const isLoading = isBuyNowMode ? isAddressesLoading : (isCartLoading || isAddressesLoading);
+    const isProcessing = isPlacing || isBuyingNow || isCreatingPaymentUrl;
+
+    if (isLoading) {
         return (
             <div className="flex justify-center items-center min-h-[60vh]">
                 <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -122,14 +180,14 @@ export default function CheckoutPage() {
         );
     }
 
-    if (!cart || !cart.items || cart.items.length === 0) {
+    if (displayItems.length === 0) {
         return (
             <div className="container mx-auto px-4 py-16 text-center max-w-md">
                 <div className="bg-slate-100 p-8 rounded-full inline-block mb-6">
                     <ShoppingBag className="h-16 w-16 text-slate-400" />
                 </div>
-                <h2 className="text-2xl font-bold mb-4">Giỏ hàng trống</h2>
-                <p className="text-muted-foreground mb-8">Vui lòng thêm sản phẩm vào giỏ để tiến hành thanh toán.</p>
+                <h2 className="text-2xl font-bold mb-4">Không có sản phẩm để thanh toán</h2>
+                <p className="text-muted-foreground mb-8">Vui lòng thêm sản phẩm vào giỏ hoặc chọn Mua ngay từ trang sản phẩm.</p>
                 <Link href="/products">
                     <Button size="lg" className="w-full">Trở lại cửa hàng</Button>
                 </Link>
@@ -254,7 +312,7 @@ export default function CheckoutPage() {
                         </CardHeader>
                         <CardContent className="p-0 bg-white">
                             <div className="max-h-[40vh] overflow-y-auto px-6 py-2 space-y-4">
-                                {cart.items?.map((item: any) => {
+                                {displayItems.map((item: any) => {
                                     const prod = item.san_pham;
                                     const variant = item.bien_the;
                                     const imgUrl = variant?.hinh_anh || prod?.anh_chinh?.duong_dan_anh || '/placeholder.png';
@@ -333,8 +391,8 @@ export default function CheckoutPage() {
                                 </div>
 
                                 <div className="flex justify-between text-sm text-slate-600">
-                                    <span>Tạm tính ({cart.tong_so_luong} sản phẩm)</span>
-                                    <span className="font-medium">{new Intl.NumberFormat('vi-VN').format(cart.tam_tinh || 0)} ₫</span>
+                                    <span>Tạm tính ({tongSoLuong} sản phẩm)</span>
+                                    <span className="font-medium">{new Intl.NumberFormat('vi-VN').format(tamTinh)} ₫</span>
                                 </div>
 
                                 {appliedCoupon && (
@@ -356,7 +414,7 @@ export default function CheckoutPage() {
                                     <div className="text-right">
                                         <span className="text-2xl font-bold text-primary block">
                                             {new Intl.NumberFormat('vi-VN').format(
-                                                Math.max(0, (cart.tam_tinh || 0) - (appliedCoupon?.so_tien_giam || 0))
+                                                Math.max(0, tamTinh - (appliedCoupon?.so_tien_giam || 0))
                                             )} ₫
                                         </span>
                                         <span className="text-xs text-muted-foreground">(Đã bao gồm VAT)</span>
@@ -366,9 +424,9 @@ export default function CheckoutPage() {
                                 <Button
                                     className="w-full h-14 mt-6 text-base font-bold rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all"
                                     onClick={handlePlaceOrder}
-                                    disabled={isPlacing || isCreatingPaymentUrl || !selectedAddressId}
+                                    disabled={isProcessing || !selectedAddressId}
                                 >
-                                    {isPlacing || isCreatingPaymentUrl ? (
+                                    {isProcessing ? (
                                         <>
                                             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                                             {isCreatingPaymentUrl ? 'Đang chuyển hướng...' : 'Đang Xử Lý...'}

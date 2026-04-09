@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { productService } from '@/services/product.service';
 import { formatCurrency } from '@/lib/utils';
 import { useCartStore } from '@/store/cart.store';
+import { useBuyNowStore } from '@/store/buyNow.store';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
 import { toast } from 'sonner';
@@ -32,6 +33,7 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
 
     const { openCart } = useCartStore();
     const { addToCart, isAdding } = useCart();
+    const setBuyNowItem = useBuyNowStore((s) => s.setBuyNowItem);
     const { wishlistData, toggleWishlist, isToggling } = useWishlist();
     const { useTrackView, trackAction } = useBehaviorTracking();
 
@@ -413,7 +415,7 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
                             <Button
                                 size="lg"
                                 className="flex-1 h-full text-sm sm:text-base font-black bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-600/20 active:scale-95 transition-all rounded-xl border-0"
-                                onClick={async () => {
+                                onClick={() => {
                                     if ((product.bien_the?.length ?? 0) > 0 && !selectedVariant) {
                                         toast.error('Vui lòng chọn kích cỡ/phân loại sản phẩm.');
                                         return;
@@ -428,19 +430,31 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
                                         window.location.href = `/login?callbackUrl=${window.location.pathname}`;
                                         return;
                                     }
-                                    try {
-                                        await addToCart({
-                                            san_pham_id: product.id,
-                                            so_luong: quantity,
-                                            bien_the_id: selectedVariant?.id,
-                                        });
-                                        trackAction(product.id, 'mua_hang');
-                                        window.location.href = '/checkout';
-                                    } catch (error: any) {
-                                        toast.error(error.message || 'Lỗi xử lý đặt hàng');
-                                    }
+                                    setBuyNowItem({
+                                        san_pham_id: product.id,
+                                        bien_the_id: selectedVariant?.id ?? null,
+                                        so_luong: quantity,
+                                        don_gia: currentPrice,
+                                        san_pham: {
+                                            ten_san_pham: product.ten_san_pham,
+                                            duong_dan: product.duong_dan,
+                                            anh_chinh: {
+                                                duong_dan_anh: product.anh_chinh?.url
+                                                    || product.anh_chinh?.duong_dan_anh
+                                                    || (product.hinh_anh || product.hinh_anh_san_pham)?.[0]?.url
+                                                    || '/placeholder.png',
+                                            },
+                                        },
+                                        bien_the: selectedVariant ? {
+                                            kich_co: selectedVariant.kich_co,
+                                            mau_sac: selectedVariant.mau_sac,
+                                            hinh_anh: selectedVariant.hinh_anh,
+                                        } : null,
+                                    });
+                                    trackAction(product.id, 'mua_hang');
+                                    window.location.href = '/checkout?buyNow=1';
                                 }}
-                                disabled={isAdding || isOutOfStock}
+                                disabled={isOutOfStock}
                             >
                                 {isOutOfStock ? 'Hết hàng' : 'Đặt Hàng Ngay'}
                             </Button>

@@ -41,6 +41,15 @@ export const authService = {
         return response.data;
     },
 
+    uploadAvatar: async (file: File): Promise<{ url: string; path?: string; filename?: string }> => {
+        const formData = new FormData();
+        formData.append('image', file);
+        const response: any = await apiClient.post('/auth/me/avatar', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        return response.data;
+    },
+
     // Google OAuth
     getGoogleRedirectUrl: async (): Promise<string> => {
         const response: any = await apiClient.get('/auth/google/redirect');

@@ -5,6 +5,16 @@ export interface OrderPayload {
     ghi_chu?: string;
 }
 
+export interface BuyNowPayload {
+    san_pham_id: number;
+    bien_the_id?: number | null;
+    so_luong: number;
+    dia_chi_id: number;
+    phuong_thuc_tt: 'cod' | 'chuyen_khoan' | 'vnpay' | 'momo';
+    ma_coupon?: string;
+    ghi_chu?: string;
+}
+
 export interface OrderItem {
     id: number;
     don_hang_id: number;

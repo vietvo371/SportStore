@@ -1,5 +1,5 @@
 import apiClient from '@/lib/api';
-import { Order, OrderPayload } from '@/types/order.types';
+import { Order, OrderPayload, BuyNowPayload } from '@/types/order.types';
 import { PaginatedResponse, ApiResponse } from '@/types/api.types';
 
 export const orderService = {
@@ -15,6 +15,11 @@ export const orderService = {
 
     placeOrder: async (payload: OrderPayload): Promise<ApiResponse<Order>> => {
         const response: any = await apiClient.post('/orders', payload);
+        return response;
+    },
+
+    buyNow: async (payload: BuyNowPayload): Promise<ApiResponse<Order>> => {
+        const response: any = await apiClient.post('/orders/buy-now', payload);
         return response;
     },
 
