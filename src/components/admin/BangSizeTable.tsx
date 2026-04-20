@@ -87,7 +87,7 @@ export function BangSizeTable({ items, onEdit }: BangSizeTableProps) {
                                         <User className="h-4 w-4 text-blue-500" />
                                     )}
                                     <span className="capitalize text-slate-600 font-medium">
-                                        {item.loai === 'ao' ? 'Áo' : item.loai === 'quan' ? 'Quần' : 'Giầy'}
+                                        {item.loai === 'ao' ? 'Áo' : item.loai === 'quan' ? 'Quần' : 'Giày'}
                                     </span>
                                 </div>
                             </TableCell>

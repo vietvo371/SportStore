@@ -321,26 +321,28 @@ export default function ProductDetailClient({ params }: { params: Promise<{ slug
                         <div className="mb-8">
                             <div className="flex justify-between items-center mb-4">
                                 <span className="font-medium text-slate-900">Chọn kích cỡ:</span>
-                                <Dialog>
-                                    <DialogTrigger asChild>
-                                        <span className="text-sm font-semibold text-red-600 cursor-pointer hover:underline underline-offset-4 transition-all hover:text-red-700 active:scale-95">Hướng dẫn chọn size</span>
-                                    </DialogTrigger>
-                                    <DialogContent className="max-w-xl bg-white p-0 overflow-hidden outline-none border-none shadow-2xl rounded-3xl">
-                                        <DialogHeader className="p-8 pb-2 space-y-2">
-                                            <DialogTitle className="text-3xl font-extrabold text-slate-900 tracking-tight">Tìm size phù hợp nhất</DialogTitle>
-                                            <DialogDescription className="text-slate-500 text-base">
-                                                Gợi ý chính xác dựa trên thông số từ hệ thống SportStore.
-                                            </DialogDescription>
-                                        </DialogHeader>
+                                {!product.bien_the?.some((v: any) => v.kich_co?.toLowerCase() === 'freesize') && (
+                                    <Dialog>
+                                        <DialogTrigger asChild>
+                                            <span className="text-sm font-semibold text-red-600 cursor-pointer hover:underline underline-offset-4 transition-all hover:text-red-700 active:scale-95">Hướng dẫn chọn size</span>
+                                        </DialogTrigger>
+                                        <DialogContent className="max-w-xl bg-white p-0 overflow-hidden outline-none border-none shadow-2xl rounded-3xl">
+                                            <DialogHeader className="p-8 pb-2 space-y-2">
+                                                <DialogTitle className="text-3xl font-extrabold text-slate-900 tracking-tight">Tìm size phù hợp nhất</DialogTitle>
+                                                <DialogDescription className="text-slate-500 text-base">
+                                                    Gợi ý chính xác dựa trên thông số từ hệ thống SportStore.
+                                                </DialogDescription>
+                                            </DialogHeader>
 
-                                        <div className="pb-4">
-                                            <SizeGuide
-                                                loai={productType}
-                                                thuong_hieu_id={product.thuong_hieu_id}
-                                            />
-                                        </div>
-                                    </DialogContent>
-                                </Dialog>
+                                            <div className="pb-4">
+                                                <SizeGuide
+                                                    loai={productType}
+                                                    thuong_hieu_id={product.thuong_hieu_id}
+                                                />
+                                            </div>
+                                        </DialogContent>
+                                    </Dialog>
+                                )}
                             </div>
                             <div className="flex flex-wrap gap-3">
                                 {filteredSizes.map((variant: any) => {

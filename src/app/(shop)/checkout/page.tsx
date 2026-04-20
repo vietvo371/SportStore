@@ -22,6 +22,7 @@ import { AddAddressModal } from '@/components/checkout/AddAddressModal';
 import { useCoupon } from '@/hooks/useCoupon';
 import { CouponResponse } from '@/types/coupon.types';
 import { Tag, X } from 'lucide-react';
+import { AvailableCoupons } from '@/components/cart/AvailableCoupons';
 
 export default function CheckoutPage() {
     return (
@@ -82,22 +83,27 @@ function CheckoutContent() {
         }
     }, [addresses]);
 
-    const handleApplyCoupon = async () => {
-        if (!couponInput.trim()) return;
+    const handleApplyCouponByCode = async (code: string) => {
+        if (!code.trim()) return;
         if (!tamTinh) return;
 
         try {
             const res = await validateCoupon({
-                ma_code: couponInput.trim(),
+                ma_code: code.trim(),
                 tam_tinh: tamTinh,
             });
             setAppliedCoupon(res);
+            setCouponInput(code.trim());
             toast.success(`Áp dụng mã ${res.ma_code} thành công! Giảm ${new Intl.NumberFormat('vi-VN').format(res.so_tien_giam)}đ`);
         } catch (error: any) {
             setAppliedCoupon(null);
             const errMsgs = error?.errors ? Object.values(error.errors).flat().join(', ') : error?.message;
             toast.error(errMsgs || 'Mã giảm giá không hợp lệ.');
         }
+    };
+
+    const handleApplyCoupon = async () => {
+        await handleApplyCouponByCode(couponInput);
     };
 
     const handleRemoveCoupon = () => {
@@ -387,6 +393,10 @@ function CheckoutContent() {
                                                 <X className="h-4 w-4" />
                                             </button>
                                         </div>
+                                    )}
+
+                                    {!appliedCoupon && (
+                                        <AvailableCoupons onApply={handleApplyCouponByCode} />
                                     )}
                                 </div>
 
