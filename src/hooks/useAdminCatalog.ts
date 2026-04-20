@@ -24,7 +24,7 @@ export function useCreateCategory() {
                 const firstError = Object.values(error.errors)[0] as string[];
                 toast.error(firstError[0] || "Dữ liệu không hợp lệ");
             } else {
-                toast.error(error.message || "Lỗi khi tạo danh mục");
+                toast.error(error.response?.data?.message || error.message || "Lỗi khi tạo danh mục");
             }
         },
     });
@@ -44,7 +44,7 @@ export function useUpdateCategory() {
                 const firstError = Object.values(error.errors)[0] as string[];
                 toast.error(firstError[0] || "Dữ liệu không hợp lệ");
             } else {
-                toast.error(error.message || "Lỗi khi cập nhật danh mục");
+                toast.error(error.response?.data?.message || error.message || "Lỗi khi cập nhật danh mục");
             }
         },
     });
@@ -59,7 +59,7 @@ export function useDeleteCategory() {
             toast.success("Đã xóa danh mục");
         },
         onError: (error: any) => {
-            toast.error(error.message || "Lỗi khi xóa danh mục");
+            toast.error(error.response?.data?.message || error.message || "Lỗi khi xóa danh mục");
         },
     });
 }
@@ -86,7 +86,7 @@ export function useCreateBrand() {
                 const firstError = Object.values(error.errors)[0] as string[];
                 toast.error(firstError[0] || "Dữ liệu không hợp lệ");
             } else {
-                toast.error(error.message || "Lỗi khi tạo thương hiệu");
+                toast.error(error.response?.data?.message || error.message || "Lỗi khi tạo thương hiệu");
             }
         },
     });
@@ -106,7 +106,7 @@ export function useUpdateBrand() {
                 const firstError = Object.values(error.errors)[0] as string[];
                 toast.error(firstError[0] || "Dữ liệu không hợp lệ");
             } else {
-                toast.error(error.message || "Lỗi khi cập nhật thương hiệu");
+                toast.error(error.response?.data?.message || error.message || "Lỗi khi cập nhật thương hiệu");
             }
         },
     });
@@ -121,7 +121,7 @@ export function useDeleteBrand() {
             toast.success("Đã xóa thương hiệu");
         },
         onError: (error: any) => {
-            toast.error(error.message || "Lỗi khi xóa thương hiệu");
+            toast.error(error.response?.data?.message || error.message || "Lỗi khi xóa thương hiệu");
         },
     });
 }

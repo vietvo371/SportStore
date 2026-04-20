@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -496,13 +497,15 @@ export default function AdminDashboard() {
                                     Các giao dịch vừa được ghi nhận
                                 </CardDescription>
                             </div>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-9 px-4 rounded-xl border-slate-200 font-semibold text-[11px] hover:bg-slate-50 text-slate-600 bg-white"
-                            >
-                                Xem tất cả
-                            </Button>
+                            <Link href="/admin/orders">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-9 px-4 rounded-xl border-slate-200 font-semibold text-[11px] hover:bg-slate-50 text-slate-600 bg-white"
+                                >
+                                    Xem tất cả
+                                </Button>
+                            </Link>
                         </div>
                     </CardHeader>
                     <CardContent className="p-0">

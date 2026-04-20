@@ -35,7 +35,7 @@ export function useCreateCoupon() {
             toast.success('Đã tạo mã giảm giá thành công');
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Không thể tạo mã giảm giá');
+            toast.error(error.response?.data?.message || error.message || 'Không thể tạo mã giảm giá');
         },
     });
 }
@@ -50,7 +50,7 @@ export function useUpdateCoupon() {
             toast.success('Đã cập nhật mã giảm giá thành công');
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Không thể cập nhật mã giảm giá');
+            toast.error(error.response?.data?.message || error.message || 'Không thể cập nhật mã giảm giá');
         },
     });
 }
@@ -65,7 +65,7 @@ export function useDeleteCoupon() {
             toast.success('Đã xóa mã giảm giá thành công');
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Không thể xóa mã giảm giá');
+            toast.error(error.response?.data?.message || error.message || 'Không thể xóa mã giảm giá');
         },
     });
 }

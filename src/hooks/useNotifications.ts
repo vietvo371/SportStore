@@ -59,7 +59,7 @@ export const useBroadcastNotification = () => {
       toast.success("Đã gửi thông báo thành công");
     },
     onError: (error: any) => {
-      toast.error(error.message || "Lỗi khi gửi thông báo");
+      toast.error(error.response?.data?.message || error.message || "Lỗi khi gửi thông báo");
     }
   });
 };

@@ -25,7 +25,7 @@ export function useApproveReview() {
             toast.success('Đã duyệt đánh giá thành công');
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Không thể duyệt đánh giá');
+            toast.error(error.response?.data?.message || error.message || 'Không thể duyệt đánh giá');
         },
     });
 }
@@ -40,7 +40,7 @@ export function useDeleteReview() {
             toast.success('Đã xóa đánh giá thành công');
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Không thể xóa đánh giá');
+            toast.error(error.response?.data?.message || error.message || 'Không thể xóa đánh giá');
         },
     });
 }

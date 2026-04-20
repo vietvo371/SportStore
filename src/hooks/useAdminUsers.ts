@@ -39,7 +39,7 @@ export function useCreateUser() {
                 const firstError = Object.values(error.errors)[0] as string[];
                 toast.error(firstError[0] || 'Dữ liệu không hợp lệ');
             } else {
-                toast.error(error.message || 'Không thể tạo người dùng');
+                toast.error(error.response?.data?.message || error.message || 'Không thể tạo người dùng');
             }
         },
     });
@@ -59,7 +59,7 @@ export function useUpdateUser() {
                 const firstError = Object.values(error.errors)[0] as string[];
                 toast.error(firstError[0] || 'Dữ liệu không hợp lệ');
             } else {
-                toast.error(error.message || 'Không thể cập nhật người dùng');
+                toast.error(error.response?.data?.message || error.message || 'Không thể cập nhật người dùng');
             }
         },
     });
@@ -75,7 +75,7 @@ export function useDeleteUser() {
             toast.success('Đã xóa người dùng thành công');
         },
         onError: (error: any) => {
-            toast.error(error.message || 'Không thể xóa người dùng');
+            toast.error(error.response?.data?.message || error.message || 'Không thể xóa người dùng');
         },
     });
 }

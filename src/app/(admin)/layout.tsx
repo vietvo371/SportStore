@@ -29,7 +29,7 @@ export default function AdminLayout({
         }
 
         // Sync with BE AdminMiddleware: allow quan_tri (legacy) OR any non-customer RBAC role
-        const hasAdminRole = user?.vai_tro === 'quan_tri' 
+        const hasAdminRole = user?.vai_tro === 'quan_tri'
             || user?.cac_vai_tro?.some(r => r.ma_slug !== 'customer');
 
         if (!hasAdminRole) {
@@ -80,9 +80,9 @@ export default function AdminLayout({
                     </div>
 
                     <div className="flex items-center gap-2 md:gap-4">
-                        <Button variant="ghost" size="icon" className="hidden sm:flex text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl">
+                        {/* <Button variant="ghost" size="icon" className="hidden sm:flex text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl">
                             <Search className="h-5 w-5" />
-                        </Button>
+                        </Button> */}
                         <NotificationCenter />
 
                         <div className="h-8 w-px bg-slate-200 mx-1 hidden sm:block" />

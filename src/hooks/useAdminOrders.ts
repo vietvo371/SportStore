@@ -34,7 +34,7 @@ export function useUpdateOrderStatus() {
             toast.success("Cập nhật trạng thái đơn hàng thành công");
         },
         onError: (error: any) => {
-            const message = error.response?.data?.message || "Có lỗi xảy ra khi cập nhật trạng thái";
+            const message = error.response?.data?.message || error.message || "Có lỗi xảy ra khi cập nhật trạng thái";
             toast.error(message);
         },
     });

@@ -190,19 +190,27 @@ export function Header() {
                                 query={searchQuery}
                                 onQueryChange={(q) => setSearchQuery(q)}
                                 trigger={
-                                    <form onSubmit={handleSearch} className="flex items-center relative gap-1 cursor-text">
-                                        <input
-                                            type="text"
-                                            placeholder="Tìm kiếm sản phẩm..."
-                                            autoComplete="off"
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="w-48 lg:w-64 h-9 px-3 pr-10 rounded-full border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all cursor-text"
-                                        />
-                                        <Button type="submit" variant="ghost" size="icon" className="absolute right-0 h-9 w-9 text-slate-500 hover:text-primary hover:bg-transparent rounded-r-full pointer-events-none">
-                                            <Search className="h-4 w-4" />
-                                        </Button>
-                                    </form>
+                                    <div className="relative group">
+                                        <form onSubmit={handleSearch} className="flex items-center relative gap-1 cursor-text">
+                                            <input
+                                                type="text"
+                                                placeholder="Tìm kiếm sản phẩm..."
+                                                autoComplete="off"
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                onFocus={() => {
+                                                    if (searchQuery.trim()) {
+                                                        // Tự động mở dropdown nếu có sẵn query
+                                                        setSearchQuery(searchQuery + '');
+                                                    }
+                                                }}
+                                                className="w-48 lg:w-64 h-9 px-3 pr-10 rounded-full border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all cursor-text group-hover:bg-white"
+                                            />
+                                            <Button type="submit" variant="ghost" size="icon" className="absolute right-0 h-9 w-9 text-slate-400 group-hover:text-primary hover:bg-transparent rounded-r-full">
+                                                <Search className="h-4 w-4" />
+                                            </Button>
+                                        </form>
+                                    </div>
                                 }
                             />
                         </div>

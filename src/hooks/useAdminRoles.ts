@@ -44,7 +44,7 @@ export const useAdminRoles = () => {
             }
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Có lỗi xảy ra');
+            toast.error(error.response?.data?.message || error.message || 'Có lỗi xảy ra');
         }
     });
 
@@ -63,7 +63,7 @@ export const useAdminRoles = () => {
             }
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Có lỗi xảy ra');
+            toast.error(error.response?.data?.message || error.message || 'Có lỗi xảy ra');
         }
     });
 
@@ -81,7 +81,7 @@ export const useAdminRoles = () => {
             }
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Có lỗi xảy ra');
+            toast.error(error.response?.data?.message || error.message || 'Có lỗi xảy ra');
         }
     });
 

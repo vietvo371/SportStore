@@ -85,6 +85,7 @@ export function OrderDetailModal({ orderId, open, onOpenChange }: OrderDetailMod
     useEffect(() => {
         if (order) {
             setNewStatus(order.trang_thai);
+            setNote(""); // Reset ghi chú khi chuyển đơn hàng khác
         }
     }, [order]);
 
@@ -93,6 +94,10 @@ export function OrderDetailModal({ orderId, open, onOpenChange }: OrderDetailMod
         updateStatus.mutate({
             id: orderId,
             data: { trang_thai: newStatus, ghi_chu: note }
+        }, {
+            onSuccess: () => {
+                setNote("");
+            }
         });
     };
 
@@ -180,14 +185,29 @@ export function OrderDetailModal({ orderId, open, onOpenChange }: OrderDetailMod
                                 <div className="space-y-4">
                                     <div className="space-y-2">
                                         <label className="text-xs font-semibold text-slate-500 uppercase">Cập nhật trạng thái</label>
-                                        <Select value={newStatus} onValueChange={setNewStatus}>
+                                        <Select 
+                                            value={newStatus} 
+                                            onValueChange={setNewStatus}
+                                            disabled={['da_huy', 'hoan_tra'].includes(order.trang_thai)}
+                                        >
                                             <SelectTrigger className="bg-white border-slate-200 rounded-xl font-medium h-11">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent style={{ zIndex: 9999 }}>
-                                                {Object.entries(ORDER_STATUS_LABELS).map(([key, label]) => (
-                                                    <SelectItem key={key} value={key}>{label}</SelectItem>
-                                                ))}
+                                                {Object.entries(ORDER_STATUS_LABELS).map(([key, label]) => {
+                                                    // Nếu đang là 'da_giao', chỉ cho phép chọn 'da_giao' (giữ nguyên) hoặc 'hoan_tra'
+                                                    const isRestrictedByDelivered = order.trang_thai === 'da_giao' && key !== 'da_giao' && key !== 'hoan_tra';
+                                                    
+                                                    return (
+                                                        <SelectItem 
+                                                            key={key} 
+                                                            value={key}
+                                                            disabled={isRestrictedByDelivered}
+                                                        >
+                                                            {label}
+                                                        </SelectItem>
+                                                    );
+                                                })}
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -202,7 +222,7 @@ export function OrderDetailModal({ orderId, open, onOpenChange }: OrderDetailMod
                                     </div>
                                     <Button
                                         className="w-full rounded-xl h-11 shadow-lg shadow-primary/20 font-bold"
-                                        disabled={newStatus === order.trang_thai || updateStatus.isPending}
+                                        disabled={(newStatus === order.trang_thai && !note.trim()) || updateStatus.isPending}
                                         onClick={handleUpdateStatus}
                                     >
                                         {updateStatus.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}

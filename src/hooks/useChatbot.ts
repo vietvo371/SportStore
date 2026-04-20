@@ -69,7 +69,7 @@ export function useChatbot() {
             
             setMessages(prev => [...prev, botMsg]);
         } catch (error: any) {
-            toast.error(error.message || 'Lỗi gửi tin nhắn tới Chatbot');
+            toast.error(error.response?.data?.message || error.message || 'Lỗi gửi tin nhắn tới Chatbot');
         } finally {
             setIsLoading(false);
         }

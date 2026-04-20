@@ -20,7 +20,7 @@ export default function AdminBannersPage() {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedBanner, setSelectedBanner] = useState<any>(null);
 
-    const { data: response, isLoading, isError, error, refetch } = useAdminBanners({
+    const { data: response, isLoading, isFetching, isError, error, refetch } = useAdminBanners({
         page,
         per_page: 10,
         search: search || undefined,
@@ -89,11 +89,16 @@ export default function AdminBannersPage() {
                     <Button 
                         variant="outline" 
                         size="icon" 
-                        onClick={() => refetch()}
-                        disabled={isLoading}
+                        onClick={() => {
+                            setSearch('');
+                            setSearchInput('');
+                            setPage(1);
+                            refetch();
+                        }}
+                        disabled={isFetching}
                         className="bg-white border-slate-200"
                     >
-                        <RefreshCw className={`h-4 w-4 text-slate-600 ${isLoading ? 'animate-spin' : ''}`} />
+                        <RefreshCw className={`h-4 w-4 text-slate-600 ${isFetching ? 'animate-spin' : ''}`} />
                     </Button>
                     <Button 
                         className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"

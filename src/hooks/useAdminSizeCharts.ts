@@ -35,7 +35,7 @@ export function useCreateSizeChart() {
             toast.success('Đã tạo quy tắc size thành công');
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Không thể tạo quy tắc size');
+            toast.error(error.response?.data?.message || error.message || 'Không thể tạo quy tắc size');
         },
     });
 }
@@ -50,7 +50,7 @@ export function useUpdateSizeChart() {
             toast.success('Đã cập nhật quy tắc size thành công');
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Không thể cập nhật quy tắc size');
+            toast.error(error.response?.data?.message || error.message || 'Không thể cập nhật quy tắc size');
         },
     });
 }
@@ -65,7 +65,7 @@ export function useDeleteSizeChart() {
             toast.success('Đã xóa quy tắc size thành công');
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Không thể xóa quy tắc size');
+            toast.error(error.response?.data?.message || error.message || 'Không thể xóa quy tắc size');
         },
     });
 }

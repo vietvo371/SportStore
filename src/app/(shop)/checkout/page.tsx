@@ -178,6 +178,20 @@ function CheckoutContent() {
     const isLoading = isBuyNowMode ? isAddressesLoading : (isCartLoading || isAddressesLoading);
     const isProcessing = isPlacing || isBuyingNow || isCreatingPaymentUrl;
 
+    // Shipping Fee Logic (Sync with BE Level 2)
+    const selectedAddress = addresses?.find((a: any) => a.id === selectedAddressId);
+    let shippingFee = 35000;
+    if (selectedAddress) {
+        if (selectedAddress.tinh_thanh.toLowerCase().includes('đà nẵng')) {
+            shippingFee = 20000;
+        }
+    }
+    if (tamTinh >= 1000000) {
+        shippingFee = 0;
+    }
+
+    const tongThanhToan = Math.max(0, tamTinh - (appliedCoupon?.so_tien_giam || 0) + shippingFee);
+
     if (isLoading) {
         return (
             <div className="flex justify-center items-center min-h-[60vh]">
@@ -414,8 +428,15 @@ function CheckoutContent() {
 
                                 <div className="flex justify-between text-sm text-slate-600">
                                     <span>Phí giao hàng</span>
-                                    <span className="font-medium text-emerald-600">Miễn phí</span>
+                                    <span className={`font-medium ${shippingFee === 0 ? 'text-emerald-600' : 'text-slate-900'}`}>
+                                        {shippingFee === 0 ? 'Miễn phí' : `${new Intl.NumberFormat('vi-VN').format(shippingFee)} ₫`}
+                                    </span>
                                 </div>
+                                {shippingFee > 0 && (
+                                    <p className="text-[10px] text-muted-foreground italic -mt-2">
+                                        (Cửa hàng tại Đà Nẵng: Nội thành 20k, Ngoại tỉnh 35k)
+                                    </p>
+                                )}
 
                                 <Separator className="my-3 opacity-50" />
 
@@ -423,11 +444,9 @@ function CheckoutContent() {
                                     <span className="text-base font-semibold text-slate-900">Tổng cộng</span>
                                     <div className="text-right">
                                         <span className="text-2xl font-bold text-primary block">
-                                            {new Intl.NumberFormat('vi-VN').format(
-                                                Math.max(0, tamTinh - (appliedCoupon?.so_tien_giam || 0))
-                                            )} ₫
+                                            {new Intl.NumberFormat('vi-VN').format(tongThanhToan)} ₫
                                         </span>
-                                        <span className="text-xs text-muted-foreground">(Đã bao gồm VAT)</span>
+                                        <span className="text-xs text-muted-foreground">(Đã bao gồm phí ship và VAT)</span>
                                     </div>
                                 </div>
 

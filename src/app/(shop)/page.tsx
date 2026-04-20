@@ -25,8 +25,28 @@ export default function Home() {
             </section>
 
 
-            {/* Featured Products Section (With Watermark Typography and Deep Contrast) */}
-            <section className="container mx-auto px-4 mt-12 mb-16 relative overflow-hidden">
+            {/* Recommendations Section (Clean Light Minimalist UI) - MOVED TO TOP */}
+            <section className="container mx-auto px-4 pt-12 pb-12 relative overflow-hidden" id="recommendations">
+                
+                {/* Very subtle background accent */}
+                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-red-50 opacity-50 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+
+                <div className="flex flex-col items-center text-center mb-10 relative z-10">
+                    <span className="px-5 py-1.5 rounded-full bg-red-50 text-red-600 text-xs font-bold tracking-widest uppercase mb-4 border border-red-100 shadow-sm">
+                        Gợi Ý SẢN PHẨM
+                    </span>
+                    <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-slate-900 uppercase">
+                        Dành Riêng Cho Bạn
+                    </h2>
+                </div>
+
+                <div className="relative z-10">
+                    <RecommendationSection title="" subtitle="" />
+                </div>
+            </section>
+
+            {/* Featured Products Section (With Watermark Typography and Deep Contrast) - MOVED TO SECOND */}
+            <section className="container mx-auto px-4 py-16 relative overflow-hidden">
                 
                 {/* Background Watermark */}
                 <div className="absolute top-0 right-0 z-0 pointer-events-none select-none overflow-hidden h-full flex items-start justify-end opacity-[0.015]">
@@ -37,7 +57,7 @@ export default function Home() {
                     <div className="flex flex-col items-start gap-3">
                         <div className="flex items-center gap-3">
                             <span className="h-[3px] w-8 sm:w-12 bg-red-600 block rounded-full"></span>
-                            <span className="text-red-600 font-bold tracking-[0.2em] uppercase text-[10px] sm:text-xs">Sản phẩm mới</span>
+                            <span className="text-red-600 font-bold tracking-[0.2em] uppercase text-[10px] sm:text-xs">Sản phẩm nổi bật</span>
                         </div>
                         <h2 className="text-[2rem] leading-[1.1] sm:text-5xl md:text-6xl font-black tracking-tighter text-slate-900 uppercase">
                             Mới Nhất <span className="text-slate-200 font-light mx-1 lg:mx-2 select-none italic">/</span> <span className="text-red-600 drop-shadow-sm">Nổi Bật</span>
@@ -72,29 +92,6 @@ export default function Home() {
                         <p className="text-slate-400 font-medium text-lg">Hệ thống đang cập nhật siêu phẩm mới. Bạn quay lại sau nhé!</p>
                     </div>
                 )}
-            </section>
-
-            {/* Recommendations Section (Clean Light Minimalist UI) */}
-            <section className="container mx-auto px-4 py-16 border-t border-slate-100 relative overflow-hidden" id="recommendations">
-                
-                {/* Very subtle background accent */}
-                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-red-50 opacity-50 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-
-                <div className="flex flex-col items-center text-center mb-16 relative z-10">
-                    <span className="px-5 py-1.5 rounded-full bg-red-50 text-red-600 text-xs font-bold tracking-widest uppercase mb-6 border border-red-100 shadow-sm">
-                        Được Tuyển Chọn
-                    </span>
-                    <h2 className="text-4xl md:text-5xl lg:text-5xl font-black tracking-tighter text-slate-900 uppercase mb-4">
-                        Dành Riêng Cho Bạn
-                    </h2>
-                    <p className="text-slate-500 font-medium text-lg max-w-xl">
-                        Những siêu phẩm được cá nhân hóa dựa trên gu thể thao của bạn.
-                    </p>
-                </div>
-
-                <div className="relative z-10">
-                    <RecommendationSection title="" subtitle="" />
-                </div>
             </section>
 
             {/* Brands Section */}

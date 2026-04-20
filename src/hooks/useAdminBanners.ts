@@ -35,7 +35,7 @@ export function useCreateBanner() {
             toast.success('Đã tạo banner thành công');
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Không thể tạo banner');
+            toast.error(error.response?.data?.message || error.message || 'Không thể tạo banner');
         },
     });
 }
@@ -50,7 +50,7 @@ export function useUpdateBanner() {
             toast.success('Đã cập nhật banner thành công');
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Không thể cập nhật banner');
+            toast.error(error.response?.data?.message || error.message || 'Không thể cập nhật banner');
         },
     });
 }
@@ -65,7 +65,7 @@ export function useDeleteBanner() {
             toast.success('Đã xóa banner thành công');
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Không thể xóa banner');
+            toast.error(error.response?.data?.message || error.message || 'Không thể xóa banner');
         },
     });
 }
@@ -80,7 +80,7 @@ export function useToggleBannerStatus() {
             toast.success('Đã thay đổi trạng thái banner');
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Không thể thay đổi trạng thái banner');
+            toast.error(error.response?.data?.message || error.message || 'Không thể thay đổi trạng thái banner');
         },
     });
 }
