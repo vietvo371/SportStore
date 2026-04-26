@@ -11,6 +11,8 @@ export interface GetProductsParams {
     minPrice?: number;
     maxPrice?: number;
     sort?: 'newest' | 'price_asc' | 'price_desc' | 'popular';
+    saleOnly?: boolean;
+    inStockOnly?: boolean;
 }
 
 export const productService = {
@@ -45,6 +47,8 @@ export const productService = {
                     popular: 'ban_chay',
                 }[params.sort];
             }
+            if (params.saleOnly) apiParams.chi_giam_gia = 1;
+            if (params.inStockOnly) apiParams.co_hang = 1;
 
             const response = await apiClient.get<PaginatedResponse<Product>>('/products', { params: apiParams });
             return response as unknown as PaginatedResponse<Product>;
