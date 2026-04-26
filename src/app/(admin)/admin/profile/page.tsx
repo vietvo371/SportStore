@@ -117,9 +117,16 @@ export default function AdminProfilePage() {
         // Kiểm tra có thay đổi gì không
         const hoVaTenChanged = data.ho_va_ten.trim() !== (user?.ho_va_ten || '').trim();
         const soDienThoaiChanged = (data.so_dien_thoai || '').trim() !== ((user?.so_dien_thoai) || '').trim();
+        const passwordChanged = isPasswordMode && data.mat_khau_cu && data.mat_khau_moi && data.mat_khau_moi_confirmation;
+        const samePassword = isPasswordMode && data.mat_khau_cu && data.mat_khau_moi && data.mat_khau_cu === data.mat_khau_moi;
 
-        if (!hoVaTenChanged && !soDienThoaiChanged) {
+        if (!hoVaTenChanged && !soDienThoaiChanged && !passwordChanged) {
             toast.error('Vui lòng thay đổi thông tin trước khi lưu.');
+            return;
+        }
+
+        if (samePassword) {
+            toast.error('Mật khẩu mới không được trùng với mật khẩu hiện tại.');
             return;
         }
 

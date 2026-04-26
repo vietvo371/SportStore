@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
     Carousel,
     CarouselContent,
@@ -15,6 +16,7 @@ import { bannerService } from '@/services/banner.service';
 
 export function HeroBanner() {
     const [api, setApi] = useState<CarouselApi>();
+    const router = useRouter();
 
     const { data: banners = [], isLoading } = useQuery({
         queryKey: ['banners', 'home_main'],
@@ -31,6 +33,18 @@ export function HeroBanner() {
 
         return () => clearInterval(intervalId);
     }, [api]);
+
+    const handleBannerClick = (duongDan: string | null) => {
+        if (!duongDan) return;
+
+        // Check if it's an external URL (starts with http:// or https://)
+        if (duongDan.startsWith('http://') || duongDan.startsWith('https://')) {
+            window.open(duongDan, '_blank', 'noopener,noreferrer');
+        } else {
+            // Internal route - use Next.js router
+            router.push(duongDan);
+        }
+    };
 
     if (isLoading) {
         return <div className="w-full h-[70vh] md:h-[85vh] bg-slate-100 animate-pulse" />;
@@ -61,7 +75,17 @@ export function HeroBanner() {
             <CarouselContent>
                 {banners.map((banner) => (
                     <CarouselItem key={banner.id}>
-                        <div className="relative w-full h-[60vh] md:h-[85vh]">
+                        <div
+                            className="relative w-full h-[60vh] md:h-[85vh] cursor-pointer"
+                            onClick={() => handleBannerClick(banner.duong_dan)}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    handleBannerClick(banner.duong_dan);
+                                }
+                            }}
+                        >
                             <Image
                                 src={banner.hinh_anh}
                                 alt={banner.tieu_de || 'SportStore Banner'}
