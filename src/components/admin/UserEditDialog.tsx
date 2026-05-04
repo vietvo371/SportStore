@@ -30,11 +30,12 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useUpdateUser } from "@/hooks/useAdminUsers";
 import { useAdminRoles } from "@/hooks/useAdminRoles";
-import { Loader2, ShieldCheck, UserCog, Ban, CheckCircle2 } from "lucide-react";
+import { Loader2, ShieldCheck } from "lucide-react";
 import { useEffect } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Crown } from "lucide-react";
+import { Crown, UserX } from "lucide-react";
+import { useAuthStore } from "@/store/auth.store";
 
 const userSchema = z.object({
     vai_tro: z.string(),
@@ -49,8 +50,12 @@ interface UserEditDialogProps {
 }
 
 export function UserEditDialog({ open, onOpenChange, user }: UserEditDialogProps) {
+    const { user: currentUser } = useAuthStore();
     const { roles, isLoadingRoles } = useAdminRoles();
     const updateUser = useUpdateUser();
+
+    const isSelf = currentUser?.id === user?.id;
+    const isReadOnly = isSelf || user?.is_master;
 
     const form = useForm<z.infer<typeof userSchema>>({
         resolver: zodResolver(userSchema),
@@ -72,6 +77,7 @@ export function UserEditDialog({ open, onOpenChange, user }: UserEditDialogProps
     }, [user, open, form]);
 
     const onSubmit = async (values: z.infer<typeof userSchema>) => {
+        if (isReadOnly) return;
         await updateUser.mutateAsync({ id: user.id, data: values });
         onOpenChange(false);
     };
@@ -113,103 +119,116 @@ export function UserEditDialog({ open, onOpenChange, user }: UserEditDialogProps
                                     </div>
                                 )}
 
-                                {user?.vai_tro !== 'khach_hang' && (
-                                    <>
-                                        <FormField
-                                            control={form.control}
-                                            name="vai_tro"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Vai trò hệ thống</FormLabel>
-                                                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                                                        <FormControl>
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder="Chọn vai trò" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent>
-                                                            <SelectItem value="khach_hang">Không cấp quyền admin</SelectItem>
-                                                            <SelectItem value="quan_tri">Cấp quyền admin</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-
-                                        <div className="space-y-4 pt-4 border-t">
-                                            <Label className="text-sm font-semibold flex items-center gap-2">
-                                                <ShieldCheck className="w-4 h-4 text-primary" />
-                                                Gán vai trò chi tiết
-                                            </Label>
-                                            {isLoadingRoles ? (
-                                                <div className="flex justify-center py-4">
-                                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                                </div>
-                                            ) : (
-                                                <div className="grid grid-cols-2 gap-3">
-                                                    {roles.filter(role => role.ma_slug !== 'customer').map((role) => (
-                                                        <FormField
-                                                            key={role.id}
-                                                            control={form.control}
-                                                            name="vai_tro_ids"
-                                                            render={({ field }) => (
-                                                                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-3 hover:bg-slate-50 transition-colors">
-                                                                    <FormControl>
-                                                                        <Checkbox
-                                                                            checked={field.value?.includes(role.id)}
-                                                                            onCheckedChange={(checked) => {
-                                                                                return checked
-                                                                                    ? field.onChange([...field.value, role.id])
-                                                                                    : field.onChange(field.value?.filter((value: number) => value !== role.id));
-                                                                            }}
-                                                                        />
-                                                                    </FormControl>
-                                                                    <div className="space-y-1 leading-none">
-                                                                        <FormLabel className="text-xs font-bold cursor-pointer">
-                                                                            {role.ten}
-                                                                        </FormLabel>
-                                                                        <p className="text-[10px] text-muted-foreground">{role.ma_slug}</p>
-                                                                    </div>
-                                                                </FormItem>
-                                                            )}
-                                                        />
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </>
+                                {isSelf && (
+                                    <div className="flex items-center gap-2 p-4 bg-amber-50 border border-amber-100 text-amber-800 rounded-2xl">
+                                        <UserX className="h-4 w-4 shrink-0" />
+                                        <p className="text-[10px] font-bold uppercase tracking-wider">
+                                            Bạn đang chỉnh sửa tài khoản của chính mình. Bạn không thể tự thay đổi quyền hạn hoặc trạng thái hoạt động.
+                                        </p>
+                                    </div>
                                 )}
 
-                                <FormField
-                                    control={form.control}
-                                    name="trang_thai"
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 bg-slate-50/50">
-                                            <div className="space-y-0.5">
-                                                <FormLabel className="text-base">
-                                                    Trạng thái hoạt động
-                                                </FormLabel>
-                                                <div className="text-sm text-slate-500">
-                                                    {field.value ? "Tài khoản đang mở" : "Tài khoản đang bị khóa"}
-                                                </div>
+                                <div className={`space-y-4 ${isReadOnly ? 'opacity-50 pointer-events-none select-none' : ''}`}>
+                                    {user?.vai_tro !== 'khach_hang' && (
+                                        <>
+                                            <FormField
+                                                control={form.control}
+                                                name="vai_tro"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Vai trò hệ thống</FormLabel>
+                                                        <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value} disabled={isReadOnly}>
+                                                            <FormControl>
+                                                                <SelectTrigger>
+                                                                    <SelectValue placeholder="Chọn vai trò" />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent>
+                                                                <SelectItem value="khach_hang">Không cấp quyền admin</SelectItem>
+                                                                <SelectItem value="quan_tri">Cấp quyền admin</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <div className="space-y-4 pt-4 border-t">
+                                                <Label className="text-sm font-semibold flex items-center gap-2">
+                                                    <ShieldCheck className="w-4 h-4 text-primary" />
+                                                    Gán vai trò chi tiết
+                                                </Label>
+                                                {isLoadingRoles ? (
+                                                    <div className="flex justify-center py-4">
+                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                    </div>
+                                                ) : (
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        {roles.filter(role => role.ma_slug !== 'customer').map((role) => (
+                                                            <FormField
+                                                                key={role.id}
+                                                                control={form.control}
+                                                                name="vai_tro_ids"
+                                                                render={({ field }) => (
+                                                                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-3 hover:bg-slate-50 transition-colors">
+                                                                        <FormControl>
+                                                                            <Checkbox
+                                                                                checked={field.value?.includes(role.id)}
+                                                                                disabled={isReadOnly}
+                                                                                onCheckedChange={(checked) => {
+                                                                                    return checked
+                                                                                        ? field.onChange([...field.value, role.id])
+                                                                                        : field.onChange(field.value?.filter((value: number) => value !== role.id));
+                                                                                }}
+                                                                            />
+                                                                        </FormControl>
+                                                                        <div className="space-y-1 leading-none">
+                                                                            <FormLabel className="text-xs font-bold cursor-pointer">
+                                                                                {role.ten}
+                                                                            </FormLabel>
+                                                                            <p className="text-[10px] text-muted-foreground">{role.ma_slug}</p>
+                                                                        </div>
+                                                                    </FormItem>
+                                                                )}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
-                                            <FormControl>
-                                                <Switch
-                                                    checked={field.value}
-                                                    onCheckedChange={field.onChange}
-                                                />
-                                            </FormControl>
-                                        </FormItem>
+                                        </>
                                     )}
-                                />
+
+                                    <FormField
+                                        control={form.control}
+                                        name="trang_thai"
+                                        render={({ field }) => (
+                                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 bg-slate-50/50">
+                                                <div className="space-y-0.5">
+                                                    <FormLabel className="text-base">
+                                                        Trạng thái hoạt động
+                                                    </FormLabel>
+                                                    <div className="text-sm text-slate-500">
+                                                        {field.value ? "Tài khoản đang mở" : "Tài khoản đang bị khóa"}
+                                                    </div>
+                                                </div>
+                                                <FormControl>
+                                                    <Switch
+                                                        checked={field.value}
+                                                        disabled={isReadOnly}
+                                                        onCheckedChange={field.onChange}
+                                                    />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
                             </div>
 
                             <DialogFooter>
                                 <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                                     Hủy
                                 </Button>
-                                <Button type="submit" disabled={updateUser.isPending || user?.is_master}>
+                                <Button type="submit" disabled={updateUser.isPending || isReadOnly}>
                                     {updateUser.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                                     Lưu thay đổi
                                 </Button>

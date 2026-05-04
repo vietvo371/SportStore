@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAdminUsers, useCreateUser } from "@/hooks/useAdminUsers";
+import { useAdminRoles } from "@/hooks/useAdminRoles";
 import { UserTable } from "@/components/admin/UserTable";
 import { UserEditDialog } from "@/components/admin/UserEditDialog";
 import { AccessDenied } from "@/components/admin/AccessDenied";
@@ -15,7 +16,8 @@ import {
     UserCheck,
     Shield,
     Activity,
-    Plus
+    Plus,
+    ShieldCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,6 +40,8 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 const createUserSchema = z.object({
     ho_va_ten: z.string().min(2, "Tên phải có ít nhất 2 ký tự"),
@@ -45,6 +49,7 @@ const createUserSchema = z.object({
     mat_khau: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
     so_dien_thoai: z.string().optional().or(z.literal("")),
     vai_tro: z.string().min(1, "Vai trò là bắt buộc"),
+    vai_tro_ids: z.array(z.number()).optional(),
 });
 
 type CreateUserFormValues = z.infer<typeof createUserSchema>;
@@ -52,7 +57,6 @@ type CreateUserFormValues = z.infer<typeof createUserSchema>;
 export default function AdminManagementPage() {
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
-    const roleFilter = "quan_tri";
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<any>(null);
@@ -60,10 +64,11 @@ export default function AdminManagementPage() {
     const { data: response, isLoading, error } = useAdminUsers({
         page,
         search: search || undefined,
-        vai_tro: roleFilter
+        loai: "nhan_vien",
     });
 
     const createUser = useCreateUser();
+    const { roles, isLoadingRoles } = useAdminRoles();
 
     const form = useForm<CreateUserFormValues>({
         resolver: zodResolver(createUserSchema),
@@ -73,9 +78,11 @@ export default function AdminManagementPage() {
             mat_khau: "",
             so_dien_thoai: "",
             vai_tro: "quan_tri",
+            vai_tro_ids: [],
         },
     });
 
+    // Xử lý 403 sau khi tất cả hooks đã được gọi (tránh lỗi "Rendered fewer hooks")
     if ((error as any)?.status === 403) {
         return <AccessDenied moduleName="Quản lý nhân viên" />;
     }
@@ -266,6 +273,52 @@ export default function AdminManagementPage() {
                                     </FormItem>
                                 )}
                             />
+
+                            {/* RBAC Role Selection */}
+                            {isLoadingRoles ? (
+                                <div className="flex justify-center py-2">
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    <Label className="text-sm font-semibold flex items-center gap-2">
+                                        <ShieldCheck className="w-4 h-4 text-primary" />
+                                        Gán vai trò chi tiết
+                                    </Label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {roles?.filter((role: any) => role.ma_slug !== 'customer').map((role: any) => (
+                                            <FormField
+                                                key={role.id}
+                                                control={form.control}
+                                                name="vai_tro_ids"
+                                                render={({ field }) => (
+                                                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-3 hover:bg-slate-50 transition-colors cursor-pointer">
+                                                        <FormControl>
+                                                            <Checkbox
+                                                                checked={field.value?.includes(role.id)}
+                                                                onCheckedChange={(checked) => {
+                                                                    return checked
+                                                                        ? field.onChange([...(field.value || []), role.id])
+                                                                        : field.onChange((field.value || []).filter((v: number) => v !== role.id));
+                                                                }}
+                                                            />
+                                                        </FormControl>
+                                                        <div className="space-y-1 leading-none">
+                                                            <FormLabel className="text-xs font-bold cursor-pointer">
+                                                                {role.ten}
+                                                            </FormLabel>
+                                                            <p className="text-[10px] text-muted-foreground">{role.ma_slug}</p>
+                                                        </div>
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        ))}
+                                    </div>
+                                    <p className="text-[10px] text-muted-foreground italic">
+                                        Để trống nếu muốn mặc định gán vai trò &quot;Quản lý cửa hàng&quot;
+                                    </p>
+                                </div>
+                            )}
 
                             <DialogFooter className="pt-4">
                                 <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>

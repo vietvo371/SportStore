@@ -26,8 +26,10 @@ export default function AdminBannersPage() {
         search: search || undefined,
     });
 
+    // Hook phải gọi TRƯỚC return có điều kiện
     const toggleStatusMutation = useToggleBannerStatus();
 
+    // Xử lý 403 sau khi tất cả hooks đã được gọi
     if ((error as any)?.status === 403) {
         return <AccessDenied moduleName="Quản lý Banner" />;
     }

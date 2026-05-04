@@ -88,12 +88,9 @@ export default function AdminProductsPage() {
     }), [page, search, categoryId, brandId, status, sortBy]);
 
     const { data: response, isLoading, error } = useAdminProducts(params);
-
-    if ((error as any)?.status === 403) {
-        return <AccessDenied moduleName="Quản lý Sản phẩm" />;
-    }
     const queryClient = useQueryClient();
 
+    // Hook phải gọi TRƯỚC return có điều kiện
     const deleteMutation = useMutation({
         mutationFn: (id: number) => adminService.deleteProduct(id),
         onSuccess: () => {
@@ -104,6 +101,11 @@ export default function AdminProductsPage() {
             toast.error("Có lỗi xảy ra khi xóa sản phẩm");
         }
     });
+
+    // Xử lý 403 sau khi tất cả hooks đã được gọi
+    if ((error as any)?.status === 403) {
+        return <AccessDenied moduleName="Quản lý Sản phẩm" />;
+    }
 
     const resetFilters = () => {
         setSearch("");

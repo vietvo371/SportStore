@@ -14,29 +14,21 @@ import {
     Loader2,
     UserCheck,
     Shield,
-    Activity
+    Activity,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 
 export default function UserManagementPage() {
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
-    const roleFilter = "khach_hang";
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<any>(null);
 
     const { data: response, isLoading, error } = useAdminUsers({
         page,
         search: search || undefined,
-        vai_tro: roleFilter
+        loai: "khach_hang",
     });
 
     if ((error as any)?.status === 403) {
@@ -61,7 +53,9 @@ export default function UserManagementPage() {
                             <Users className="h-6 w-6 text-primary" />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase italic">Quản Lý Khách Hàng</h1>
+                            <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase italic">
+                                Quản Lý Khách Hàng
+                            </h1>
                             <p className="text-slate-500 font-medium flex items-center gap-2 mt-0.5">
                                 <Shield className="h-4 w-4 text-primary/60" />
                                 Quản lý thông tin và trạng thái tài khoản khách hàng
@@ -109,7 +103,9 @@ export default function UserManagementPage() {
                         <Loader2 className="h-12 w-12 animate-spin text-primary/30" />
                         <Activity className="h-6 w-6 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                     </div>
-                    <p className="text-slate-400 font-black animate-pulse uppercase tracking-widest text-[10px]">Đang truy xuất danh sách khách hàng...</p>
+                    <p className="text-slate-400 font-black animate-pulse uppercase tracking-widest text-[10px]">
+                        Đang truy xuất danh sách khách hàng...
+                    </p>
                 </div>
             ) : (
                 <div className="space-y-6">

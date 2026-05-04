@@ -2,9 +2,10 @@
 
 import { useAuthStore } from "@/store/auth.store";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
-import { Loader2, Menu, Bell, Search, User as UserIcon } from "lucide-react";
+import { authService } from "@/services/auth.service";
+import { Loader2, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
@@ -14,31 +15,97 @@ export default function AdminLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const { user, isAuthenticated, _hasHydrated } = useAuthStore();
+    const { user, isAuthenticated, _hasHydrated, updateUser, logout } = useAuthStore();
     const router = useRouter();
     const [isAuthorized, setIsAuthorized] = useState(false);
     const [open, setOpen] = useState(false);
+    const hasSynced = useRef(false);
 
     useEffect(() => {
-        // Wait for hydration from localStorage before checking auth
         if (!_hasHydrated) return;
-
         if (!isAuthenticated) {
             router.push("/login?callbackUrl=/admin");
             return;
         }
 
-        // Sync with BE AdminMiddleware: allow quan_tri (legacy) OR any non-customer RBAC role
-        const hasAdminRole = user?.vai_tro === 'quan_tri'
-            || user?.cac_vai_tro?.some(r => r.ma_slug !== 'customer');
+        const syncAndAuthorize = async () => {
+            try {
+                const res: any = await authService.getMe();
 
-        if (!hasAdminRole) {
-            router.push("/");
-            return;
+                let freshUser: any = null;
+                if (res) {
+                    if (typeof res === 'object') {
+                        freshUser = (res as any).id ? res : (res as any).data;
+                    }
+                }
+
+                if (!freshUser?.id) {
+                    console.warn('[AdminLayout] Cannot fetch fresh permissions, using cached data');
+                    const hasAdminRole = user?.vai_tro === 'quan_tri'
+                        || user?.cac_vai_tro?.some((r: any) => r.ma_slug !== 'customer');
+                    if (hasAdminRole) {
+                        setIsAuthorized(true);
+                    } else {
+                        logout();
+                        router.push("/");
+                    }
+                    return;
+                }
+
+                const fullUser = {
+                    id: freshUser.id,
+                    ho_va_ten: freshUser.ho_va_ten,
+                    email: freshUser.email,
+                    so_dien_thoai: freshUser.so_dien_thoai,
+                    anh_dai_dien: freshUser.anh_dai_dien,
+                    dia_chi: freshUser.dia_chi,
+                    trang_thai: freshUser.trang_thai,
+                    xac_thuc_email_luc: freshUser.xac_thuc_email_luc,
+                    is_master: freshUser.is_master,
+                    vai_tro: freshUser.vai_tro,
+                    cac_vai_tro: freshUser.cac_vai_tro || [],
+                };
+
+                const hasAdminRole = fullUser.vai_tro === 'quan_tri'
+                    || fullUser.cac_vai_tro?.some((r: any) => r.ma_slug !== 'customer');
+
+                if (!hasAdminRole) {
+                    logout();
+                    router.push("/");
+                    return;
+                }
+
+                updateUser(fullUser);
+                setIsAuthorized(true);
+            } catch (error) {
+                console.error('[AdminLayout] Failed to sync user permissions:', error);
+                const hasAdminRole = user?.vai_tro === 'quan_tri'
+                    || user?.cac_vai_tro?.some((r: any) => r.ma_slug !== 'customer');
+                if (hasAdminRole) {
+                    setIsAuthorized(true);
+                } else {
+                    logout();
+                    router.push("/");
+                }
+            }
+        };
+
+        // Only call the API once per mount (not when user from store changes)
+        if (!hasSynced.current) {
+            hasSynced.current = true;
+            syncAndAuthorize();
+        } else {
+            // Subsequent renders after first sync: just check auth with existing user
+            const hasAdminRole = user?.vai_tro === 'quan_tri'
+                || user?.cac_vai_tro?.some((r: any) => r.ma_slug !== 'customer');
+            if (hasAdminRole) {
+                setIsAuthorized(true);
+            } else if (isAuthenticated) {
+                logout();
+                router.push("/");
+            }
         }
-
-        setIsAuthorized(true);
-    }, [isAuthenticated, user, router, _hasHydrated]);
+    }, [_hasHydrated, isAuthenticated, router, logout]);
 
     if (!isAuthorized) {
         return (
