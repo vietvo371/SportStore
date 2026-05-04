@@ -104,7 +104,7 @@ export function NotificationCenter() {
                                                     : item.du_lieu_them;
                                                     
                                                 if (payload?.link) {
-                                                    setOpen(false); // Đóng popover
+                                                    setOpen(false);
                                                     router.push(payload.link);
                                                     return;
                                                 }
@@ -112,6 +112,9 @@ export function NotificationCenter() {
                                                 console.error('Lỗi parse du_lieu_them', error);
                                             }
                                         }
+
+                                        setOpen(false);
+                                        router.push('/profile/notifications');
                                     }}
                                 >
                                     <div className="flex gap-3">
