@@ -48,6 +48,25 @@ const sidebarItems: SidebarItem[] = [
     { name: 'Thông báo', href: '/admin/notifications', icon: BellIcon, permission: 'gui_quang_ba' },
 ];
 
+// Export helper để lấy screen đầu tiên user có quyền truy cập
+export function getFirstAccessibleScreen(user: any): string {
+    if (!user) return '/';
+
+    if (user.is_master) return '/admin';
+
+    const userPermissions = new Set(
+        user.cac_vai_tro?.flatMap((role: any) => role.quyen?.map((q: any) => q.ma_slug) || []) || []
+    );
+
+    for (const item of sidebarItems) {
+        if (!item.permission || userPermissions.has(item.permission)) {
+            return item.href;
+        }
+    }
+
+    return '/';
+}
+
 interface AdminSidebarProps {
     className?: string;
     setOpen?: (open: boolean) => void;

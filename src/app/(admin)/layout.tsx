@@ -3,7 +3,7 @@
 import { useAuthStore } from "@/store/auth.store";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { AdminSidebar, getFirstAccessibleScreen } from "@/components/admin/AdminSidebar";
 import { authService } from "@/services/auth.service";
 import { Loader2, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
@@ -41,8 +41,8 @@ export default function AdminLayout({
 
                 if (!freshUser?.id) {
                     console.warn('[AdminLayout] Cannot fetch fresh permissions, using cached data');
-                    const hasAdminRole = user?.vai_tro === 'quan_tri'
-                        || user?.cac_vai_tro?.some((r: any) => r.ma_slug !== 'customer');
+                    const hasAdminRole = user?.cac_vai_tro?.some((r: any) => r.ma_slug !== 'customer')
+                        || user?.is_master;
                     if (hasAdminRole) {
                         setIsAuthorized(true);
                     } else {
@@ -66,8 +66,8 @@ export default function AdminLayout({
                     cac_vai_tro: freshUser.cac_vai_tro || [],
                 };
 
-                const hasAdminRole = fullUser.vai_tro === 'quan_tri'
-                    || fullUser.cac_vai_tro?.some((r: any) => r.ma_slug !== 'customer');
+                const hasAdminRole = fullUser.cac_vai_tro?.some((r: any) => r.ma_slug !== 'customer')
+                    || fullUser.is_master;
 
                 if (!hasAdminRole) {
                     logout();
@@ -77,10 +77,20 @@ export default function AdminLayout({
 
                 updateUser(fullUser);
                 setIsAuthorized(true);
+
+                // Nếu không có quyền xem dashboard → redirect sang screen có quyền đầu tiên
+                const userPermissions = new Set(
+                    (fullUser.cac_vai_tro || []).flatMap((r: any) => r.quyen?.map((q: any) => q.ma_slug) || [])
+                );
+                const hasDashboard = fullUser.is_master || userPermissions.has('xem_dashboard');
+                if (!hasDashboard && typeof window !== 'undefined') {
+                    const firstScreen = getFirstAccessibleScreen(fullUser);
+                    router.push(firstScreen);
+                }
             } catch (error) {
                 console.error('[AdminLayout] Failed to sync user permissions:', error);
-                const hasAdminRole = user?.vai_tro === 'quan_tri'
-                    || user?.cac_vai_tro?.some((r: any) => r.ma_slug !== 'customer');
+                const hasAdminRole = user?.cac_vai_tro?.some((r: any) => r.ma_slug !== 'customer')
+                    || user?.is_master;
                 if (hasAdminRole) {
                     setIsAuthorized(true);
                 } else {
@@ -96,8 +106,8 @@ export default function AdminLayout({
             syncAndAuthorize();
         } else {
             // Subsequent renders after first sync: just check auth with existing user
-            const hasAdminRole = user?.vai_tro === 'quan_tri'
-                || user?.cac_vai_tro?.some((r: any) => r.ma_slug !== 'customer');
+            const hasAdminRole = user?.cac_vai_tro?.some((r: any) => r.ma_slug !== 'customer')
+                || user?.is_master;
             if (hasAdminRole) {
                 setIsAuthorized(true);
             } else if (isAuthenticated) {

@@ -29,7 +29,7 @@ function GoogleCallbackContent() {
                 setStatus('success');
 
                 setTimeout(() => {
-                    if (data.user.vai_tro === 'quan_tri') {
+                    if (data.user.is_master) {
                         router.push('/admin');
                     } else {
                         router.push('/');

@@ -31,7 +31,8 @@ export default function LoginPage() {
                 return;
             }
             setAuth(data.user, data.token);
-            if (data.user.vai_tro === 'quan_tri') {
+            // is_master user luôn vào admin, không cần check vai_tro hay RBAC ở login
+            if (data.user.is_master) {
                 router.push('/admin');
             } else {
                 router.push('/');
