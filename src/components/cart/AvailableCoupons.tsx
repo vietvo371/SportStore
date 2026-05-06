@@ -15,7 +15,7 @@ export function AvailableCoupons({ onApply }: { onApply?: (code: string) => void
     });
 
     const [copiedCode, setCopiedCode] = useState<string | null>(null);
-    const [isExpanded, setIsExpanded] = useState(false);
+
 
     const handleCopy = (code: string) => {
         navigator.clipboard.writeText(code);
@@ -37,7 +37,7 @@ export function AvailableCoupons({ onApply }: { onApply?: (code: string) => void
         return null;
     }
 
-    const visibleCoupons = isExpanded ? coupons : coupons.slice(0, 2);
+    const visibleCoupons = coupons;
 
     return (
         <div className="space-y-3 mt-4">
@@ -45,7 +45,7 @@ export function AvailableCoupons({ onApply }: { onApply?: (code: string) => void
                 <Ticket className="h-4 w-4 text-rose-600" />
                 Mã giảm giá dành cho bạn
             </h4>
-            <div className="space-y-3">
+            <div className={`space-y-3 ${coupons.length > 2 ? 'max-h-[280px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-rose-200 scrollbar-track-transparent' : ''}`}>
                 {visibleCoupons.map((coupon: any) => (
                     <div 
                         key={coupon.id} 
@@ -103,14 +103,7 @@ export function AvailableCoupons({ onApply }: { onApply?: (code: string) => void
                     </div>
                 ))}
                 
-                {coupons.length > 2 && (
-                    <button 
-                        onClick={() => setIsExpanded(!isExpanded)}
-                        className="w-full text-xs text-center text-slate-500 font-medium hover:text-rose-600 py-1 transition-colors"
-                    >
-                        {isExpanded ? 'Thu gọn' : `Xem thêm ${coupons.length - 2} mã khác`}
-                    </button>
-                )}
+
             </div>
         </div>
     );

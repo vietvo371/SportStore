@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { 
-    Bell, 
-    CheckCheck, 
-    ChevronRight, 
-    Info, 
-    Tag, 
-    ShoppingBag, 
-    BadgeCheck 
+import {
+    Bell,
+    CheckCheck,
+    ChevronRight,
+    Info,
+    Tag,
+    ShoppingBag,
+    BadgeCheck
 } from "lucide-react";
 import {
     Popover,
@@ -18,17 +18,34 @@ import {
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
-import { useNotifications, useMarkAllRead, useMarkRead } from "@/hooks/useNotifications";
+import { useNotifications, useMarkAllRead, useMarkRead, notificationKeys } from "@/hooks/useNotifications";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEcho } from "@/hooks/useEcho";
+import { useAuthStore } from "@/store/auth.store";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export function NotificationCenter() {
     const [open, setOpen] = useState(false);
     const router = useRouter();
+    const queryClient = useQueryClient();
+    const { user } = useAuthStore();
     const { data: response, isLoading } = useNotifications();
     const markRead = useMarkRead();
     const markAllRead = useMarkAllRead();
+
+    // Realtime: lắng nghe thông báo mới
+    useEcho(
+        user ? `private-user.${user.id}` : '',
+        'NewNotification',
+        (data: any) => {
+            queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+            toast.info(data.tieu_de || 'Bạn có thông báo mới');
+        },
+        !!user
+    );
 
     const notifications = response?.data || [];
     const unreadCount = notifications.filter(n => !n.da_doc_luc).length;

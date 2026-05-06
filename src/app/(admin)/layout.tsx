@@ -9,6 +9,7 @@ import { Loader2, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
+import { AdminRealtimeListener } from "@/components/admin/AdminRealtimeListener";
 
 export default function AdminLayout({
     children,
@@ -181,6 +182,7 @@ export default function AdminLayout({
                 </header>
 
                 <main className="p-4 md:p-8 flex-1 animate-in fade-in duration-500">
+                    <AdminRealtimeListener />
                     <div className="max-w-7xl mx-auto h-full">
                         {children}
                     </div>

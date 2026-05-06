@@ -9,8 +9,11 @@ import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
 import { OrderItem } from '@/types/order.types';
 import { ReviewModal } from '@/components/product/ReviewModal';
-import { useOrder, useOrderDetails } from '@/hooks/useOrder';
+import { useOrder, useOrderDetails, orderKeys } from '@/hooks/useOrder';
 import { toast } from 'sonner';
+import { useEcho } from '@/hooks/useEcho';
+import { useAuthStore } from '@/store/auth.store';
+import { useQueryClient } from '@tanstack/react-query';
 
 const getStatusBadge = (status: string) => {
     switch (status) {
@@ -26,6 +29,34 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ code: s
     const { code } = use(params);
     const { data: responseData, isLoading, error, refetch } = useOrderDetails(code);
     const { createPaymentUrl, isCreatingPaymentUrl } = useOrder();
+    const { user } = useAuthStore();
+    const queryClient = useQueryClient();
+
+    // Realtime: cập nhật trạng thái đơn hàng
+    useEcho(
+        user ? `private-user.${user.id}` : '',
+        'OrderStatusUpdated',
+        (data: any) => {
+            if (data.ma_don_hang === code) {
+                queryClient.invalidateQueries({ queryKey: orderKeys.detail(code) });
+                toast.info(`Đơn hàng đã cập nhật trạng thái`);
+            }
+        },
+        !!user
+    );
+
+    // Realtime: thanh toán thành công
+    useEcho(
+        user ? `private-user.${user.id}` : '',
+        'OrderPaid',
+        (data: any) => {
+            if (data.ma_don_hang === code) {
+                queryClient.invalidateQueries({ queryKey: orderKeys.detail(code) });
+                toast.success('Thanh toán thành công!');
+            }
+        },
+        !!user
+    );
 
     const order = responseData?.data; // The interceptor returns { success, data } from API
 

@@ -65,12 +65,22 @@ export function ReviewModal({
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsSubmitting(true);
         try {
+            const badWords = await reviewService.getBadWords();
+            const textToCheck = `${values.tieu_de} ${values.noi_dung}`;
+            const foundBadWords = reviewService.containsBadWords(textToCheck, badWords);
+
+            if (foundBadWords.length > 0) {
+                toast.error('Đánh giá của bạn chứa nội dung không phù hợp. Vui lòng chỉnh sửa và thử lại.');
+                setIsSubmitting(false);
+                return;
+            }
+
             await reviewService.submitReview({
                 san_pham_id: productId,
                 don_hang_id: orderId,
                 ...values,
             });
-            toast.success('Đánh giá của bạn đã được gửi và đang chờ duyệt.');
+            toast.success('Đánh giá của bạn đã được đăng thành công. Cảm ơn bạn!');
             form.reset();
             if (onSuccess) onSuccess();
             onClose();

@@ -140,19 +140,21 @@ export function AdminSidebar({ className, setOpen }: AdminSidebarProps) {
             </nav>
 
             <div className="p-4 mt-auto border-t border-slate-800 space-y-1">
-                <Link
-                    href="/admin/profile"
-                    onClick={handleLinkClick}
-                    className={cn(
-                        "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
-                        pathname === '/admin/profile'
-                            ? "bg-primary text-white shadow-lg shadow-primary/20"
-                            : "hover:bg-slate-800 hover:text-white text-slate-400"
-                    )}
-                >
-                    <UserCircle className="h-5 w-5" />
-                    Hồ sơ của tôi
-                </Link>
+                {user?.is_master && (
+                    <Link
+                        href="/admin/profile"
+                        onClick={handleLinkClick}
+                        className={cn(
+                            "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
+                            pathname === '/admin/profile'
+                                ? "bg-primary text-white shadow-lg shadow-primary/20"
+                                : "hover:bg-slate-800 hover:text-white text-slate-400"
+                        )}
+                    >
+                        <UserCircle className="h-5 w-5" />
+                        Hồ sơ của tôi
+                    </Link>
+                )}
                 <Link
                     href="/"
                     onClick={handleLinkClick}

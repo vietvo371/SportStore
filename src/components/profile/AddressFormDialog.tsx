@@ -105,7 +105,11 @@ export function AddressFormDialog({ open, onOpenChange, initialData }: AddressFo
                             <FormField
                                 control={form.control}
                                 name="ho_va_ten"
-                                rules={{ required: 'Vui lòng nhập họ và tên' }}
+                                rules={{
+                                    required: 'Vui lòng nhập họ và tên',
+                                    minLength: { value: 2, message: 'Họ tên phải có ít nhất 2 ký tự' },
+                                    pattern: { value: /^[\p{L}]+(?:\s+[\p{L}]+)+$/u, message: 'Vui lòng nhập đầy đủ họ và tên' }
+                                }}
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Họ và Tên</FormLabel>
