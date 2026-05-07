@@ -332,8 +332,8 @@ function ProductsContent() {
                                                     : 'text-slate-600 hover:bg-slate-50 hover:text-primary'
                                                     }`}
                                             >
-                                                {b.logo && (
-                                                    <img src={b.logo} alt={b.ten} className="w-5 h-5 object-contain rounded-sm shrink-0" />
+                                                {b.logo_url && (
+                                                    <img src={b.logo_url} alt={b.ten} className="w-5 h-5 object-contain rounded-sm shrink-0" />
                                                 )}
                                                 <span>{b.ten}</span>
                                                 {brand === b.duong_dan && (

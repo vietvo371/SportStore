@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import Image from 'next/image';
 import { useBrands } from '@/services/brand.service';
 import { productService } from '@/services/product.service';
 import { ProductCard } from '@/components/product/ProductCard';
@@ -55,15 +54,12 @@ export function BrandsTab() {
                                         flex items-center gap-3 text-slate-500
                                     `}
                                 >
-                                    {brand.logo ? (
+                                    {brand.logo_url ? (
                                         <div className={`relative w-8 h-8 flex items-center justify-center transition-all duration-500 ${isActive ? 'scale-110 drop-shadow-sm' : 'grayscale opacity-60'}`}>
-                                            <Image
-                                                src={brand.logo}
+                                            <img
+                                                src={brand.logo_url}
                                                 alt={brand.ten}
-                                                fill
-                                                unoptimized
-                                                className="object-contain"
-                                                sizes="32px"
+                                                className="object-contain w-full h-full"
                                             />
                                         </div>
                                     ) : (

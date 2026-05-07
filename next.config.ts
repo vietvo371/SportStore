@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'cdn.ketnoibongda.vn', pathname: '/**' },
       { protocol: 'http',  hostname: 'localhost', port: '8000', pathname: '/**' },
       { protocol: 'http',  hostname: '127.0.0.1', port: '8000', pathname: '/**' },
+      { protocol: 'https', hostname: '**', pathname: '/**' },
     ],
     formats: ['image/avif', 'image/webp'],
   },

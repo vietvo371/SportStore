@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+
 const formSchema = z.object({
     ten: z.string().min(2, "Tên thương hiệu phải có ít nhất 2 ký tự"),
     mo_ta: z.string().optional(),
@@ -30,8 +31,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Shield } from "lucide-react";
-import { useEffect } from "react";
+import { Loader2, Upload, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useCreateBrand, useUpdateBrand } from "@/hooks/useAdminCatalog";
 
 interface BrandDialogProps {
@@ -48,6 +49,9 @@ export function BrandDialog({
     const isEdit = !!brand;
     const createMutation = useCreateBrand();
     const updateMutation = useUpdateBrand();
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [logoFile, setLogoFile] = useState<File | null>(null);
+    const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -65,25 +69,51 @@ export function BrandDialog({
                 mo_ta: brand.mo_ta || "",
                 trang_thai: !!brand.trang_thai,
             });
+            if (brand.logo_url) {
+                setLogoPreview(brand.logo_url);
+            } else {
+                setLogoPreview(null);
+            }
         } else {
             form.reset({
                 ten: "",
                 mo_ta: "",
                 trang_thai: true,
             });
+            setLogoPreview(null);
         }
+        setLogoFile(null);
     }, [brand, form, open]);
 
+    function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (file) {
+            setLogoFile(file);
+            setLogoPreview(URL.createObjectURL(file));
+        }
+    }
+
+    function removeLogo() {
+        setLogoFile(null);
+        setLogoPreview(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    }
+
     function onSubmit(values: FormValues) {
+        const payload: any = { ...values };
+        if (logoFile) {
+            payload.logo = logoFile;
+        }
+
         if (isEdit) {
             updateMutation.mutate(
-                { id: brand.id, data: values },
-                {
-                    onSuccess: () => onOpenChange(false),
-                }
+                { id: brand.id, data: payload },
+                { onSuccess: () => onOpenChange(false) }
             );
         } else {
-            createMutation.mutate(values, {
+            createMutation.mutate(payload, {
                 onSuccess: () => onOpenChange(false),
             });
         }
@@ -105,6 +135,59 @@ export function BrandDialog({
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="p-8 space-y-6">
+                        {/* Logo upload */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold text-slate-700">Logo thương hiệu</label>
+                            <div className="flex items-center gap-4">
+                                {logoPreview ? (
+                                    <div className="relative w-20 h-20 rounded-xl border border-slate-200 overflow-hidden bg-white flex items-center justify-center">
+                                        <img
+                                            src={logoPreview}
+                                            alt="Logo preview"
+                                            className="object-contain w-full h-full p-1"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={removeLogo}
+                                            className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600 transition-colors"
+                                        >
+                                            <X className="w-3 h-3" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="w-20 h-20 rounded-xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center gap-1 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer"
+                                    >
+                                        <Upload className="w-5 h-5 text-slate-400" />
+                                        <span className="text-[10px] text-slate-400">Tải lên</span>
+                                    </button>
+                                )}
+                                <div className="flex-1">
+                                    <p className="text-xs text-slate-500">PNG, JPG, WEBP hoặc SVG. Tối đa 2MB.</p>
+                                    {logoPreview && (
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="mt-1 text-xs h-7 px-2"
+                                            onClick={() => fileInputRef.current?.click()}
+                                        >
+                                            Thay đổi
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                                className="hidden"
+                                onChange={handleLogoChange}
+                            />
+                        </div>
+
                         <FormField
                             control={form.control}
                             name="ten"

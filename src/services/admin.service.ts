@@ -210,10 +210,39 @@ export const adminService = {
         return apiClient.get(`/admin/brands/${id}`);
     },
     adminCreateBrand: async (data: any): Promise<ApiResponse<any>> => {
-        return apiClient.post('/admin/brands', data);
+        const formData = new FormData();
+        Object.entries(data).forEach(([key, value]) => {
+            if (value !== null && value !== undefined) {
+                if (key === 'logo' && value instanceof File) {
+                    formData.append(key, value);
+                } else if (typeof value === 'boolean') {
+                    formData.append(key, value ? '1' : '0');
+                } else {
+                    formData.append(key, String(value));
+                }
+            }
+        });
+        return apiClient.post('/admin/brands', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
     },
     adminUpdateBrand: async (id: number, data: any): Promise<ApiResponse<any>> => {
-        return apiClient.put(`/admin/brands/${id}`, data);
+        const formData = new FormData();
+        formData.append('_method', 'PUT');
+        Object.entries(data).forEach(([key, value]) => {
+            if (value !== null && value !== undefined) {
+                if (key === 'logo' && value instanceof File) {
+                    formData.append(key, value);
+                } else if (typeof value === 'boolean') {
+                    formData.append(key, value ? '1' : '0');
+                } else {
+                    formData.append(key, String(value));
+                }
+            }
+        });
+        return apiClient.post(`/admin/brands/${id}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
     },
     adminDeleteBrand: async (id: number): Promise<ApiResponse<any>> => {
         return apiClient.delete(`/admin/brands/${id}`);

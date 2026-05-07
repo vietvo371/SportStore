@@ -15,7 +15,6 @@ import {
     Trash2,
     Shield,
     MoreHorizontal,
-    ExternalLink,
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -76,8 +75,16 @@ export function BrandTable({ brands, onEdit }: BrandTableProps) {
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-3">
-                                            <div className="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400">
-                                                <Shield className="h-4 w-4" />
+                                            <div className="h-10 w-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden">
+                                                {brand.logo_url ? (
+                                                    <img
+                                                        src={brand.logo_url}
+                                                        alt={brand.ten}
+                                                        className="object-contain w-full h-full p-1"
+                                                    />
+                                                ) : (
+                                                    <Shield className="h-4 w-4 text-slate-400" />
+                                                )}
                                             </div>
                                             <div>
                                                 <p className="font-medium text-slate-900">{brand.ten}</p>
